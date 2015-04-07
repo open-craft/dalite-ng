@@ -26,6 +26,7 @@ class QuestionAdmin(admin.ModelAdmin):
         ]}),
         (None, {'fields': ['example_rationale']}),
     ]
+    radio_fields = {'answer_style': admin.HORIZONTAL, 'answer_num_choices': admin.HORIZONTAL}
 
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
