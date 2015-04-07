@@ -2,18 +2,7 @@
 
 from django.db import models
 
-class Assignment(models.Model):
-    identifier = models.CharField(
-        primary_key=True, max_length=100,
-        help_text='A unique identifier for this assignment used for inclusion in a course.'
-    )
-    title = models.CharField(max_length=200)
-
-    def __unicode__(self):
-        return self.identifier
-
 class Question(models.Model):
-    assignment = models.ForeignKey(Assignment)
     title = models.CharField(
         'Question title', primary_key=True, max_length=100,
         help_text='The question name must follow the conventions of course name abreviation plus '
@@ -55,3 +44,14 @@ class Question(models.Model):
 
     def __unicode__(self):
         return self.title
+
+class Assignment(models.Model):
+    identifier = models.CharField(
+        primary_key=True, max_length=100,
+        help_text='A unique identifier for this assignment used for inclusion in a course.'
+    )
+    title = models.CharField(max_length=200)
+    questions = models.ManyToManyField(Question)
+
+    def __unicode__(self):
+        return self.identifier
