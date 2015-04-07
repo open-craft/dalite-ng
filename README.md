@@ -23,12 +23,13 @@ Setting up the development server
 
    The password can be passed in the environment:
 
-        export DALITE_DB_PASSWORD='your password here'
+        $ export DALITE_DB_PASSWORD='your password here'
 
-3. Create the database tables.
+3. Create the database tables and the superuser.
 
         $ ./manage.py migrate
+        $ ./manage.py createsuperuser
 
-3. Run the Django development server.
+4. Run the Django development server.
 
         $ ./manage.py runserver
