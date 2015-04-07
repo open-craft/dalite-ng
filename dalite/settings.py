@@ -60,7 +60,7 @@ WSGI_APPLICATION = 'dalite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DALITE_DB_NAME', 'dalite_django'),
+        'NAME': os.environ.get('DALITE_DB_NAME', 'dalite_ng'),
         'USER': os.environ.get('DALITE_DB_USER', 'dalite'),
         'PASSWORD': os.environ.get('DALITE_DB_PASSWORD', ''),
     }
