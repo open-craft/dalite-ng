@@ -1,10 +1,10 @@
 Dalite NG
 =========
 
-Dalite NG is a rewrite of the [Dalite tool][1] as a cleaner, Django-based LTI
+Dalite NG is a rewrite of the [Dalite tool][old-dalite] as a cleaner, Django-based LTI
 tool.
 
-[1]: https://github.com/open-craft/edu8-dalite/
+[old-dalite]: https://github.com/open-craft/edu8-dalite/
 
 Setting up the development server
 ---------------------------------
@@ -25,11 +25,13 @@ Setting up the development server
 
         $ export DALITE_DB_PASSWORD='your password here'
 
-3. Create the database tables and the superuser.
+3. Generate a secret key following the instructions in dalite/local_settings.py.
+
+4. Create the database tables and the superuser.
 
         $ ./manage.py migrate
         $ ./manage.py createsuperuser
 
-4. Run the Django development server.
+5. Run the Django development server.
 
         $ ./manage.py runserver
