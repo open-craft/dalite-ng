@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
 
 class Question(models.Model):
@@ -48,6 +49,24 @@ class Question(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def clean(self):
+        if bool(self.primary_image) + bool(self.primary_video_url) != 1:
+            raise exceptions.ValidationError(
+                _('You must specify exactly one of the primary image and video URL fields.')
+            )
+        if bool(self.secondary_image) + bool(self.secondary_video_url) > 1:
+            raise exceptions.ValidationError(
+                _('You can only specify one of the secondary image and video URL fields.')
+            )
+        if not 1 <= self.correct_answer <= self.answer_num_choices:
+            raise exceptions.ValidationError(
+                _('The correct answer is outside of the valid range.')
+            )
+        if not 1 <= self.second_best_answer <= self.answer_num_choices:
+            raise exceptions.ValidationError(
+                _('The second-best answer is outside of the valid range.')
+            )
 
     class Meta:
         verbose_name = _('question')
