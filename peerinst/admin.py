@@ -29,4 +29,4 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
-    pass
+    filter_horizontal = ['questions']
