@@ -41,10 +41,13 @@ class Question(models.Model):
         _('Number of choices'), choices=zip(*[range(2, 6)] * 2)
     )
     correct_answer = models.PositiveSmallIntegerField(_('Correct answer'))
-    second_best_answer = models.PositiveSmallIntegerField(_('Second-best answer'))
     example_rationale = models.TextField(
         _('Example for a good rationale'),
         help_text=_('Type in an example of a good rationale for the question.')
+    )
+    example_answer = models.PositiveSmallIntegerField(
+        _('Example answer'),
+        help_text=_('The answer associated with the example rationale.')
     )
 
     def __unicode__(self):
@@ -63,9 +66,9 @@ class Question(models.Model):
             raise exceptions.ValidationError(
                 _('The correct answer is outside of the valid range.')
             )
-        if not 1 <= self.second_best_answer <= self.answer_num_choices:
+        if not 1 <= self.example_answer <= self.answer_num_choices:
             raise exceptions.ValidationError(
-                _('The second-best answer is outside of the valid range.')
+                _('The example answer is outside of the valid range.')
             )
 
     class Meta:

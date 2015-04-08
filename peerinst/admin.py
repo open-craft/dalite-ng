@@ -22,9 +22,9 @@ class QuestionAdmin(admin.ModelAdmin):
             ),
         }),
         (_('Answers'), {'fields': [
-            'answer_style', 'answer_num_choices', 'correct_answer', 'second_best_answer'
+            'answer_style', 'answer_num_choices', 'correct_answer'
         ]}),
-        (None, {'fields': ['example_rationale']}),
+        (_('Example rationale'), {'fields': ['example_rationale', 'example_answer']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL, 'answer_num_choices': admin.HORIZONTAL}
 
