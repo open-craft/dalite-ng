@@ -7,7 +7,11 @@ from . import models
 
 class AnswerLabelInline(admin.TabularInline):
     model = models.AnswerLabel
+    max_num = 5
     extra = 5
+    can_delete = False
+    exclude = ['index']
+    ordering = ['index']
 
 @admin.register(models.Question)
 class QuestionAdmin(admin.ModelAdmin):
@@ -32,6 +36,13 @@ class QuestionAdmin(admin.ModelAdmin):
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL, 'answer_num_choices': admin.HORIZONTAL}
     inlines = [AnswerLabelInline]
+    fieldsets_and_inlines_order = 'ffffif'
+
+    def save_formset(self, request, form, formset, change):
+        answer_labels = formset.save(commit=False)
+        for i, label in enumerate(answer_labels, 1):
+            label.index = i
+            label.save()
 
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):

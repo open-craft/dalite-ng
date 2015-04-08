@@ -79,8 +79,8 @@ class AnswerLabel(models.Model):
 
     class Meta:
         unique_together = ('question', 'index')
-        verbose_name = 'label'
-        verbose_name_plural = 'labels'
+        verbose_name = _('answer label')
+        verbose_name_plural = _('answer labels')
 
 class Assignment(models.Model):
     identifier = models.CharField(
