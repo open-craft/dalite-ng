@@ -54,22 +54,19 @@ class Question(models.Model):
         return self.title
 
     def clean(self):
+        errors = {}
         if bool(self.primary_image) + bool(self.primary_video_url) != 1:
-            raise exceptions.ValidationError(
-                _('You must specify exactly one of the primary image and video URL fields.')
-            )
+            msg = _('You must specify exactly one of the primary image and video URL fields.')
+            errors['primary_image'] = errors['primary_video_url'] = msg
         if bool(self.secondary_image) + bool(self.secondary_video_url) > 1:
-            raise exceptions.ValidationError(
-                _('You can only specify one of the secondary image and video URL fields.')
-            )
+            msg = _('You can only specify one of the secondary image and video URL fields.')
+            errors['secondary_image'] = errors['secondary_video_url'] = msg
         if not 1 <= self.correct_answer <= self.answer_num_choices:
-            raise exceptions.ValidationError(
-                _('The correct answer is outside of the valid range.')
-            )
+            errors['correct_answer'] = _('The correct answer is outside of the valid range.')
         if not 1 <= self.example_answer <= self.answer_num_choices:
-            raise exceptions.ValidationError(
-                _('The example answer is outside of the valid range.')
-            )
+            errors['example_answer'] = _('The example answer is outside of the valid range.')
+        if errors:
+            raise exceptions.ValidationError(errors)
 
     class Meta:
         verbose_name = _('question')
