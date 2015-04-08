@@ -1,3 +1,4 @@
 *.py[cdo]
+/dalite/local_settings.py
 /media
 /static
