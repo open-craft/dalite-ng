@@ -5,6 +5,10 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from . import models
 
+class AnswerLabelInline(admin.TabularInline):
+    model = models.AnswerLabel
+    extra = 5
+
 @admin.register(models.Question)
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -27,6 +31,7 @@ class QuestionAdmin(admin.ModelAdmin):
         (_('Example rationale'), {'fields': ['example_rationale', 'example_answer']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL, 'answer_num_choices': admin.HORIZONTAL}
+    inlines = [AnswerLabelInline]
 
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):

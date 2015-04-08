@@ -72,6 +72,16 @@ class Question(models.Model):
         verbose_name = _('question')
         verbose_name_plural = _('questions')
 
+class AnswerLabel(models.Model):
+    question = models.ForeignKey(Question)
+    index = models.PositiveSmallIntegerField()
+    label = models.CharField(max_length=200)
+
+    class Meta:
+        unique_together = ('question', 'index')
+        verbose_name = 'label'
+        verbose_name_plural = 'labels'
+
 class Assignment(models.Model):
     identifier = models.CharField(
         _('identifier'), primary_key=True, max_length=100,
