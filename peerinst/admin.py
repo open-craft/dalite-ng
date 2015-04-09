@@ -40,7 +40,7 @@ class QuestionAdmin(admin.ModelAdmin):
         (_('Main image or video'), {'fields': ['primary_image', 'primary_video_url']}),
         (_('Secondary image or video'), {
             'fields': ['secondary_image', 'secondary_video_url'],
-            'classes': ['collapse'],
+            'classes': ['grp-collapse', 'grp-closed'],
             'description': _(
                 'Choose either a video or image to include on the first page of the question, '
                 'where students select concept tags. This is only used if you want the question '
@@ -50,11 +50,13 @@ class QuestionAdmin(admin.ModelAdmin):
             ),
         }),
         (_('Answers'), {'fields': ['answer_style']}),
+        ('Answer choices placeholder', {
+            'fields': [], 'classes': ['placeholder', 'answerchoice_set-group']
+        }),
         (_('Example rationale'), {'fields': ['example_rationale', 'example_answer']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
     inlines = [AnswerChoiceInline]
-    fieldsets_and_inlines_order = 'ffffif'
 
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):

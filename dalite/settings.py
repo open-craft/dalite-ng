@@ -100,6 +100,8 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+GRAPPELLI_ADMIN_TITLE = 'Dalite NG administration'
+
 try:
     from .local_settings import *
 except ImportError:
