@@ -1,0 +1,2 @@
+This file ensures the log/ directory exists, which is required for the default
+logging to work.
