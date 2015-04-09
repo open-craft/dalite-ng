@@ -5,9 +5,15 @@ from django.db import models
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
 
+class QuestionManager(models.Manager):
+    def get_by_natural_key(self, title):
+        return self.get(title=title)
+
 class Question(models.Model):
+    objects = QuestionManager()
+
     title = models.CharField(
-        _('Question title'), primary_key=True, max_length=100,
+        _('Question title'), unique=True, max_length=100,
         help_text=_(
             'The question name must follow the conventions of course name abreviation plus '
             'question and number: LynDynQ14.'
@@ -61,6 +67,9 @@ class Question(models.Model):
             errors['secondary_image'] = errors['secondary_video_url'] = msg
         if errors:
             raise exceptions.ValidationError(errors)
+
+    def natural_key(self):
+        return (self.title,)
 
     class Meta:
         verbose_name = _('question')
