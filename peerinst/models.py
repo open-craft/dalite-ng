@@ -35,19 +35,17 @@ class Question(models.Model):
     )
     answer_style = models.IntegerField(
         _('Answer style'), choices=ANSWER_STYLE_CHOICES,
-        help_text=_('Whether the answers are alphabetic (A, B, C…) or numeric (1, 2, 3…).')
+        help_text=_(
+            'Whether the answers are annotated with letters (A, B, C…) or numbers (1, 2, 3…).'
+        )
     )
-    answer_num_choices = models.PositiveSmallIntegerField(
-        _('Number of choices'), choices=zip(*[range(2, 6)] * 2)
-    )
-    correct_answer = models.PositiveSmallIntegerField(_('Correct answer'))
     example_rationale = models.TextField(
         _('Example for a good rationale'),
-        help_text=_('Type in an example of a good rationale for the question.')
+        help_text=_('An example of a good rationale for the question.')
     )
     example_answer = models.PositiveSmallIntegerField(
         _('Example answer'),
-        help_text=_('The answer associated with the example rationale.')
+        help_text=_('The answer associated with the example rationale (1=first, 2=second, etc.).')
     )
 
     def __unicode__(self):
@@ -61,10 +59,6 @@ class Question(models.Model):
         if bool(self.secondary_image) + bool(self.secondary_video_url) > 1:
             msg = _('You can only specify one of the secondary image and video URL fields.')
             errors['secondary_image'] = errors['secondary_video_url'] = msg
-        if not 1 <= self.correct_answer <= self.answer_num_choices:
-            errors['correct_answer'] = _('The correct answer is outside of the valid range.')
-        if not 1 <= self.example_answer <= self.answer_num_choices:
-            errors['example_answer'] = _('The example answer is outside of the valid range.')
         if errors:
             raise exceptions.ValidationError(errors)
 
@@ -72,15 +66,14 @@ class Question(models.Model):
         verbose_name = _('question')
         verbose_name_plural = _('questions')
 
-class AnswerLabel(models.Model):
+class AnswerChoice(models.Model):
     question = models.ForeignKey(Question)
-    index = models.PositiveSmallIntegerField()
-    label = models.CharField(max_length=200)
+    text = models.CharField(_('Text'), max_length=500)
+    correct = models.BooleanField(_('Correct?'))
 
     class Meta:
-        unique_together = ('question', 'index')
-        verbose_name = _('answer label')
-        verbose_name_plural = _('answer labels')
+        verbose_name = _('answer choice')
+        verbose_name_plural = _('answer choices')
 
 class Assignment(models.Model):
     identifier = models.CharField(
