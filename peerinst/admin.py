@@ -61,3 +61,5 @@ class QuestionAdmin(admin.ModelAdmin):
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
     filter_horizontal = ['questions']
+    class Media:
+        js = ['peerinst/js/prepopulate_added_question.js']
