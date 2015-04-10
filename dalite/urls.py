@@ -14,5 +14,6 @@ urlpatterns = [
     # url(r'^$', 'dalite.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
+    url(br'^grappelli/', include('grappelli.urls')),
     url(br'^admin/', include(admin.site.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -25,7 +25,8 @@ Setting up the development server
 
         $ export DALITE_DB_PASSWORD='your password here'
 
-3. Generate a secret key following the instructions in dalite/local_settings.py.
+3. Generate a secret key, e.g. using `tools/gen_secret_key.py`, an put it in
+   `dalite/local_settings.py`.
 
 4. Create the database tables and the superuser.
 
