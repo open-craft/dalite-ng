@@ -106,3 +106,14 @@ class Assignment(models.Model):
     class Meta:
         verbose_name = _('assignment')
         verbose_name_plural = _('assignments')
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question)
+    first_answer_choice = models.PositiveSmallIntegerField(_('First answer choice'))
+    rationale = models.TextField(_('Rationale'))
+    second_answer_choice = models.PositiveSmallIntegerField(
+        _('Second answer choice'), blank=True, null=True
+    )
+    chosen_rationale = models.ForeignKey('self', blank=True, null=True)
+    user_token = models.CharField(max_length=100, blank=True)
+    show_to_others = models.BooleanField(_('Show to others?'), default=False)

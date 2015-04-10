@@ -33,6 +33,17 @@ class AnswerChoiceInline(admin.TabularInline):
     extra = 5
     ordering = ['id']
 
+class AnswerInline(admin.StackedInline):
+    model = models.Answer
+    extra = 0
+    fields = ['rationale', 'first_answer_choice']
+    inline_classes = ['grp-collapse', 'grp-open']
+
+    def get_queryset(self, request):
+        # Only include example answers not belonging to any student
+        qs = admin.StackedInline.get_queryset(self, request)
+        return qs.filter(user_token='', show_to_others=True)
+
 @admin.register(models.Question)
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -56,7 +67,18 @@ class QuestionAdmin(admin.ModelAdmin):
         (_('Example rationale'), {'fields': ['example_rationale', 'example_answer']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
-    inlines = [AnswerChoiceInline]
+    inlines = [AnswerChoiceInline, AnswerInline]
+
+    def save_related(self, request, form, formsets, change):
+        for fs in formsets:
+            if fs.model is models.Answer:
+                answers = fs.save(commit=False)
+                for a in answers:
+                    a.show_to_others = True
+                    a.save()
+                fs.save_m2m()
+            else:
+                fs.save()
 
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
