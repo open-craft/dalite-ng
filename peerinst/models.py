@@ -40,7 +40,7 @@ class Question(models.Model):
         (NUMERIC, 'numeric'),
     )
     answer_style = models.IntegerField(
-        _('Answer style'), choices=ANSWER_STYLE_CHOICES,
+        _('Answer style'), choices=ANSWER_STYLE_CHOICES, default=ALPHA,
         help_text=_(
             'Whether the answers are annotated with letters (A, B, C…) or numbers (1, 2, 3…).'
         )
