@@ -19,10 +19,6 @@ class AnswerChoiceInlineFormSet(forms.BaseInlineFormSet):
         correct_answers = sum(f.cleaned_data.get('correct', False) for f in forms)
         if not correct_answers:
             errors.append(_('At least one of the answers must be marked as correct.'))
-        # TODO(smarnach): Validate example_answer on the parent instance.  Note that the parent
-        # has already been saved at this point, but there is no way of validating this kind of
-        # dependent data before the parent is saved.
-        # errors['example_answer'] = _('The example answer is outside of the valid range.')
         if errors:
             raise exceptions.ValidationError(errors)
 
@@ -60,11 +56,7 @@ class QuestionAdmin(admin.ModelAdmin):
                 'subsequent pages.'
             ),
         }),
-        (_('Answers'), {'fields': ['answer_style']}),
-        ('Answer choices placeholder', {
-            'fields': [], 'classes': ['placeholder', 'answerchoice_set-group']
-        }),
-        (_('Example rationale'), {'fields': ['example_rationale', 'example_answer']}),
+        (None, {'fields': ['answer_style']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
     inlines = [AnswerChoiceInline, AnswerInline]

@@ -50,14 +50,6 @@ class Question(models.Model):
             'Whether the answers are annotated with letters (A, B, C…) or numbers (1, 2, 3…).'
         )
     )
-    example_rationale = models.TextField(
-        _('Example for a good rationale'),
-        help_text=_('An example of a good rationale for the question.')
-    )
-    example_answer = models.PositiveSmallIntegerField(
-        _('Example answer'),
-        help_text=_('The answer associated with the example rationale (1=first, 2=second, etc.).')
-    )
 
     def __unicode__(self):
         return self.title
