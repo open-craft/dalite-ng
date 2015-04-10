@@ -31,6 +31,8 @@ class AnswerChoiceInline(admin.TabularInline):
 
 class AnswerInline(admin.StackedInline):
     model = models.Answer
+    verbose_name = _('example answer')
+    verbose_name_plural = _('example answers')
     extra = 0
     fields = ['rationale', 'first_answer_choice']
     inline_classes = ['grp-collapse', 'grp-open']

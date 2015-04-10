@@ -80,6 +80,9 @@ class AnswerChoice(models.Model):
     text = models.CharField(_('Text'), max_length=500)
     correct = models.BooleanField(_('Correct?'))
 
+    def __unicode__(self):
+        return self.text
+
     class Meta:
         verbose_name = _('answer choice')
         verbose_name_plural = _('answer choices')
@@ -109,3 +112,6 @@ class Answer(models.Model):
     chosen_rationale = models.ForeignKey('self', blank=True, null=True)
     user_token = models.CharField(max_length=100, blank=True)
     show_to_others = models.BooleanField(_('Show to others?'), default=False)
+
+    def __unicode__(self):
+        return unicode(_('{} for question {}').format(self.id, self.question.title))
