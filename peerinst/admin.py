@@ -36,7 +36,7 @@ class AnswerChoiceInline(admin.TabularInline):
 @admin.register(models.Question)
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['title']}),
+        (None, {'fields': ['title', 'text']}),
         (_('Main image or video'), {'fields': ['primary_image', 'primary_video_url']}),
         (_('Secondary image or video'), {
             'fields': ['secondary_image', 'secondary_video_url'],

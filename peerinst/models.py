@@ -19,6 +19,11 @@ class Question(models.Model):
             'question and number: LynDynQ14.'
         )
     )
+    text = models.TextField(
+        _('Question text'), help_text = _(
+            'Enter the question text.  You can use HTML tags for formatting.'
+        )
+    )
     primary_image = models.ImageField(
         _('Main question image'), blank=True, null=True, upload_to='images',
         help_text=_('An image to include on the first page of the question.')
@@ -59,12 +64,15 @@ class Question(models.Model):
 
     def clean(self):
         errors = {}
-        if bool(self.primary_image) + bool(self.primary_video_url) != 1:
-            msg = _('You must specify exactly one of the primary image and video URL fields.')
-            errors['primary_image'] = errors['primary_video_url'] = msg
-        if bool(self.secondary_image) + bool(self.secondary_video_url) > 1:
-            msg = _('You can only specify one of the secondary image and video URL fields.')
-            errors['secondary_image'] = errors['secondary_video_url'] = msg
+        for ordinal in 'primary', 'secondary':
+            fields = [ordinal + '_image', ordinal + '_video_url']
+            filled_in_fields = sum(bool(getattr(self, f)) for f in fields)
+            if filled_in_fields > 1:
+                msg = _(
+                    'You can only specify one of the {} image and video URL fields.'
+                    .format(ordinal)
+                )
+                errors.update({f: msg for f in fields})
         if errors:
             raise exceptions.ValidationError(errors)
 
