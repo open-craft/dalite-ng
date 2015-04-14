@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import itertools
+import string
 from django.db import models
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
@@ -70,6 +72,20 @@ class Question(models.Model):
 
     def natural_key(self):
         return (self.title,)
+
+    def get_choice_label_iter(self):
+        if self.answer_style == Question.ALPHA:
+            return iter(string.uppercase)
+        elif self.answer_style == Question.NUMERIC:
+            return itertools.count(1)
+        assert False, 'The field Question.answer_style has an invalid value.'
+
+    def get_choice_label(self, index):
+        if self.answer_style == Question.ALPHA:
+            return string.uppercase[index - 1]
+        elif self.answer_style == Question.NUMERIC:
+            return index
+        assert False, 'The field Question.answer_style has an invalid value.'
 
     class Meta:
         verbose_name = _('question')
