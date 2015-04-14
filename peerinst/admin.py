@@ -32,9 +32,12 @@ class AnswerChoiceInline(admin.TabularInline):
 class AnswerModelForm(forms.ModelForm):
     class Meta:
         labels = {'first_answer_choice': _('Associated answer')}
-        help_texts = {'rationale': _(
-            'An example rationale that will be shown to students during the answer review.'
-        )}
+        help_texts = {
+            'rationale':
+                _('An example rationale that will be shown to students during the answer review.'),
+            'first_answer_choice':
+                _('The number of the associated answer; 1 = first answer, 2 = second answer etc.'),
+        }
 
 class AnswerInline(admin.StackedInline):
     model = models.Answer
