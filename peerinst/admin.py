@@ -19,10 +19,6 @@ class AnswerChoiceInlineFormSet(forms.BaseInlineFormSet):
         correct_answers = sum(f.cleaned_data.get('correct', False) for f in forms)
         if not correct_answers:
             errors.append(_('At least one of the answers must be marked as correct.'))
-        # TODO(smarnach): Validate example_answer on the parent instance.  Note that the parent
-        # has already been saved at this point, but there is no way of validating this kind of
-        # dependent data before the parent is saved.
-        # errors['example_answer'] = _('The example answer is outside of the valid range.')
         if errors:
             raise exceptions.ValidationError(errors)
 
@@ -32,6 +28,30 @@ class AnswerChoiceInline(admin.TabularInline):
     max_num = 5
     extra = 5
     ordering = ['id']
+
+class AnswerModelForm(forms.ModelForm):
+    class Meta:
+        labels = {'first_answer_choice': _('Associated answer')}
+        help_texts = {
+            'rationale':
+                _('An example rationale that will be shown to students during the answer review.'),
+            'first_answer_choice':
+                _('The number of the associated answer; 1 = first answer, 2 = second answer etc.'),
+        }
+
+class AnswerInline(admin.StackedInline):
+    model = models.Answer
+    form = AnswerModelForm
+    verbose_name = _('example answer')
+    verbose_name_plural = _('example answers')
+    extra = 0
+    fields = ['rationale', 'first_answer_choice']
+    inline_classes = ['grp-collapse', 'grp-open']
+
+    def get_queryset(self, request):
+        # Only include example answers not belonging to any student
+        qs = admin.StackedInline.get_queryset(self, request)
+        return qs.filter(user_token='', show_to_others=True)
 
 @admin.register(models.Question)
 class QuestionAdmin(admin.ModelAdmin):
@@ -49,14 +69,21 @@ class QuestionAdmin(admin.ModelAdmin):
                 'subsequent pages.'
             ),
         }),
-        (_('Answers'), {'fields': ['answer_style']}),
-        ('Answer choices placeholder', {
-            'fields': [], 'classes': ['placeholder', 'answerchoice_set-group']
-        }),
-        (_('Example rationale'), {'fields': ['example_rationale', 'example_answer']}),
+        (None, {'fields': ['answer_style']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
-    inlines = [AnswerChoiceInline]
+    inlines = [AnswerChoiceInline, AnswerInline]
+
+    def save_related(self, request, form, formsets, change):
+        for fs in formsets:
+            if fs.model is models.Answer:
+                answers = fs.save(commit=False)
+                for a in answers:
+                    a.show_to_others = True
+                    a.save()
+                fs.save_m2m()
+            else:
+                fs.save()
 
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):

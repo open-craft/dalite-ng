@@ -50,14 +50,6 @@ class Question(models.Model):
             'Whether the answers are annotated with letters (A, B, C…) or numbers (1, 2, 3…).'
         )
     )
-    example_rationale = models.TextField(
-        _('Example for a good rationale'),
-        help_text=_('An example of a good rationale for the question.')
-    )
-    example_answer = models.PositiveSmallIntegerField(
-        _('Example answer'),
-        help_text=_('The answer associated with the example rationale (1=first, 2=second, etc.).')
-    )
 
     def __unicode__(self):
         return self.title
@@ -88,6 +80,9 @@ class AnswerChoice(models.Model):
     text = models.CharField(_('Text'), max_length=500)
     correct = models.BooleanField(_('Correct?'))
 
+    def __unicode__(self):
+        return self.text
+
     class Meta:
         verbose_name = _('answer choice')
         verbose_name_plural = _('answer choices')
@@ -106,3 +101,17 @@ class Assignment(models.Model):
     class Meta:
         verbose_name = _('assignment')
         verbose_name_plural = _('assignments')
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question)
+    first_answer_choice = models.PositiveSmallIntegerField(_('First answer choice'))
+    rationale = models.TextField(_('Rationale'))
+    second_answer_choice = models.PositiveSmallIntegerField(
+        _('Second answer choice'), blank=True, null=True
+    )
+    chosen_rationale = models.ForeignKey('self', blank=True, null=True)
+    user_token = models.CharField(max_length=100, blank=True)
+    show_to_others = models.BooleanField(_('Show to others?'), default=False)
+
+    def __unicode__(self):
+        return unicode(_('{} for question {}').format(self.id, self.question.title))
