@@ -1,0 +1,17 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block body %}
+<div class="container">
+  <h1>{{ assignment.title }} </h1>
+  <h2>{% trans 'Question' %} {{ question_index }}</h2>
+  <div id="question-text">
+    {{ question.text|safe }}
+  </div>
+  <form action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="{% trans 'Submit' %}" />
+  </form>
+</div>
+{% endblock %}

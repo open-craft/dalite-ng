@@ -1,0 +1,23 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Dalite NG">
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+
+    <title>{% block title %}Dalite NG{% endblock %}</title>
+
+    <link href="{% static 'peerinst/css/bootstrap.min.css' %}" rel="stylesheet">
+  </head>
+
+  <body>
+    {% block body %}{% endblock %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="{% static 'peerinst/js/bootstrap.min.js' %}"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
