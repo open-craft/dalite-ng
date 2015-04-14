@@ -29,8 +29,16 @@ class AnswerChoiceInline(admin.TabularInline):
     extra = 5
     ordering = ['id']
 
+class AnswerModelForm(forms.ModelForm):
+    class Meta:
+        labels = {'first_answer_choice': _('Associated answer')}
+        help_texts = {'rationale': _(
+            'An example rationale that will be shown to students during the answer review.'
+        )}
+
 class AnswerInline(admin.StackedInline):
     model = models.Answer
+    form = AnswerModelForm
     verbose_name = _('example answer')
     verbose_name_plural = _('example answers')
     extra = 0
