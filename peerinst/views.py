@@ -1,7 +1,8 @@
 import random
 from django import http
+from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import edit
 from django.views.generic import list as list_views
@@ -63,14 +64,14 @@ class QuestionView(edit.FormView):
         except QuestionRedirect as e:
             return redirect(self.get_redirect_url(e.target_url_name))
 
-    def start_over(self):
+    def start_over(self, msg=None):
         """Start over with the current question.
 
         This redirect is used when inconsistent data is encountered and shouldn't be called under
         normal circumstances.
         """
-        # TODO(smarnach): Push some error message for display at the top of the page to notify
-        # user that something went wrong.  Maybe we should show a "Bad Request" error page instead.
+        if msg is not None:
+            messages.add_message(self.request, messages.ERROR, msg)
         raise QuestionRedirect('question-start')
 
 
@@ -210,9 +211,15 @@ class QuestionSummaryView(QuestionView):
         try:
             chosen_rationale = models.Answer.objects.get(id=self.chosen_rationale_id)
         except models.Answer.DoesNotExist:
-            self.start_over()
+            self.start_over(_(
+                'The rationale you chose does not exist anymore.  '
+                'This should not happen.  Please start over with the question.'
+            ))
         if chosen_rationale.first_answer_choice != self.second_answer_choice:
-            self.start_over()
+            self.start_over(_(
+                'The rationale you chose does not match your second answer choice.  '
+                'This should not happen.  Please start over with the question.'
+            ))
         answer = models.Answer(
             question=self.question,
             first_answer_choice=self.first_answer_choice,
