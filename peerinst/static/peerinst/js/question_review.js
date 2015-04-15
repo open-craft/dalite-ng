@@ -2,25 +2,22 @@
 // selected during question review.
 
 $(function() {
-    function setRadioButtonStatus(name, disabled) {
-        // Disable or enable or radio buttons for the given name.
-        $('input[type=radio][name=' + name + ']').each(function() {
+    function setRadioButtonStatus(index) {
+        // Disable or enable the radio buttons for the set of rationales with the given index.
+        var disabled = !$('#id_second_answer_choice_' + index).get(0).checked;
+        $('input[type=radio][name=rationale_choice_' + index + ']').each(function() {
             this.disabled = disabled;
             if (disabled) this.checked = false;
         });
     }
 
     // Disable all radio buttons until the user has chosen an answer.
-    setRadioButtonStatus('rationale_choice_0', true);
-    setRadioButtonStatus('rationale_choice_1', true);
+    setRadioButtonStatus(0);
+    setRadioButtonStatus(1);
 
     // Enable the right set of rationales when the user changes the selected answer.
     $('input[type=radio][name=second_answer_choice]').change(function() {
-        var n, enable_name, disable_name;
-        enable_name = this.id.replace('id_second_answer', 'rationale');
-        n = enable_name.length - 1
-        disable_name = enable_name.substr(0, n) + (enable_name[n] == '0' ? '1' : '0');
-        setRadioButtonStatus(enable_name, false);
-        setRadioButtonStatus(disable_name, true);
+        setRadioButtonStatus(0);
+        setRadioButtonStatus(1);
     });
 });
