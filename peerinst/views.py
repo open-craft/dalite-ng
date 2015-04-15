@@ -1,3 +1,4 @@
+import random
 from django import http
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -32,6 +33,7 @@ class QuestionView(edit.FormView):
             self.question = self.assignment.questions.all()[int(self.question_index) - 1]
         except IndexError:
             raise http.Http404(_('Question does not exist.'))
+        self.answer_choices = self.question.get_choices()
         return edit.FormView.get_form_kwargs(self)
 
     def get_context_data(self, **kwargs):
@@ -40,6 +42,7 @@ class QuestionView(edit.FormView):
             question_index=self.question_index,
             assignment=self.assignment,
             question=self.question,
+            answer_choices=self.answer_choices,
         )
         return context
 
@@ -83,7 +86,7 @@ class QuestionStartView(QuestionView):
 
     def get_form_kwargs(self):
         kwargs = QuestionView.get_form_kwargs(self)
-        kwargs.update(question=self.question)
+        kwargs.update(answer_choices=self.answer_choices)
         return kwargs
 
     def form_valid(self, form):
@@ -110,7 +113,41 @@ class QuestionReviewView(QuestionView):
             # We got here without doing the first step, or the session has expired.
             self.start_over()
         kwargs = QuestionView.get_form_kwargs(self)
-        kwargs.update(question=self.question, first_answer_choice=self.first_answer_choice)
+        return self.select_rationales(kwargs)
+
+    def select_rationales(self, kwargs):
+        first_choice = self.first_answer_choice
+        answer_choices = self.question.answerchoice_set.all()
+        # Find all public rationales for this question.
+        rationales = models.Answer.objects.filter(question=self.question, show_to_others=True)
+        # Find the subset of rationales for the answer the user chose.
+        first_rationales = rationales.filter(first_answer_choice=self.first_answer_choice)
+        # Select a second answer to offer at random.  If the user's answer wasn't correct, the
+        # second answer choice offered must be correct.
+        if answer_choices[first_choice - 1].correct:
+            # We must make sure that rationales for the second answer exist.  The choice is
+            # weighted by the number of rationales available.
+            other_rationales = rationales.exclude(first_answer_choice=first_choice)
+            # We don't use random.choice to avoid fetching all rationales from the database.
+            random_rationale = other_rationales[random.randrange(other_rationales.count())]
+            second_choice = random_rationale.first_answer_choice
+        else:
+            # Select a random correct answer.  We assume that a correct answer exists.
+            second_choice = random.choice(
+                [i for i, choice in enumerate(answer_choices, 1) if choice.correct]
+            )
+        second_rationales = rationales.filter(first_answer_choice=second_choice)
+        # Select up to four rationales for each choice, if available.
+        display_rationales = [
+            random.sample(r, min(4, r.count())) for r in [first_rationales, second_rationales]
+        ]
+        answer_choices = [
+            (c, self.question.get_choice_label(c)) for c in [first_choice, second_choice]
+        ]
+        kwargs.update(
+            answer_choices=answer_choices,
+            display_rationales=display_rationales,
+        )
         return kwargs
 
     def get_context_data(self, **kwargs):

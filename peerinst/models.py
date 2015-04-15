@@ -74,6 +74,10 @@ class Question(models.Model):
         return (self.title,)
 
     def get_choice_label_iter(self):
+        """Return an iterable over the answer labels with the style determined by answer_style.
+
+        The iterable doesn't stop after the current number of answer choices.
+        """
         if self.answer_style == Question.ALPHA:
             return iter(string.uppercase)
         elif self.answer_style == Question.NUMERIC:
@@ -81,11 +85,22 @@ class Question(models.Model):
         assert False, 'The field Question.answer_style has an invalid value.'
 
     def get_choice_label(self, index):
+        """Return an answer label for answer index with the style determined by answer_style.
+
+        This method does not check whether index is out of bounds.
+        """
         if self.answer_style == Question.ALPHA:
             return string.uppercase[index - 1]
         elif self.answer_style == Question.NUMERIC:
             return index
         assert False, 'The field Question.answer_style has an invalid value.'
+
+    def get_choices(self):
+        """Return a list of pairs (answer label, answer choice text)."""
+        return [
+            (label, choice.text)
+            for label, choice in zip(self.get_choice_label_iter(), self.answerchoice_set.all())
+        ]
 
     class Meta:
         verbose_name = _('question')
