@@ -12,7 +12,7 @@
   {% endblock %}
   <form action="" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {% block inner_form %}{{ form.as_p }}{% endblock %}
     <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
   </form>
 </div>
