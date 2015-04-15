@@ -8,10 +8,12 @@
   <div id="question-text">
     {{ question.text|safe }}
   </div>
+  {% block answers %}
+  {% endblock %}
   <form action="" method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="{% trans 'Next' %}" />
+    <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
   </form>
 </div>
 {% endblock %}

@@ -1,29 +1,17 @@
-{% extends 'peerinst/base.html' %}
+{% extends 'peerinst/question_start.html' %}
 {% load i18n %}
 
-{% block body %}
-<div class="container">
-  <h1>{{ assignment.title }} </h1>
-  <h2>{% trans 'Question' %} {{ question_index }}</h2>
-  <div id="question-text">
-    {{ question.text|safe }}
+{% block answers %}
+<dl id="answer-choices">
+  {% for label, choice in answer_choices %}
+  <dt>{{ label }}</dt><dd>{{ choice|safe }}</dd>
+  {% endfor %}
+</dl>
+<div id="your-answer">
+  <p>{% trans 'You answered' %} {{ first_choice_label }} {{ second_choice_label }}</p>
+  <div id="your-rationale">
+    <p>{% trans 'Your rationale:' %}</p>
+    {{ rationale }}
   </div>
-  <dl id="answer-choices">
-    {% for label, choice in answer_choices %}
-    <dt>{{ label }}</dt><dd>{{ choice|safe }}</dd>
-    {% endfor %}
-  </dl>
-  <div id="your-answer">
-    <p>{% trans 'You answered' %} {{ first_choice_label }}</p>
-    <div id="your-rationale">
-      <p>{% trans 'Your rationale:' %}</p>
-      {{ rationale }}
-    </div>
-  </div>
-  <form action="" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="{% trans 'Next' %}" />
-  </form>
 </div>
 {% endblock %}
