@@ -17,15 +17,6 @@ class FirstAnswerForm(forms.Form):
         self.base_fields['first_answer_choice'].choices = enumerate(choice_texts, 1)
         forms.Form.__init__(self, *args, **kwargs)
 
-    def clean_first_answer_choice(self):
-        choice = self.cleaned_data['first_answer_choice']
-        try:
-            choice = int(choice)
-        except ValueError:
-            # This can only happen for manually crafted requests.
-            raise forms.ValidationError('Answer choice must be an integer.')
-        return choice
-
 class ReviewAnswerForm(forms.Form):
     """Form on the answer review page."""
 
@@ -42,15 +33,6 @@ class ReviewAnswerForm(forms.Form):
                 (r.id, r.rationale) for r in rationales
             ]
         forms.Form.__init__(self, *args, **kwargs)
-
-    def clean_second_answer_choice(self):
-        choice = self.cleaned_data['second_answer_choice']
-        try:
-            choice = int(choice)
-        except ValueError:
-            # This can only happen for manually crafted requests.
-            raise forms.ValidationError('Answer choice must be an integer.')
-        return choice
 
     def clean(self):
         cleaned_data = forms.Form.clean(self)

@@ -91,7 +91,7 @@ class QuestionStartView(QuestionView):
 
     def form_valid(self, form):
         self.request.session['answer_dict'] = dict(
-            first_answer_choice=form.cleaned_data['first_answer_choice'],
+            first_answer_choice=int(form.cleaned_data['first_answer_choice']),
             rationale=form.cleaned_data['rationale'],
         )
         return QuestionView.form_valid(self, form)
@@ -160,7 +160,7 @@ class QuestionReviewView(QuestionView):
 
     def form_valid(self, form):
         self.answer_dict.update(
-            second_answer_choice=form.cleaned_data['second_answer_choice'],
+            second_answer_choice=int(form.cleaned_data['second_answer_choice']),
             chosen_rationale_id=form.cleaned_data['chosen_rationale_id'],
         )
         self.request.session['answer_dict'] = self.answer_dict
