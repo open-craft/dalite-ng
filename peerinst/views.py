@@ -188,7 +188,7 @@ class QuestionSummaryView(QuestionView):
 
     def get_context_data(self, **kwargs):
         context = QuestionView.get_context_data(self, **kwargs)
-        context = dict(
+        context.update(
             first_choice_label=self.question.get_choice_label(self.first_answer_choice),
             second_choice_label=self.question.get_choice_label(self.second_answer_choice),
             rationale=self.rationale,

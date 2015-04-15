@@ -8,6 +8,11 @@
   <div id="question-text">
     {{ question.text|safe }}
   </div>
+  <dl id="answer-choices">
+    {% for label, choice in answer_choices %}
+    <dt>{{ label }}</dt><dd>{{ choice|safe }}</dd>
+    {% endfor %}
+  </dl>
   <div id="your-answer">
     <p>{% trans 'You answered' %} {{ first_choice_label }}</p>
     <div id="your-rationale">
