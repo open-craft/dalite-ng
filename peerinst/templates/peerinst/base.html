@@ -11,13 +11,12 @@
 
     <title>{% block title %}Dalite NG{% endblock %}</title>
 
-    <link href="{% static 'peerinst/css/bootstrap.min.css' %}" rel="stylesheet">
+    {% block stylesheets %}{% endblock %}
   </head>
 
   <body>
     {% block body %}{% endblock %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="{% static 'peerinst/js/bootstrap.min.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
