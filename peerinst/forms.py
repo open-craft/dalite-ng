@@ -5,7 +5,11 @@ from django.utils.translation import ugettext_lazy as _
 class FirstAnswerForm(forms.Form):
     """Form to select one of the answer choices and enter a rationale."""
 
-    first_answer_choice = forms.ChoiceField(widget=forms.RadioSelect)
+    error_css_class = 'validation-error'
+
+    first_answer_choice = forms.ChoiceField(
+        label=_('Choose one of these answers:'), widget=forms.RadioSelect
+    )
     rationale = forms.CharField(widget=forms.Textarea)
 
     def __init__(self, answer_choices, *args, **kwargs):
@@ -25,9 +29,11 @@ class FirstAnswerForm(forms.Form):
 class ReviewAnswerForm(forms.Form):
     """Form on the answer review page."""
 
-    second_answer_choice = forms.ChoiceField(widget=forms.RadioSelect)
-    rationale_choice_0 = forms.ChoiceField(required=False, widget=forms.RadioSelect)
-    rationale_choice_1 = forms.ChoiceField(required=False, widget=forms.RadioSelect)
+    error_css_class = 'validation-error'
+
+    second_answer_choice = forms.ChoiceField(label='', widget=forms.RadioSelect)
+    rationale_choice_0 = forms.ChoiceField(label='', required=False, widget=forms.RadioSelect)
+    rationale_choice_1 = forms.ChoiceField(label='', required=False, widget=forms.RadioSelect)
 
     def __init__(self, answer_choices, display_rationales, *args, **kwargs):
         self.base_fields['second_answer_choice'].choices = answer_choices
