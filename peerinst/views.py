@@ -105,6 +105,7 @@ class QuestionReviewView(QuestionView):
     success_url_name = 'question-summary'
 
     def get_form_kwargs(self):
+        kwargs = QuestionView.get_form_kwargs(self)
         try:
             self.answer_dict = self.request.session['answer_dict']
             self.first_answer_choice = self.answer_dict['first_answer_choice']
@@ -112,7 +113,6 @@ class QuestionReviewView(QuestionView):
         except KeyError:
             # We got here without doing the first step, or the session has expired.
             self.start_over()
-        kwargs = QuestionView.get_form_kwargs(self)
         return self.select_rationales(kwargs)
 
     def select_rationales(self, kwargs):
@@ -175,6 +175,7 @@ class QuestionSummaryView(QuestionView):
     success_url_name = 'question-start'
 
     def get_form_kwargs(self):
+        kwargs = QuestionView.get_form_kwargs(self)
         try:
             self.answer_dict = self.request.session['answer_dict']
             self.first_answer_choice = self.answer_dict['first_answer_choice']
@@ -184,7 +185,7 @@ class QuestionSummaryView(QuestionView):
         except KeyError:
             # We got here without doing the first steps, or the session has expired.
             self.start_over()
-        return QuestionView.get_form_kwargs(self)
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = QuestionView.get_context_data(self, **kwargs)
