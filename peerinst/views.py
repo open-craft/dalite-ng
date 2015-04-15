@@ -80,7 +80,7 @@ class QuestionStartView(QuestionView):
     The user can choose one answer and enter a rationale.
     """
 
-    template_name = 'peerinst/question.html'
+    template_name = 'peerinst/question_start.html'
     form_class = forms.FirstAnswerForm
     success_url_name = 'question-review'
 
@@ -100,7 +100,7 @@ class QuestionStartView(QuestionView):
 class QuestionReviewView(QuestionView):
     """Show rationales from other users and give the opportunity to reconsider the first answer."""
 
-    template_name = 'peerinst/review_answer.html'
+    template_name = 'peerinst/question_review.html'
     form_class = forms.ReviewAnswerForm
     success_url_name = 'question-summary'
 
@@ -170,7 +170,7 @@ class QuestionReviewView(QuestionView):
 class QuestionSummaryView(QuestionView):
     """Show a summary of answers to the student and submit the data to the database."""
 
-    template_name = 'peerinst/answer_summary.html'
+    template_name = 'peerinst/question_summary.html'
     form_class = forms.forms.Form
     success_url_name = 'question-start'
 
