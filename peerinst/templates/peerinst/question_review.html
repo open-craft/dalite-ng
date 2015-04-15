@@ -1,17 +1,13 @@
-{% extends 'peerinst/question_start.html' %}
+{% extends 'peerinst/question_review_base.html' %}
 {% load i18n %}
 
 {% block answers %}
-<dl id="answer-choices">
-  {% for label, choice in answer_choices %}
-  <dt>{{ label }}</dt><dd>{{ choice|safe }}</dd>
-  {% endfor %}
-</dl>
-<div id="your-answer">
-  <p>{% trans 'You answered' %} {{ first_choice_label }} {{ second_choice_label }}</p>
-  <div id="your-rationale">
-    <p>{% trans 'Your rationale:' %}</p>
-    {{ rationale }}
-  </div>
-</div>
+{{ block.super }}
+<p>
+  {% blocktrans %}
+  Consider the problem again, noting the rationales below that have been provided by other
+  students.  They may, or may not, cause you to reconsider your answer.  Read them, and select your
+  final answer.
+  {% endblocktrans %}
+</p>
 {% endblock %}
