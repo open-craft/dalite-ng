@@ -5,7 +5,7 @@
 <h1>{% trans Assignments %}</h1>
 <ul>
 {% for assignment in object_list %}
-  <li><a href="{% url 'start-assignment' assignment.identifier %}">
+  <li><a href="{% url 'assignment-start' assignment.identifier %}">
     {{ assignment.identifier }}
   <a></li>
 {% empty %}
