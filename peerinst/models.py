@@ -74,7 +74,7 @@ class Question(models.Model):
         return (self.title,)
 
     def get_choice_label_iter(self):
-        """Return an iterable over the answer labels with the style determined by answer_style.
+        """Return an iterator over the answer labels with the style determined by answer_style.
 
         The iterable doesn't stop after the current number of answer choices.
         """

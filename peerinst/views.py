@@ -66,7 +66,7 @@ class QuestionView(edit.FormView):
     def start_over(self):
         """Start over with the current question.
 
-        This redirect is used when incosistent data is encountered and shouldn't be called under
+        This redirect is used when inconsistent data is encountered and shouldn't be called under
         normal circumstances.
         """
         # TODO(smarnach): Push some error message for display at the top of the page to notify
