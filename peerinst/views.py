@@ -55,11 +55,11 @@ class QuestionView(edit.FormView):
     def get_success_url(self):
         return self.get_redirect_url(self.success_url_name)
 
-    def get(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         # We override this method to enable triggering redirects from within other methods, which
-        # is usually not possible.
+        # is usually not possible.  This is used in the start_over() method below.
         try:
-            return edit.FormView.get(self, request, *args, **kwargs)
+            return edit.FormView.dispatch(self, request, *args, **kwargs)
         except QuestionRedirect as e:
             return redirect(self.get_redirect_url(e.target_url_name))
 
