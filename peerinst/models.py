@@ -26,19 +26,13 @@ class Question(models.Model):
             'Enter the question text.  You can use HTML tags for formatting.'
         )
     )
-    primary_image = models.ImageField(
-        _('Main question image'), blank=True, null=True, upload_to='images',
-        help_text=_('An image to include on the first page of the question.')
+    image = models.ImageField(
+        _('Question image'), blank=True, null=True, upload_to='images',
+        help_text=_('An image to include after the question text.')
     )
-    primary_video_url = models.URLField(
-        _('Main question video URL'), blank=True,
-        help_text=_('A video to include on the first page of the question.')
-    )
-    secondary_image = models.ImageField(
-        _('Secondary question image'), blank=True, null=True, upload_to='images'
-    )
-    secondary_video_url = models.URLField(
-        _('Secondary question video URL'), blank=True, max_length=200
+    video_url = models.URLField(
+        _('Question video URL'), blank=True,
+        help_text=_('A video to include after the question text.')
     )
     ALPHA = 0
     NUMERIC = 1
@@ -58,15 +52,11 @@ class Question(models.Model):
 
     def clean(self):
         errors = {}
-        for ordinal in 'primary', 'secondary':
-            fields = [ordinal + '_image', ordinal + '_video_url']
-            filled_in_fields = sum(bool(getattr(self, f)) for f in fields)
-            if filled_in_fields > 1:
-                msg = _(
-                    'You can only specify one of the {} image and video URL fields.'
-                    .format(ordinal)
-                )
-                errors.update({f: msg for f in fields})
+        fields = ['image', 'video_url']
+        filled_in_fields = sum(bool(getattr(self, f)) for f in fields)
+        if filled_in_fields > 1:
+            msg = _('You can only specify one of the image and video URL fields.')
+            errors.update({f: msg for f in fields})
         if errors:
             raise exceptions.ValidationError(errors)
 

@@ -57,18 +57,7 @@ class AnswerInline(admin.StackedInline):
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['title', 'text']}),
-        (_('Main image or video'), {'fields': ['primary_image', 'primary_video_url']}),
-        (_('Secondary image or video'), {
-            'fields': ['secondary_image', 'secondary_video_url'],
-            'classes': ['grp-collapse', 'grp-closed'],
-            'description': _(
-                'Choose either a video or image to include on the first page of the question, '
-                'where students select concept tags. This is only used if you want the question '
-                'to be hidden when students select concept tags; instead, a preliminary video or '
-                'image can be displayed. The main question image will be displayed on all '
-                'subsequent pages.'
-            ),
-        }),
+        (_('Question image or video'), {'fields': ['image', 'video_url']}),
         (None, {'fields': ['answer_style']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
