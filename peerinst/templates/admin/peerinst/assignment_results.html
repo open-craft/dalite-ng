@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% load i18n grp_tags %}
+
+{% block title %}{% trans 'Assignment results' %}{% endblock %}
+
+{% block content %}
+<div class="g-d-c">
+  <div class="g-d-24">
+    <table class="assignment-data">
+      <tbody>
+        {% for label, item in assignment_data %}
+        <tr><th>{{ label }}</th><td>{{ item }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="g-d-24">
+    <table class="question-data grp-full-width">
+      <thead>
+        <tr>
+          {% for label in question_data.labels %}
+          <th>{{ label }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for question in question_data.rows %}
+        <tr class="grp-row-{% cycle 'odd' 'even' %}">
+          {% for item in question.data %}
+          <td><a href="{{ question.link }}">{{ item }}</a></td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
