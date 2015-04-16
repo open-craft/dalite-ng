@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from django.conf.urls import include, url
 
+from . import admin_views
 from . import views
 
 urlpatterns = [
@@ -12,4 +16,8 @@ urlpatterns = [
             url(r'^summary$', views.QuestionSummaryView.as_view(), name='question-summary'),
         ])),
     ])),
+    url(r'^admin/peerinst/assignment_results/(?P<assignment_id>[^/]+)',
+        admin_views.AssignmentResultsView.as_view(), name='assignment-results'),
+    url(r'^admin/peerinst/question_results/(?P<question_id>[^/]+)',
+        admin_views.QuestionResultsView.as_view(), name='question-results'),
 ]
