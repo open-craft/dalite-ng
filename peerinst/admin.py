@@ -5,7 +5,7 @@ from django.core import exceptions
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from . import models
+from .models import Answer, AnswerChoice, Assignment, Question, Category
 
 class AnswerChoiceInlineFormSet(forms.BaseInlineFormSet):
     def clean(self):
@@ -23,7 +23,7 @@ class AnswerChoiceInlineFormSet(forms.BaseInlineFormSet):
             raise exceptions.ValidationError(errors)
 
 class AnswerChoiceInline(admin.TabularInline):
-    model = models.AnswerChoice
+    model = AnswerChoice
     formset = AnswerChoiceInlineFormSet
     max_num = 5
     extra = 5
@@ -40,7 +40,7 @@ class AnswerModelForm(forms.ModelForm):
         }
 
 class AnswerInline(admin.StackedInline):
-    model = models.Answer
+    model = Answer
     form = AnswerModelForm
     verbose_name = _('example answer')
     verbose_name_plural = _('example answers')
@@ -53,19 +53,20 @@ class AnswerInline(admin.StackedInline):
         qs = admin.StackedInline.get_queryset(self, request)
         return qs.filter(user_token='', show_to_others=True)
 
-@admin.register(models.Question)
+@admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['title', 'text']}),
+        (None, {'fields': ['title', 'text', 'category']}),
         (_('Question image or video'), {'fields': ['image', 'video_url']}),
         (None, {'fields': ['answer_style']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
     inlines = [AnswerChoiceInline, AnswerInline]
+    list_display = ['title', 'category']
 
     def save_related(self, request, form, formsets, change):
         for fs in formsets:
-            if fs.model is models.Answer:
+            if fs.model is Answer:
                 answers = fs.save(commit=False)
                 for a in answers:
                     a.show_to_others = True
@@ -74,8 +75,13 @@ class QuestionAdmin(admin.ModelAdmin):
             else:
                 fs.save()
 
-@admin.register(models.Assignment)
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
     filter_horizontal = ['questions']
     class Media:
         js = ['peerinst/js/prepopulate_added_question.js']
+
