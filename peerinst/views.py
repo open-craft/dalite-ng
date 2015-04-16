@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import random
 from django import http
 from django.contrib import messages
@@ -35,6 +38,20 @@ class QuestionView(edit.FormView):
         except IndexError:
             raise http.Http404(_('Question does not exist.'))
         self.answer_choices = self.question.get_choices()
+        self.answer_dict = self.request.session.get('answer_dict', None)
+        if self.answer_dict is not None:
+            if (self.assignment_id != self.answer_dict['assignment_id'] or
+                self.question_index != self.answer_dict['question_index']):
+                # We have session data for a different question.  Start over with the current one.
+                self.start_over()
+            if self.request.resolver_match.url_name != self.answer_dict['url_name']:
+                # We have data for the current question, but a different step, so let's redirect
+                # there.  This mostly disables the back button while processing a question.
+                raise QuestionRedirect(self.answer_dict['url_name'])
+        else:
+            if self.request.resolver_match.url_name != 'question-start':
+                # We don't have session data, but are at a later step
+                self.start_over()
         return edit.FormView.get_form_kwargs(self)
 
     def get_context_data(self, **kwargs):
@@ -46,6 +63,16 @@ class QuestionView(edit.FormView):
             answer_choices=self.answer_choices,
         )
         return context
+
+    def form_valid(self, form):
+        if self.answer_dict is not None:
+            self.answer_dict.update(
+                assignment_id=self.assignment_id,
+                question_index=self.question_index,
+                url_name=self.success_url_name,
+            )
+            self.request.session['answer_dict'] = self.answer_dict
+        return edit.FormView.form_valid(self, form)
 
     def get_redirect_url(self, name):
         return reverse(
@@ -70,6 +97,7 @@ class QuestionView(edit.FormView):
         This redirect is used when inconsistent data is encountered and shouldn't be called under
         normal circumstances.
         """
+        self.request.session.pop('answer_dict', None)
         if msg is not None:
             messages.add_message(self.request, messages.ERROR, msg)
         raise QuestionRedirect('question-start')
@@ -91,10 +119,11 @@ class QuestionStartView(QuestionView):
         return kwargs
 
     def form_valid(self, form):
-        self.request.session['answer_dict'] = dict(
+        self.answer_dict = dict(
             first_answer_choice=int(form.cleaned_data['first_answer_choice']),
             rationale=form.cleaned_data['rationale'],
         )
+        self.request.session['answer_dict'] = self.answer_dict
         return QuestionView.form_valid(self, form)
 
 
@@ -107,13 +136,8 @@ class QuestionReviewView(QuestionView):
 
     def get_form_kwargs(self):
         kwargs = QuestionView.get_form_kwargs(self)
-        try:
-            self.answer_dict = self.request.session['answer_dict']
-            self.first_answer_choice = self.answer_dict['first_answer_choice']
-            self.rationale = self.answer_dict['rationale']
-        except KeyError:
-            # We got here without doing the first step, or the session has expired.
-            self.start_over()
+        self.first_answer_choice = self.answer_dict['first_answer_choice']
+        self.rationale = self.answer_dict['rationale']
         return self.select_rationales(kwargs)
 
     def select_rationales(self, kwargs):
@@ -177,15 +201,10 @@ class QuestionSummaryView(QuestionView):
 
     def get_form_kwargs(self):
         kwargs = QuestionView.get_form_kwargs(self)
-        try:
-            self.answer_dict = self.request.session['answer_dict']
-            self.first_answer_choice = self.answer_dict['first_answer_choice']
-            self.second_answer_choice = self.answer_dict['second_answer_choice']
-            self.rationale = self.answer_dict['rationale']
-            self.chosen_rationale_id = self.answer_dict['chosen_rationale_id']
-        except KeyError:
-            # We got here without doing the first steps, or the session has expired.
-            self.start_over()
+        self.first_answer_choice = self.answer_dict['first_answer_choice']
+        self.second_answer_choice = self.answer_dict['second_answer_choice']
+        self.rationale = self.answer_dict['rationale']
+        self.chosen_rationale_id = self.answer_dict['chosen_rationale_id']
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -200,6 +219,7 @@ class QuestionSummaryView(QuestionView):
     def form_valid(self, form):
         self.save_answer()
         del self.request.session['answer_dict']
+        self.answer_dict = None
         self.question_index += 1
         if self.question_index >= self.assignment.questions.count():
             # TODO(smarnach): Figure out what to do when reaching the last question.
