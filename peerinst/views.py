@@ -138,9 +138,10 @@ class QuestionReviewView(QuestionView):
         kwargs = QuestionView.get_form_kwargs(self)
         self.first_answer_choice = self.answer_dict['first_answer_choice']
         self.rationale = self.answer_dict['rationale']
-        return self.select_rationales(kwargs)
+        kwargs.update(self.select_rationales())
+        return kwargs
 
-    def select_rationales(self, kwargs):
+    def select_rationales(self):
         first_choice = self.first_answer_choice
         answer_choices = self.question.answerchoice_set.all()
         # Find all public rationales for this question.
@@ -169,11 +170,10 @@ class QuestionReviewView(QuestionView):
         answer_choices = [
             (c, self.question.get_choice_label(c)) for c in [first_choice, second_choice]
         ]
-        kwargs.update(
+        return dict(
             answer_choices=answer_choices,
             display_rationales=display_rationales,
         )
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = QuestionView.get_context_data(self, **kwargs)
