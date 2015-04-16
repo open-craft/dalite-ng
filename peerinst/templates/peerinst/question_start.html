@@ -15,6 +15,17 @@
   <div id="question-text">
     {{ question.text|safe }}
   </div>
+  {% if question.image %}
+  <div id="question-image">
+    <img src="{{ question.image.url }}" height="{{ question.image.height }}"
+         width="{{ question.image.width }}">
+  </div>
+  {% endif %}
+  {% if question.video_url %}
+  <div id="question-video">
+    <object width="640" height="390" data="{{ question.video_url }}"></object>
+  </div>
+  {% endif %}
   {% block answers %}
   {% endblock %}
   <form action="" method="post">
