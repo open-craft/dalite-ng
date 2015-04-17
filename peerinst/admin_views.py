@@ -114,6 +114,7 @@ class AssignmentResultsView(TemplateView):
         assignment = get_object_or_404(models.Assignment, identifier=self.assignment_id)
         sums, question_data = get_assignment_aggregates(assignment)
         context.update(
+            assignment=assignment,
             assignment_data=self.prepare_assignment_data(sums),
             question_data=self.prepare_question_data(question_data),
         )

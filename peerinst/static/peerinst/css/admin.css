@@ -1,0 +1,15 @@
+.results-summary {
+    border: 0px;
+    margin-top: 1ex;
+    margin-bottom: 3ex;
+}
+
+.results-summary td {
+    border: 0px;
+    padding: 0.6ex;
+}
+
+.results-summary th {
+    border: 0px;
+    padding: 0.6ex;
+}
