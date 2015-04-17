@@ -150,6 +150,7 @@ class Assignment(models.Model):
 
 class Answer(models.Model):
     question = models.ForeignKey(Question)
+    assignment = models.ForeignKey(Assignment, blank=True, null=True)
     first_answer_choice = models.PositiveSmallIntegerField(_('First answer choice'))
     rationale = models.TextField(_('Rationale'))
     second_answer_choice = models.PositiveSmallIntegerField(
