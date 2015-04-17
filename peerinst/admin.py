@@ -57,7 +57,6 @@ class AnswerInline(admin.StackedInline):
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['title', 'text']}),
-        (_('Question image or video'), {'fields': ['image', 'video_url']}),
         (None, {'fields': ['answer_style']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
@@ -74,8 +73,16 @@ class QuestionAdmin(admin.ModelAdmin):
             else:
                 fs.save()
 
+    class Media:
+        js = [
+            'peerinst/js/handlebars.js',
+            'peerinst/js/add_media.js'
+        ]
+
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
     filter_horizontal = ['questions']
     class Media:
-        js = ['peerinst/js/prepopulate_added_question.js']
+        js = [
+            'peerinst/js/prepopulate_added_question.js',
+        ]

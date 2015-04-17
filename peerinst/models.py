@@ -26,14 +26,6 @@ class Question(models.Model):
             'Enter the question text.  You can use HTML tags for formatting.'
         )
     )
-    image = models.ImageField(
-        _('Question image'), blank=True, null=True, upload_to='images',
-        help_text=_('An image to include after the question text.')
-    )
-    video_url = models.URLField(
-        _('Question video URL'), blank=True,
-        help_text=_('A video to include after the question text.')
-    )
     ALPHA = 0
     NUMERIC = 1
     ANSWER_STYLE_CHOICES = (
@@ -136,3 +128,12 @@ class Answer(models.Model):
 
     def __unicode__(self):
         return unicode(_('{} for question {}').format(self.id, self.question.title))
+
+class ImageResource(models.Model):
+    file = models.ImageField(
+        _('Image Resource'), blank=True, null=True, upload_to='images',
+        help_text=_('An image to include after the question text.')
+    )
+
+    def __unicode__(self):
+        return u'ImageResource {}'.format(self.file)
