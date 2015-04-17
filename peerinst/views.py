@@ -28,6 +28,34 @@ class QuestionRedirect(Exception):
 class QuestionView(edit.FormView):
     """Base class for the views in the student UI."""
 
+    def load_session_data(self):
+        self._session_data = self.request.session.setdefault('answer_dict', {})
+        # Serialisation for some reason turns the key into a string.
+        self.answer_dict = self._session_data.get(unicode(self.question.id), None)
+        if self.answer_dict is None:
+            if self.request.resolver_match.url_name != 'question-start':
+                # We don't have session data, but are not at the first step.
+                self.start_over()
+        else:
+            if self.request.resolver_match.url_name != self.answer_dict['url_name']:
+                # We have data for the current question, but a different step, so let's redirect
+                # there.  This mostly disables the back button while processing a question.
+                raise QuestionRedirect(self.answer_dict['url_name'])
+
+    def store_session_data(self):
+        # There is a race condition here:  Django loads the session before calling the view, and
+        # stores it after returning.  Two concurrent request can result in changes being lost.
+        # This only happens if the same user sends POST requests for two different questions at
+        # exactly the same time, which doesn't seem likely (or useful to support).
+        self._session_data[unicode(self.question.id)] = self.answer_dict
+        self.answer_dict.update(url_name=self.success_url_name)
+        # Explicitly mark the session as modified since it can't detect nested modifications.
+        self.request.session.modified = True
+
+    def pop_session_data(self):
+        self._session_data.pop(unicode(self.question.id), None)
+        self.request.session.modified = True
+
     def get_form_kwargs(self):
         self.assignment_id = self.kwargs['assignment_id']
         self.question_index = int(self.kwargs.get('question_index', 1))
@@ -38,20 +66,7 @@ class QuestionView(edit.FormView):
         except IndexError:
             raise http.Http404(_('Question does not exist.'))
         self.answer_choices = self.question.get_choices()
-        self.answer_dict = self.request.session.get('answer_dict', None)
-        if self.answer_dict is not None:
-            if (self.assignment_id != self.answer_dict['assignment_id'] or
-                self.question_index != self.answer_dict['question_index']):
-                # We have session data for a different question.  Start over with the current one.
-                self.start_over()
-            if self.request.resolver_match.url_name != self.answer_dict['url_name']:
-                # We have data for the current question, but a different step, so let's redirect
-                # there.  This mostly disables the back button while processing a question.
-                raise QuestionRedirect(self.answer_dict['url_name'])
-        else:
-            if self.request.resolver_match.url_name != 'question-start':
-                # We don't have session data, but are at a later step
-                self.start_over()
+        self.load_session_data()
         return edit.FormView.get_form_kwargs(self)
 
     def get_context_data(self, **kwargs):
@@ -63,16 +78,6 @@ class QuestionView(edit.FormView):
             answer_choices=self.answer_choices,
         )
         return context
-
-    def form_valid(self, form):
-        if self.answer_dict is not None:
-            self.answer_dict.update(
-                assignment_id=self.assignment_id,
-                question_index=self.question_index,
-                url_name=self.success_url_name,
-            )
-            self.request.session['answer_dict'] = self.answer_dict
-        return edit.FormView.form_valid(self, form)
 
     def get_redirect_url(self, name):
         return reverse(
@@ -97,7 +102,7 @@ class QuestionView(edit.FormView):
         This redirect is used when inconsistent data is encountered and shouldn't be called under
         normal circumstances.
         """
-        self.request.session.pop('answer_dict', None)
+        self.pop_session_data()
         if msg is not None:
             messages.add_message(self.request, messages.ERROR, msg)
         raise QuestionRedirect('question-start')
@@ -123,7 +128,7 @@ class QuestionStartView(QuestionView):
             first_answer_choice=int(form.cleaned_data['first_answer_choice']),
             rationale=form.cleaned_data['rationale'],
         )
-        self.request.session['answer_dict'] = self.answer_dict
+        self.store_session_data()
         return QuestionView.form_valid(self, form)
 
 
@@ -188,7 +193,7 @@ class QuestionReviewView(QuestionView):
             second_answer_choice=int(form.cleaned_data['second_answer_choice']),
             chosen_rationale_id=form.cleaned_data['chosen_rationale_id'],
         )
-        self.request.session['answer_dict'] = self.answer_dict
+        self.store_session_data()
         return QuestionView.form_valid(self, form)
 
 
@@ -218,8 +223,7 @@ class QuestionSummaryView(QuestionView):
 
     def form_valid(self, form):
         self.save_answer()
-        del self.request.session['answer_dict']
-        self.answer_dict = None
+        self.pop_session_data()
         self.question_index += 1
         if self.question_index >= self.assignment.questions.count():
             # TODO(smarnach): Figure out what to do when reaching the last question.
