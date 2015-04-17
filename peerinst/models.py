@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import itertools
+import string
 from django.db import models
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
@@ -24,19 +26,13 @@ class Question(models.Model):
             'Enter the question text.  You can use HTML tags for formatting.'
         )
     )
-    primary_image = models.ImageField(
-        _('Main question image'), blank=True, null=True, upload_to='images',
-        help_text=_('An image to include on the first page of the question.')
+    image = models.ImageField(
+        _('Question image'), blank=True, null=True, upload_to='images',
+        help_text=_('An image to include after the question text.')
     )
-    primary_video_url = models.URLField(
-        _('Main question video URL'), blank=True,
-        help_text=_('A video to include on the first page of the question.')
-    )
-    secondary_image = models.ImageField(
-        _('Secondary question image'), blank=True, null=True, upload_to='images'
-    )
-    secondary_video_url = models.URLField(
-        _('Secondary question video URL'), blank=True, max_length=200
+    video_url = models.URLField(
+        _('Question video URL'), blank=True,
+        help_text=_('A video to include after the question text.')
     )
     ALPHA = 0
     NUMERIC = 1
@@ -56,20 +52,45 @@ class Question(models.Model):
 
     def clean(self):
         errors = {}
-        for ordinal in 'primary', 'secondary':
-            fields = [ordinal + '_image', ordinal + '_video_url']
-            filled_in_fields = sum(bool(getattr(self, f)) for f in fields)
-            if filled_in_fields > 1:
-                msg = _(
-                    'You can only specify one of the {} image and video URL fields.'
-                    .format(ordinal)
-                )
-                errors.update({f: msg for f in fields})
+        fields = ['image', 'video_url']
+        filled_in_fields = sum(bool(getattr(self, f)) for f in fields)
+        if filled_in_fields > 1:
+            msg = _('You can only specify one of the image and video URL fields.')
+            errors.update({f: msg for f in fields})
         if errors:
             raise exceptions.ValidationError(errors)
 
     def natural_key(self):
         return (self.title,)
+
+    def get_choice_label_iter(self):
+        """Return an iterator over the answer labels with the style determined by answer_style.
+
+        The iterable doesn't stop after the current number of answer choices.
+        """
+        if self.answer_style == Question.ALPHA:
+            return iter(string.uppercase)
+        elif self.answer_style == Question.NUMERIC:
+            return itertools.count(1)
+        assert False, 'The field Question.answer_style has an invalid value.'
+
+    def get_choice_label(self, index):
+        """Return an answer label for answer index with the style determined by answer_style.
+
+        This method does not check whether index is out of bounds.
+        """
+        if self.answer_style == Question.ALPHA:
+            return string.uppercase[index - 1]
+        elif self.answer_style == Question.NUMERIC:
+            return index
+        assert False, 'The field Question.answer_style has an invalid value.'
+
+    def get_choices(self):
+        """Return a list of pairs (answer label, answer choice text)."""
+        return [
+            (label, choice.text)
+            for label, choice in zip(self.get_choice_label_iter(), self.answerchoice_set.all())
+        ]
 
     class Meta:
         verbose_name = _('question')

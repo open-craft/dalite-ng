@@ -1,0 +1,31 @@
+{% extends 'peerinst/question_review_base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block answers %}
+{{ block.super }}
+<p>
+  {% blocktrans %}
+  Consider the problem again, noting the rationales below that have been provided by other
+  students.  They may, or may not, cause you to reconsider your answer.  Read them, and select your
+  final answer.
+  {% endblocktrans %}
+</p>
+{% endblock %}
+
+{% block inner_form %}
+{{ form.non_field_errors }}
+{{ form.second_answer_choice.errors }}
+<div class="rationales" id="rationales-0">
+  <p>{{ form.second_answer_choice.0 }}</p>
+  {{ form.rationale_choice_0.errors }} {{ form.rationale_choice_0 }}
+</div>
+<div class="rationales" id="rationales-1">
+  <p>{{ form.second_answer_choice.1 }}</p>
+  {{ form.rationale_choice_1.errors }} {{ form.rationale_choice_1 }}
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'peerinst/js/question_review.js' %}"></script>
+{% endblock %}

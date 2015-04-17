@@ -1,0 +1,37 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block body %}
+{% if messages %}
+<ul class="messages">
+  {% for message in messages %}
+  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+<div class="container">
+  <h1>{{ assignment.title }} </h1>
+  <h2>{% trans 'Question' %} {{ question_index }}</h2>
+  <div id="question-text">
+    {{ question.text|safe }}
+  </div>
+  {% if question.image %}
+  <div id="question-image">
+    <img src="{{ question.image.url }}" height="{{ question.image.height }}"
+         width="{{ question.image.width }}">
+  </div>
+  {% endif %}
+  {% if question.video_url %}
+  <div id="question-video">
+    <object width="640" height="390" data="{{ question.video_url }}"></object>
+  </div>
+  {% endif %}
+  {% block answers %}
+  {% endblock %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {% block inner_form %}{{ form.as_p }}{% endblock %}
+    <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
+  </form>
+</div>
+{% endblock %}
