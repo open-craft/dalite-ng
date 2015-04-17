@@ -107,6 +107,10 @@ class QuestionView(edit.FormView):
             messages.add_message(self.request, messages.ERROR, msg)
         raise QuestionRedirect('question-start')
 
+    def get_user_token(self):
+        # TODO(smarnach): Return user token of current LTI user
+        return 'test'
+
 
 class QuestionStartView(QuestionView):
     """Render a question with answer choices.
@@ -147,6 +151,9 @@ class QuestionReviewView(QuestionView):
         return kwargs
 
     def select_rationales(self):
+        # Make the choice of rationales deterministic, so people can't see all rationales by
+        # repeatedly reloading the page.
+        random.seed((self.get_user_token(), self.assignment_id, self.question_index))
         first_choice = self.first_answer_choice
         answer_choices = self.question.answerchoice_set.all()
         # Find all public rationales for this question.
@@ -253,7 +260,3 @@ class QuestionSummaryView(QuestionView):
             user_token=self.get_user_token(),
         )
         answer.save()
-
-    def get_user_token(self):
-        # TODO(smarnach): Return user token of current LTI user
-        return 'test'
