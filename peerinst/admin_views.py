@@ -4,6 +4,7 @@ from __future__ import division, unicode_literals
 import collections
 import functools
 import itertools
+import urllib
 from django.core.urlresolvers import reverse
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
@@ -93,17 +94,18 @@ class AssignmentResultsView(TemplateView):
     def prepare_question_data(self, question_data):
         rows = []
         for i, (question, sums) in enumerate(question_data, 1):
+            get_params = urllib.urlencode(
+                dict(assignment=self.assignment_id, question=question.id)
+            )
             rows.append(dict(
                 data=(i, question.title) + self.prepare_stats(sums),
-                link=reverse('question-results', kwargs=dict(
-                    assignment_id=self.assignment_id, question_id=question.id
-                )),
+                link='?'.join([reverse('admin:peerinst_answer_changelist'), get_params]),
             ))
         return dict(
             labels=(
                 _('No.'), _('Question ID'), _('Total answers'), _('Total students'),
                 _('First correct'), _('Percent'), _('Second correct'), _('Percent'),
-                _('Switches'), _('Percent'),
+                _('Switches'), _('Percent'), ''
             ),
             rows=rows,
         )
@@ -120,6 +122,3 @@ class AssignmentResultsView(TemplateView):
         )
         print context['question_data']
         return context
-
-class QuestionResultsView(TemplateView):
-    template_name = "admin/peerinst/question_results.html"

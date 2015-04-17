@@ -19,8 +19,6 @@ urlpatterns = [
     url(r'^admin/peerinst/', include([
         url(r'^assignment_results/(?P<assignment_id>[^/]+)/', include([
             url(r'^$', admin_views.AssignmentResultsView.as_view(), name='assignment-results'),
-            url(r'(?P<question_id>[^/]+)$', admin_views.QuestionResultsView.as_view(),
-                name='question-results'),
         ])),
     ])),
 ]

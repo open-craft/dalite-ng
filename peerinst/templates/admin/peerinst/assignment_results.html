@@ -44,8 +44,9 @@
         {% for question in question_data.rows %}
         <tr class="grp-row-{% cycle 'odd' 'even' %}">
           {% for item in question.data %}
-          <td><a href="{{ question.link }}">{{ item }}</a></td>
+          <td>{{ item }}</td>
           {% endfor %}
+          <td><a href="{{ question.link }}">{% trans 'Show answers' %}</a></td>
         </tr>
         {% endfor %}
       </tbody>
