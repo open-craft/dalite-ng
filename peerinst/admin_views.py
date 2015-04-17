@@ -5,6 +5,7 @@ import collections
 import functools
 import itertools
 from django.core.urlresolvers import reverse
+from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
@@ -27,6 +28,7 @@ def get_question_aggregates(assignment, question):
         total_answers=answers.count(),
         correct_first_answers=answers.filter(first_answer_choice__in=correct_choices).count(),
         correct_second_answers=answers.filter(second_answer_choice__in=correct_choices).count(),
+        switches=answers.exclude(second_answer_choice=F('first_answer_choice')).count(),
     )
     # Get a set of all user tokens.  DISTINCT queries are not implemented for MySQL, so this is the
     # only way I can think of to determine the number of students who answered at least one
@@ -72,15 +74,19 @@ class AssignmentResultsView(TemplateView):
             percent(sums['correct_first_answers']),
             sums['correct_second_answers'],
             percent(sums['correct_second_answers']),
+            sums['switches'],
+            percent(sums['switches']),
         )
 
     def prepare_assignment_data(self, sums):
         return zip((
             _('Total number of answers recorded:'),
             _('Total number of participating students:'),
-            _('Correct first answer choices:'),
+            _('Correct answer choices – first attempt:'),
             _('↳ Percentage of total answers:'),
-            _('Correct second answer choices:'),
+            _('Correct answer choices – second attempt:'),
+            _('↳ Percentage of total answers:'),
+            _('Number of answer choice switches:'),
             _('↳ Percentage of total answers:'),
         ), self.prepare_stats(sums))
 
@@ -96,7 +102,8 @@ class AssignmentResultsView(TemplateView):
         return dict(
             labels=(
                 _('No.'), _('Question ID'), _('Total answers'), _('Total students'),
-                _('First correct'), _('Percent'), _('Second correct'), _('Percent')
+                _('First correct'), _('Percent'), _('Second correct'), _('Percent'),
+                _('Switches'), _('Percent'),
             ),
             rows=rows,
         )
