@@ -16,8 +16,11 @@ urlpatterns = [
             url(r'^summary$', views.QuestionSummaryView.as_view(), name='question-summary'),
         ])),
     ])),
-    url(r'^admin/peerinst/assignment_results/(?P<assignment_id>[^/]+)',
-        admin_views.AssignmentResultsView.as_view(), name='assignment-results'),
-    url(r'^admin/peerinst/question_results/(?P<question_id>[^/]+)',
-        admin_views.QuestionResultsView.as_view(), name='question-results'),
+    url(r'^admin/peerinst/', include([
+        url(r'^assignment_results/(?P<assignment_id>[^/]+)/', include([
+            url(r'^$', admin_views.AssignmentResultsView.as_view(), name='assignment-results'),
+            url(r'(?P<question_id>[^/]+)$', admin_views.QuestionResultsView.as_view(),
+                name='question-results'),
+        ])),
+    ])),
 ]

@@ -11,8 +11,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
 from . import models
 
-def get_question_aggregates(question):
-    """Get aggregate statistics for the given question.
+def get_question_aggregates(assignment, question):
+    """Get aggregate statistics for the given assignment and question.
 
     This function returns a pair (sums, students), where 'sums' is a collections.Counter object
     mapping labels to integers, and 'students' is the set of all user tokens of the submitted
@@ -22,7 +22,7 @@ def get_question_aggregates(question):
     answerchoice_correct = question.answerchoice_set.values_list('correct', flat=True)
     correct_choices = list(itertools.compress(itertools.count(1), answerchoice_correct))
     # Select answers entered by students, not example answers
-    answers = question.answer_set.exclude(user_token='')
+    answers = question.answer_set.filter(assignment=assignment).exclude(user_token='')
     sums = collections.Counter(
         total_answers=answers.count(),
         correct_first_answers=answers.filter(first_answer_choice__in=correct_choices).count(),
@@ -45,7 +45,7 @@ def get_assignment_aggregates(assignment):
     students = set()
     question_data = []
     for question in assignment.questions.all():
-        q_sums, q_students = get_question_aggregates(question)
+        q_sums, q_students = get_question_aggregates(assignment, question)
         sums += q_sums
         students |= q_students
         q_sums.update(total_students=len(q_students))
@@ -89,7 +89,9 @@ class AssignmentResultsView(TemplateView):
         for i, (question, sums) in enumerate(question_data, 1):
             rows.append(dict(
                 data=(i, question.title) + self.prepare_stats(sums),
-                link=reverse('question-results', kwargs=dict(question_id=question.id)),
+                link=reverse('question-results', kwargs=dict(
+                    assignment_id=self.assignment_id, question_id=question.id
+                )),
             ))
         return dict(
             labels=(
@@ -101,7 +103,8 @@ class AssignmentResultsView(TemplateView):
         
     def get_context_data(self, **kwargs):
         context = TemplateView.get_context_data(self, **kwargs)
-        assignment = get_object_or_404(models.Assignment, identifier=self.kwargs['assignment_id'])
+        self.assignment_id = self.kwargs['assignment_id']
+        assignment = get_object_or_404(models.Assignment, identifier=self.assignment_id)
         sums, question_data = get_assignment_aggregates(assignment)
         context.update(
             assignment_data=self.prepare_assignment_data(sums),

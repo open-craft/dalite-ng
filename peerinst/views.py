@@ -242,6 +242,7 @@ class QuestionSummaryView(QuestionView):
             ))
         answer = models.Answer(
             question=self.question,
+            assignment=self.assignment,
             first_answer_choice=self.first_answer_choice,
             rationale=self.rationale,
             second_answer_choice=self.second_answer_choice,
