@@ -1,12 +1,28 @@
 {% extends "admin/base_site.html" %}
-{% load i18n grp_tags %}
+{% load i18n staticfiles grp_tags %}
 
 {% block title %}{% trans 'Assignment results' %}{% endblock %}
+
+{% block extrastyle %}
+<link href="{% static 'peerinst/css/admin.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block breadcrumbs %}
+<ul>
+  <li><a href="{% url 'admin:app_list' app_label='peerinst' %}">{% trans 'Home' %}</a></li>
+  <li>{{ assignment.identifier }} {% trans 'results' %}</li>
+</ul>
+{% endblock %}
+
+{% block content_title %}
+<h1>{% trans 'Results for the assignment' %} {{ assignment.identifier }}</h1>
+{% endblock %}
 
 {% block content %}
 <div class="g-d-c">
   <div class="g-d-24">
-    <table class="assignment-data">
+    <h2>Summary</h2>
+    <table class="results-summary">
       <tbody>
         {% for label, item in assignment_data %}
         <tr><th>{{ label }}</th><td>{{ item }}</td></tr>
@@ -15,7 +31,8 @@
     </table>
   </div>
   <div class="g-d-24">
-    <table class="question-data grp-full-width">
+    <h2>Results for individual questions</h2>
+    <table class="results-question-data">
       <thead>
         <tr>
           {% for label in question_data.labels %}
