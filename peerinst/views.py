@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import inspect
+import itertools
+import json
+import logging
+import math
 import random
+import time
 from django import http
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -11,6 +17,8 @@ from django.views.generic import edit
 from django.views.generic import list as list_views
 from . import forms
 from . import models
+
+flatten = itertools.chain.from_iterable
 
 
 class AssignmentListView(list_views.ListView):
@@ -27,6 +35,23 @@ class QuestionRedirect(Exception):
 
 class QuestionView(edit.FormView):
     """Base class for the views in the student UI."""
+
+    def log(self, **data):
+        """Log a record in JSON format.
+
+        The passed in data is supplemented by some standard entries that are available for every
+        request.
+        """
+        data.update(
+            timestamp=math.trunc(time.time()),
+            user=self.user_token,
+            http_method=self.request.method,
+            assignment_id=self.assignment_id,
+            assignment_title=self.assignment.title,
+            question_id=self.question.id,
+            question_text=self.question.text,
+        )
+        logging.getLogger(__name__).info(json.dumps(data))
 
     def load_session_data(self):
         self._session_data = self.request.session.setdefault('answer_dict', {})
@@ -57,6 +82,7 @@ class QuestionView(edit.FormView):
         self.request.session.modified = True
 
     def get_form_kwargs(self):
+        self.user_token = 'test'
         self.assignment_id = self.kwargs['assignment_id']
         self.question_index = int(self.kwargs.get('question_index', 1))
         self.assignment = get_object_or_404(models.Assignment, identifier=self.assignment_id)
@@ -107,10 +133,6 @@ class QuestionView(edit.FormView):
             messages.add_message(self.request, messages.ERROR, msg)
         raise QuestionRedirect('question-start')
 
-    def get_user_token(self):
-        # TODO(smarnach): Return user token of current LTI user
-        return 'test'
-
 
 class QuestionStartView(QuestionView):
     """Render a question with answer choices.
@@ -125,6 +147,9 @@ class QuestionStartView(QuestionView):
     def get_form_kwargs(self):
         kwargs = QuestionView.get_form_kwargs(self)
         kwargs.update(answer_choices=self.answer_choices)
+        if self.request.method == 'GET':
+            # Log entry when the page is first shown, mainly for the timestamp.
+            self.log()
         return kwargs
 
     def form_valid(self, form):
@@ -132,6 +157,7 @@ class QuestionStartView(QuestionView):
             first_answer_choice=int(form.cleaned_data['first_answer_choice']),
             rationale=form.cleaned_data['rationale'],
         )
+        self.log(**self.answer_dict)
         self.store_session_data()
         return QuestionView.form_valid(self, form)
 
@@ -151,9 +177,18 @@ class QuestionReviewView(QuestionView):
         return kwargs
 
     def select_rationales(self):
+        """Select the rationales to show to the user based on their answer choice.
+
+        The two answer choices presented will include the answer the user chose.  If the user's
+        answer wasn't correct, the second choice will be a correct answer.  If the user's answer
+        wasn't correct, the second choice presented will be weighted by the number of available
+        rationales, i.e. an answer that has only a few rationales available will have a low chance
+        of being shown to the user.  Up to four rationales are presented to the user for each
+        choice, if available.
+        """
         # Make the choice of rationales deterministic, so people can't see all rationales by
         # repeatedly reloading the page.
-        random.seed((self.get_user_token(), self.assignment_id, self.question_index))
+        random.seed((self.user_token, self.assignment_id, self.question_index))
         first_choice = self.first_answer_choice
         answer_choices = self.question.answerchoice_set.all()
         # Find all public rationales for this question.
@@ -176,7 +211,7 @@ class QuestionReviewView(QuestionView):
             )
         second_rationales = rationales.filter(first_answer_choice=second_choice)
         # Select up to four rationales for each choice, if available.
-        display_rationales = [
+        self.display_rationales = [
             random.sample(r, min(4, r.count())) for r in [first_rationales, second_rationales]
         ]
         answer_choices = [
@@ -184,8 +219,9 @@ class QuestionReviewView(QuestionView):
         ]
         return dict(
             answer_choices=answer_choices,
-            display_rationales=display_rationales,
+            display_rationales=self.display_rationales,
         )
+    select_rationales.version = "simple_v1.0"
 
     def get_context_data(self, **kwargs):
         context = QuestionView.get_context_data(self, **kwargs)
@@ -196,11 +232,26 @@ class QuestionReviewView(QuestionView):
         return context
 
     def form_valid(self, form):
+        second_answer_choice = int(form.cleaned_data['second_answer_choice'])
+        chosen_rationale_id = form.cleaned_data['chosen_rationale_id']
         self.answer_dict.update(
-            second_answer_choice=int(form.cleaned_data['second_answer_choice']),
-            chosen_rationale_id=form.cleaned_data['chosen_rationale_id'],
+            second_answer_choice=second_answer_choice,
+            chosen_rationale_id=chosen_rationale_id,
         )
         self.store_session_data()
+        self.log(
+            second_answer_choice=second_answer_choice,
+            switch=self.first_answer_choice != second_answer_choice,
+            rationale_algorithm=dict(
+                version=self.select_rationales.version,
+                description=inspect.getdoc(self.select_rationales),
+            ),
+            rationales=[
+                {'id': r.id, 'text': r.rationale}
+                for r in flatten(self.display_rationales)
+            ],
+            chosen_rationale_id=chosen_rationale_id,
+        )
         return QuestionView.form_valid(self, form)
 
 
@@ -258,6 +309,6 @@ class QuestionSummaryView(QuestionView):
             rationale=self.rationale,
             second_answer_choice=self.second_answer_choice,
             chosen_rationale=chosen_rationale,
-            user_token=self.get_user_token(),
+            user_token=self.user_token,
         )
         answer.save()
