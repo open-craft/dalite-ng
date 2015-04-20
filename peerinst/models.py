@@ -125,6 +125,7 @@ class Assignment(models.Model):
 
 class Answer(models.Model):
     question = models.ForeignKey(Question)
+    assignment = models.ForeignKey(Assignment, blank=True, null=True)
     first_answer_choice = models.PositiveSmallIntegerField(_('First answer choice'))
     rationale = models.TextField(_('Rationale'))
     second_answer_choice = models.PositiveSmallIntegerField(
@@ -133,6 +134,16 @@ class Answer(models.Model):
     chosen_rationale = models.ForeignKey('self', blank=True, null=True)
     user_token = models.CharField(max_length=100, blank=True)
     show_to_others = models.BooleanField(_('Show to others?'), default=False)
+
+    def first_answer_choice_label(self):
+        return self.question.get_choice_label(self.first_answer_choice)
+    first_answer_choice_label.short_description = _('First answer choice')
+    first_answer_choice_label.admin_order_field = 'first_answer_choice'
+
+    def second_answer_choice_label(self):
+        return self.question.get_choice_label(self.second_answer_choice)
+    second_answer_choice_label.short_description = _('Second answer choice')
+    second_answer_choice_label.admin_order_field = 'second_answer_choice'
 
     def __unicode__(self):
         return unicode(_('{} for question {}').format(self.id, self.question.title))
