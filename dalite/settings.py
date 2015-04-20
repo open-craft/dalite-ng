@@ -32,6 +32,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'peerinst',
+    'django_lti_tool_provider'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -120,6 +121,24 @@ LOGGING = {
         },
     },
 }
+
+# LTI integration
+# View or url name to redirect to after successful LTI authentication:
+# first tries to find matching url pattern by reverse(REDIRECT_AFTER_LTI) if no match found
+# redirects to "/" + REDIRECT_AFTER_LTI
+REDIRECT_AFTER_LTI = ''
+
+# these are sensitive settings, so it is better to fail early than use some defaults visible on public repo
+CONSUMER_KEY = os.environ.get('CONSUMER_KEY', None)
+LTI_SECRET = os.environ.get('LTI_SECRET', None)
+
+# hint: LTi passport in edX Studio should look like <arbitrary_label>:CONSUMER_KEY:LTI_SECRET
+
+# Used to automatically generate stable passwords from anonymous user ids coming from LTI requests - keep secret as well
+# If compromised, attackers would be able to restore any student passwords knowing his anonymous user ID from LMS
+PASSWORD_GENERATOR_NONCE = os.environ.get('PASSWORD_GENERATOR_NONCE', None)
+
+# LTI Integration end
 
 try:
     from .local_settings import *
