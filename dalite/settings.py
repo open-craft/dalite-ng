@@ -125,10 +125,10 @@ LOGGING = {
 # LTI integration
 
 # these are sensitive settings, so it is better to fail early than use some defaults visible on public repo
-CONSUMER_KEY = os.environ.get('CONSUMER_KEY', None)
-LTI_SECRET = os.environ.get('LTI_SECRET', None)
+LTI_CLIENT_KEY = os.environ.get('LTI_CLIENT_KEY', None)
+LTI_CLIENT_SECRET = os.environ.get('LTI_CLIENT_SECRET', None)
 
-# hint: LTi passport in edX Studio should look like <arbitrary_label>:CONSUMER_KEY:LTI_SECRET
+# hint: LTi passport in edX Studio should look like <arbitrary_label>:LTI_CLIENT_KEY:LTI_CLIENT_SECRET
 
 # Used to automatically generate stable passwords from anonymous user ids coming from LTI requests - keep secret as well
 # If compromised, attackers would be able to restore any student passwords knowing his anonymous user ID from LMS
