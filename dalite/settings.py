@@ -107,16 +107,26 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'file': {
+        'file_debug_log': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'log/debug.log'),
         },
+        'file_student_log': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'log/student.log'),
+        },
     },
     'loggers': {
         'django.request': {
-            'handlers': ['file'],
+            'handlers': ['file_debug_log'],
             'level': 'DEBUG',
+            'propagate': True,
+        },
+        'peerinst.views': {
+            'handlers': ['file_student_log'],
+            'level': 'INFO',
             'propagate': True,
         },
     },
