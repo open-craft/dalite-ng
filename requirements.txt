@@ -4,5 +4,5 @@ mysql-python==1.2.5
 pillow
 
 -e git+https://github.com/tophatmonocle/ims_lti_py.git@979244d83c2e6420d2c1941f58e52f641c56ad12#egg=ims_lti_py-develop
--e git+https://github.com/open-craft/django-lti-tool-provider@0743fd3874d36f9d1d5a16e3419fa01cb686df7d#egg=django_lti_tool_provider-master
+-e git+https://github.com/open-craft/django-lti-tool-provider@3d254d11c78a3019659beeb5096eb0c39d09469e#egg=django_lti_tool_provider-master
 

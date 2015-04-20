@@ -123,10 +123,6 @@ LOGGING = {
 }
 
 # LTI integration
-# View or url name to redirect to after successful LTI authentication:
-# first tries to find matching url pattern by reverse(REDIRECT_AFTER_LTI) if no match found
-# redirects to "/" + REDIRECT_AFTER_LTI
-REDIRECT_AFTER_LTI = ''
 
 # these are sensitive settings, so it is better to fail early than use some defaults visible on public repo
 CONSUMER_KEY = os.environ.get('CONSUMER_KEY', None)
