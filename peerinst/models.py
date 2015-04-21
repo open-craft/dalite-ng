@@ -36,6 +36,13 @@ class QuestionManager(models.Manager):
 class Question(models.Model):
     objects = QuestionManager()
 
+    id = models.AutoField(
+        primary_key=True,
+        help_text=_(
+            'Use this ID to refer to the question in the LMS. Note: The question will have to have '
+            'been saved at least once before an ID is available.'
+        )
+    )
     title = models.CharField(
         _('Question title'), unique=True, max_length=100,
         help_text=_(
@@ -127,11 +134,6 @@ class Question(models.Model):
     class Meta:
         verbose_name = _('question')
         verbose_name_plural = _('questions')
-
-Question._meta.get_field_by_name('id')[0].help_text = _(
-    'Use this ID to refer to the question in the LMS. Note: The question will have to have '
-    'been saved at least once before an ID is available.'
-)
 
 class AnswerChoice(models.Model):
     question = models.ForeignKey(Question)
