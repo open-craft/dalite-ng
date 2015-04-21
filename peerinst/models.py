@@ -39,8 +39,7 @@ class Question(models.Model):
     title = models.CharField(
         _('Question title'), unique=True, max_length=100,
         help_text=_(
-            'The question name must follow the conventions of course name abreviation plus '
-            'question and number: LynDynQ14.'
+            'A title for the question. Presented to the user, and used for lookup when creating assignments.'
         )
     )
     text = models.TextField(
@@ -128,6 +127,11 @@ class Question(models.Model):
     class Meta:
         verbose_name = _('question')
         verbose_name_plural = _('questions')
+
+Question._meta.get_field_by_name('id')[0].help_text = _(
+    'Use this ID to refer to the question in the LMS. Note: The question will have to have '
+    'been saved at least once before an ID is available.'
+)
 
 class AnswerChoice(models.Model):
     question = models.ForeignKey(Question)

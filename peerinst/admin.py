@@ -58,11 +58,12 @@ class AnswerInline(admin.StackedInline):
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['title', 'text', 'category']}),
+        (None, {'fields': ['title', 'text', 'category', 'id']}),
         (_('Question image or video'), {'fields': ['image', 'image_alt_text', 'video_url']}),
         (None, {'fields': ['answer_style']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
+    readonly_fields = ['id']
     inlines = [AnswerChoiceInline, AnswerInline]
     list_display = ['title', 'category']
 
@@ -95,9 +96,6 @@ class AssignmentAdmin(admin.ModelAdmin):
                 reverse('assignment-results', kwargs={'assignment_id': obj.identifier}),
                 _('View assignment results')
             )
-
-    class Media:
-        js = ['peerinst/js/prepopulate_added_question.js']
 
 def publish_answers(modeladmin, request, queryset):
     queryset.update(show_to_others=True)
