@@ -44,7 +44,7 @@ class Question(models.Model):
         )
     )
     text = models.TextField(
-        _('Question text'), help_text = _(
+        _('Question text'), help_text=_(
             'Enter the question text.  You can use HTML tags for formatting.'
         )
     )
@@ -52,9 +52,14 @@ class Question(models.Model):
         _('Question image'), blank=True, null=True, upload_to='images',
         help_text=_('An image to include after the question text.')
     )
+    image_alt_text = models.CharField(
+        _('Image Alt Text'), blank=True, max_length=1024,
+        help_text=_('Alternative text for accessibility. For instance, the student may be using a screen reader.')
+    )
+    # Videos will be handled by off-site services.
     video_url = models.URLField(
         _('Question video URL'), blank=True,
-        help_text=_('A video to include after the question text.')
+        help_text=_('A video to include after the question text. All videos should include transcripts.')
     )
     ALPHA = 0
     NUMERIC = 1
@@ -82,6 +87,9 @@ class Question(models.Model):
         if filled_in_fields > 1:
             msg = _('You can only specify one of the image and video URL fields.')
             errors.update({f: msg for f in fields})
+        if self.image and not self.image_alt_text:
+            msg = _('You must provide alternative text for accessibility if providing an image.')
+            errors.update({'image_alt_text': msg})
         if errors:
             raise exceptions.ValidationError(errors)
 

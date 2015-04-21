@@ -59,7 +59,7 @@ class AnswerInline(admin.StackedInline):
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['title', 'text', 'category']}),
-        (_('Question image or video'), {'fields': ['image', 'video_url']}),
+        (_('Question image or video'), {'fields': ['image', 'image_alt_text', 'video_url']}),
         (None, {'fields': ['answer_style']}),
     ]
     radio_fields = {'answer_style': admin.HORIZONTAL}
