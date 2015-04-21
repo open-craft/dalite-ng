@@ -34,9 +34,9 @@ class ReviewAnswerForm(forms.Form):
     def __init__(self, answer_choices, display_rationales, *args, **kwargs):
         self.base_fields['second_answer_choice'].choices = answer_choices
         for i, rationales in enumerate(display_rationales):
-            self.base_fields['rationale_choice_{}'.format(i)].choices = [
-                (r.id, r.rationale) for r in rationales
-            ]
+            self.base_fields['rationale_choice_{}'.format(i)].choices = (
+                [(r.id, r.rationale) for r in rationales] + [(None, _('None of the above choices'))]
+            )
         forms.Form.__init__(self, *args, **kwargs)
 
     def clean(self):

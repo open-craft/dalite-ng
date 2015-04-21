@@ -184,6 +184,12 @@ class QuestionStartView(QuestionFormView):
         return super(QuestionStartView, self).form_valid(form)
 
 
+def _int_or_None(s):
+    if s == 'None':
+        return None
+    return int(s)
+
+
 class QuestionReviewView(QuestionFormView):
     """Show rationales from other users and give the opportunity to reconsider the first answer."""
 
@@ -255,7 +261,7 @@ class QuestionReviewView(QuestionFormView):
 
     def form_valid(self, form):
         self.second_answer_choice = int(form.cleaned_data['second_answer_choice'])
-        self.chosen_rationale_id = form.cleaned_data['chosen_rationale_id']
+        self.chosen_rationale_id = _int_or_None(form.cleaned_data['chosen_rationale_id'])
         self.save_answer()
         self.log(
             second_answer_choice=self.second_answer_choice,
@@ -275,19 +281,22 @@ class QuestionReviewView(QuestionFormView):
 
     def save_answer(self):
         """Validate and save the answer defined by the arguments to the database."""
-        try:
-            chosen_rationale = models.Answer.objects.get(id=self.chosen_rationale_id)
-        except models.Answer.DoesNotExist:
-            # Raises exception.
-            self.start_over(_(
-                'The rationale you chose does not exist anymore.  '
-                'This should not happen.  Please start over with the question.'
-            ))
-        if chosen_rationale.first_answer_choice != self.second_answer_choice:
-            self.start_over(_(
-                'The rationale you chose does not match your second answer choice.  '
-                'This should not happen.  Please start over with the question.'
-            ))
+        if self.chosen_rationale_id is not None:
+            try:
+                chosen_rationale = models.Answer.objects.get(id=self.chosen_rationale_id)
+            except models.Answer.DoesNotExist:
+                # Raises exception.
+                self.start_over(_(
+                    'The rationale you chose does not exist anymore.  '
+                    'This should not happen.  Please start over with the question.'
+                ))
+            if chosen_rationale.first_answer_choice != self.second_answer_choice:
+                self.start_over(_(
+                    'The rationale you chose does not match your second answer choice.  '
+                    'This should not happen.  Please start over with the question.'
+                ))
+        else:
+            chosen_rationale = None
         answer = models.Answer(
             question=self.question,
             assignment=self.assignment,
