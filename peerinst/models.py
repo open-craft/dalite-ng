@@ -3,9 +3,31 @@ from __future__ import unicode_literals
 
 import itertools
 import string
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
+
+def no_hyphens(value):
+    if '-' in value:
+        raise ValidationError(_('Hyphens may not be used in this field.'))
+
+class Category(models.Model):
+    title = models.CharField(
+        _('Category Name'), unique=True, max_length=100,
+        help_text=_(
+            'Name of a category questions can be sorted into.'
+        ),
+        validators=[no_hyphens]
+    )
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _('category')
+        verbose_name_plural = _('categories')
+
 
 class QuestionManager(models.Manager):
     def get_by_natural_key(self, title):
@@ -46,8 +68,11 @@ class Question(models.Model):
             'Whether the answers are annotated with letters (A, B, C…) or numbers (1, 2, 3…).'
         )
     )
+    category = models.ForeignKey(Category, blank=True, null=True)
 
     def __unicode__(self):
+        if self.category:
+            return u'{} - {}'.format(self.category, self.title)
         return self.title
 
     def clean(self):
