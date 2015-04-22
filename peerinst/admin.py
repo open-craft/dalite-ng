@@ -103,7 +103,7 @@ def publish_answers(modeladmin, request, queryset):
     queryset.update(show_to_others=True)
 publish_answers.short_description = _('Show selected answers to students')
 
-@admin.register(models.Answer)
+@admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ['first_answer_choice_label', 'rationale', 'show_to_others']
     list_display_links = None
