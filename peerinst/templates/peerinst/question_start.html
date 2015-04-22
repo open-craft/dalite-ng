@@ -1,7 +1,7 @@
 {% extends 'peerinst/base.html' %}
 {% load i18n %}
 
-{% block title %}{{ assignment.title }} - {{ question.title }}{% endblock %}
+{% block title %}{{ question.title }}{% endblock %}
 {% block body %}
 <div class="meta-container">
   {% if messages %}
@@ -27,15 +27,16 @@
       <object width="640" height="390" data="{{ question.video_url }}"></object>
     </div>
     {% endif %}
-    {% block answers %}
-    {% endblock %}
+    {% block answers %}{% endblock %}
+    {% if form %}
     <form action="" method="post">
       {% csrf_token %}
       {% block inner_form %}{{ form }}{% endblock %}
       <div>
-          <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
+        <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
       </div>
     </form>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

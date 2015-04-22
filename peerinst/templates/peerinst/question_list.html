@@ -2,14 +2,14 @@
 {% load i18n %}
 
 {% block body %}
-<h1>{% trans 'Assignments' %}</h1>
+<h1>{% trans 'Questions' %}</h1>
 <ul>
 {% for obj in object_list %}
-  <li><a href="{% url 'question-list' assignment_id=obj.pk %}">
+  <li><a href="{% url 'question-start' assignment_id=assignment.pk question_id=obj.pk %}">
     {{ obj.pk }}
   <a></li>
 {% empty %}
-  <li>{% trans 'No assignments available.' %}</li>
+  <li>{% trans 'No questions available.' %}</li>
 {% endfor %}
 </ul>
 {% endblock %}

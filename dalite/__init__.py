@@ -13,7 +13,7 @@ from django_lti_tool_provider.signals import Signals
 
 
 class ApplicationHookManager(AbstractApplicationHookManager):
-    ASSIGNMENT_ID_KEY = 'custom_assignment_id'
+    LTI_KEYS = ['custom_assignment_id', 'custom_question_id']
 
     @classmethod
     def _generate_password(cls, base, nonce):
@@ -37,7 +37,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         login(request, authenticated)
 
     def vary_by_key(self, lti_data):
-        return lti_data[self.ASSIGNMENT_ID_KEY]
+        return ":".join(str(lti_data[k]) for k in self.LTI_LEYS)
 
 LTIView.register_authentication_manager(ApplicationHookManager())
 
