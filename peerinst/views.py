@@ -8,12 +8,12 @@ import logging
 import math
 import random
 import time
-from django import http
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
+from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic.base import TemplateView
@@ -88,6 +88,12 @@ class QuestionMixin(object):
         )
         return context
 
+    def submission_error(self):
+        messages.error(self.request, format_html(
+            '<h3 class="messages-title">{}</h3>{}',
+            _("There was a problem with your submission"),
+            _('Check the form below.')))
+
     def start_over(self, msg=None):
         """Start over with the current question.
 
@@ -154,6 +160,10 @@ class QuestionFormView(QuestionMixin, FormView):
 
     def get_success_url(self):
         return self.get_redirect_url(self.success_url_name)
+
+    def form_invalid(self, form):
+        self.submission_error()
+        return super(QuestionFormView, self).form_invalid(form)
 
 
 class QuestionStartView(QuestionFormView):

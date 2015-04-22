@@ -21,5 +21,7 @@ urlpatterns = [
         url(r'^assignment_results/(?P<assignment_id>[^/]+)/', include([
             url(r'^$', admin_views.AssignmentResultsView.as_view(), name='assignment-results'),
         ])),
+        url(r'^question_preview/(?P<question_id>[^/]+)$',
+            admin_views.QuestionPreviewView.as_view(), name='question-preview'),
     ])),
 ]

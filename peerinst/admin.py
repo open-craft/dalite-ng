@@ -55,8 +55,15 @@ class AnswerInline(admin.StackedInline):
     verbose_name = _('example answer')
     verbose_name_plural = _('example answers')
     extra = 0
-    fields = ['rationale', 'first_answer_choice']
+    fields = ['hint', 'rationale', 'first_answer_choice']
     inline_classes = ['grp-collapse', 'grp-open']
+    readonly_fields = ['hint']
+
+    def hint(self, obj):
+        return _(
+            'You can add example answers more comfortably by using the "Preview" button in the '
+            'top right corner.  The button appears after saving the question for the first time.'
+        )
 
     def get_queryset(self, request):
         # Only include example answers not belonging to any student

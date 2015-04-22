@@ -49,12 +49,15 @@ class Question(models.Model):
     title = models.CharField(
         _('Question title'), unique=True, max_length=100,
         help_text=_(
-            'A title for the question. Presented to the user, and used for lookup when creating assignments.'
+            'A title for the question. Used for lookup when creating assignments, but not '
+            'presented to the student.'
         )
     )
     text = models.TextField(
         _('Question text'), help_text=_(
-            'Enter the question text.  You can use HTML tags for formatting.'
+            'Enter the question text.  You can use HTML tags for formatting.  You can use the '
+            '"Preview" button in the top right corner to see what the question will look like for '
+            'students.  The button appears after saving the question for the first time.'
         )
     )
     image = models.ImageField(
@@ -62,13 +65,16 @@ class Question(models.Model):
         help_text=_('An image to include after the question text.')
     )
     image_alt_text = models.CharField(
-        _('Image Alt Text'), blank=True, max_length=1024,
-        help_text=_('Alternative text for accessibility. For instance, the student may be using a screen reader.')
+        _('Image Alt Text'), blank=True, max_length=1024, help_text=_(
+            'Alternative text for accessibility. For instance, the student may be using a screen '
+            'reader.'
+        )
     )
     # Videos will be handled by off-site services.
     video_url = models.URLField(
-        _('Question video URL'), blank=True,
-        help_text=_('A video to include after the question text. All videos should include transcripts.')
+        _('Question video URL'), blank=True, help_text=_(
+            'A video to include after the question text. All videos should include transcripts.'
+        )
     )
     ALPHA = 0
     NUMERIC = 1

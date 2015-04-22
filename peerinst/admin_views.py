@@ -5,13 +5,16 @@ import collections
 import functools
 import itertools
 import urllib
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
 from . import models
+from . import forms
 
 
 class AdminIndexView(TemplateView):
@@ -131,5 +134,34 @@ class AssignmentResultsView(TemplateView):
             assignment_data=self.prepare_assignment_data(sums),
             question_data=self.prepare_question_data(question_data),
         )
-        print context['question_data']
         return context
+
+class QuestionPreviewView(FormView):
+    template_name = 'admin/peerinst/question_preview.html'
+    form_class = forms.FirstAnswerForm
+
+    def get_form_kwargs(self):
+        self.question = get_object_or_404(models.Question, pk=self.kwargs['question_id'])
+        self.answer_choices = self.question.get_choices()
+        kwargs = super(QuestionPreviewView, self).get_form_kwargs()
+        kwargs.update(answer_choices=self.answer_choices)
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionPreviewView, self).get_context_data(**kwargs)
+        context.update(question=self.question, answer_choices=self.answer_choices)
+        return context
+
+    def form_valid(self, form):
+        answer = models.Answer(
+            question=self.question,
+            first_answer_choice=int(form.cleaned_data['first_answer_choice']),
+            rationale=form.cleaned_data['rationale'],
+            show_to_others=True,
+        )
+        answer.save()
+        messages.add_message(self.request, messages.INFO, _('Example answer saved.'))
+        return super(QuestionPreviewView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('question-preview', kwargs=dict(question_id=self.question.pk))
