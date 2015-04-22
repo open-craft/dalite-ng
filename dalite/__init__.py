@@ -37,7 +37,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         login(request, authenticated)
 
     def vary_by_key(self, lti_data):
-        return ":".join(str(lti_data[k]) for k in self.LTI_LEYS)
+        return ":".join(str(lti_data[k]) for k in self.LTI_KEYS)
 
 LTIView.register_authentication_manager(ApplicationHookManager())
 
