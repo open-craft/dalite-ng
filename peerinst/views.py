@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import edit
 from django.views.generic import list as list_views
 from . import forms
@@ -114,6 +115,7 @@ class QuestionView(edit.FormView):
     def get_success_url(self):
         return self.get_redirect_url(self.success_url_name)
 
+    @xframe_options_exempt
     def dispatch(self, request, *args, **kwargs):
         # We override this method to enable triggering redirects from within other methods, which
         # is usually not possible.  This is used in the start_over() method below.
