@@ -24,7 +24,10 @@ class ApplicationHookManager(AbstractApplicationHookManager):
 
     def authenticated_redirect_to(self, request, lti_data):
         assignment_id = lti_data['custom_assignment_id']
-        return reverse('assignment-start', kwargs={'assignment_id': assignment_id})
+        question_id = lti_data['custom_question_id']
+        return reverse(
+            'question-start', kwargs=dict(assignment_id=assignment_id, question_id=question_id)
+        )
 
     def authentication_hook(self, request, user_id=None, username=None, email=None):
         # have no better option than to automatically generate password from user_id
@@ -37,7 +40,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         login(request, authenticated)
 
     def vary_by_key(self, lti_data):
-        return ":".join(str(lti_data[k]) for k in self.LTI_LEYS)
+        return ":".join(str(lti_data[k]) for k in self.LTI_KEYS)
 
 LTIView.register_authentication_manager(ApplicationHookManager())
 

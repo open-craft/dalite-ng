@@ -2,11 +2,11 @@
 {% load i18n %}
 
 {% block answers %}
-<dl id="answer-choices">
+<ul id="answer-choices">
   {% for label, choice in answer_choices %}
-  <dt>{{ label }}</dt><dd>{{ choice|safe }}</dd>
+  <li class="{% if label == first_choice_label %}first-choice{% endif %}{% if label == second_choice_label %} second-choice{% endif %}">{{ label }}. {{ choice|safe }}</li>
   {% endfor %}
-</dl>
+</ul>
 <div id="your-answer">
   <p>{% trans 'You answered:' %} <strong>{{ first_choice_label }} {{ second_choice_label }}</strong></p>
   <div id="your-rationale">

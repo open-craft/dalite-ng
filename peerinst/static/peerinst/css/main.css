@@ -6,13 +6,6 @@ img {
     max-width: 100%;
     height: auto;
 }
-h2 {
-    color: #646464;
-    font: 1.2em/1.2em Georgia, Cambria, "Times New Roman", Times, serif;
-    letter-spacing: 1px;
-    margin-bottom: 15px;
-    text-transform: uppercase;
-}
 dt  {
     clear:left;
     float:left;
@@ -26,9 +19,6 @@ blockquote, .rationale-text {
     background-color: #F6F6F6;
     border: 1px solid #C8C8C8;
     padding: 1em;
-}
-div.meta-container {
-    max-width: 500px;
 }
 div.action {
     height: 40px;
@@ -63,18 +53,29 @@ div.light-button:active, input[type="submit"]:active, input[type="button"]:activ
 }
 
 input[type='text'], textarea {
-    background: none repeat scroll 0% 0% #FFF;
+    background: none repeat scroll 0 0 #FFF;
     border: 1px solid #C8C8C8;
-    border-radius: 0px;
-    box-shadow: 0px 1px 0px 0px rgba(255, 255, 255, 0.6), 0px 0px 3px 0px rgba(0, 0, 0, 0.1) inset;
+    border-radius: 0;
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6), 0px 0px 3px 0px rgba(0, 0, 0, 0.1) inset;
     box-sizing: border-box;
     font: 1em "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
     padding: 5px 12px;
     vertical-align: top;
+    margin-left: 1em;
+    margin-bottom: .5em;
 }
 
 ul {
     list-style: none;
+}
+
+ul#id_first_answer_choice {
+    margin-top: 0;
+    margin-bottom: 2em;
+}
+
+ul#answer-choices{
+    list-style: disc;
 }
 
 input[type='text'] {
@@ -87,13 +88,50 @@ input[type='text']:focus, .form-field:focus {
 
 .rationales {
     display: table;
+    border-collapse: collapse;
 }
 .rationale {
     display: table-row;
+}
+.rationale-choice {
+    /* Keeps things looking sane if there are no example rationales. */
+    padding-bottom: 1em;
 }
 .rationale-choice, .rationale-text-container{
     display: table-cell;
 }
 .rationale-choice {
     white-space: nowrap;
+}
+
+.errorlist, ul li.error {
+    display: block;
+    box-shadow: 0 -1px 2px 0 #F3D9DB inset;
+    border-bottom: 3px solid #A0050E;
+    background: none repeat scroll 0 0 #FBF2F3;
+    box-sizing: border-box;
+    margin: 0 0 20px;
+    padding: 20px;
+    font-size: 15px;
+    color: #3C3C3C;
+    line-height: 1.41575em;
+}
+
+li.error h3{
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0 !important;
+    color: #A0050E;
+    margin: 0;
+}
+
+li.first-choice{
+    font-weight: bold;
+}
+li.second-choice{
+    font-style: italic;
+}
+#rationales-1 {
+    border-top: 1px solid lightgray;
 }
