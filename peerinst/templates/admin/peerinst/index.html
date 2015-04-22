@@ -1,0 +1,52 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans 'Dalite NG administration' %}</h1>
+<div class="g-d-c">
+  <div class="g-d-12 g-d-f">
+   <div class="grp-module">
+     <h2>{% trans 'Student progress by assignment' %}</h2>
+     {% for assignment in assignments %}
+     <div class="grp-row grp-cells">
+       <div class="grp-cell">
+         <p><a href="{% url 'assignment-results' assignment.pk %}">{{ assignment.identifier }}</a></p>
+       </div>
+       <div class="grp-cell">
+         <p><a href="{% url 'assignment-results' assignment.pk %}">{{ assignment.title }}</a></p>
+       </div>
+     </div>
+     {% empty %}
+     <div class="grp-row">
+       <p>{% trans 'No assignments defined.' %}</p>
+     </div>
+     {% endfor %}
+   </div>
+  </div>
+  <div class="g-d-12 g-d-l">
+    <div class="grp-module">
+      <h2>{% trans 'Management' %}</h2>
+      <div class="grp-row">
+        <p><a href="{% url 'admin:peerinst_assignment_changelist' %}">
+            {% trans 'Assignments' %}
+        </a></p>
+      </div>
+      <div class="grp-row">
+        <p><a href="{% url 'admin:peerinst_question_changelist' %}">
+            {% trans 'Questions' %}
+        </a></p>
+      </div>
+      <div class="grp-row">
+        <p><a href="{% url 'admin:peerinst_category_changelist' %}">
+            {% trans 'Question categories' %}
+        </a></p>
+      </div>
+      <div class="grp-row">
+        <p><a href="{% url 'admin:app_list' app_label='auth' %}">
+            {% trans 'Users' %}
+        </a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

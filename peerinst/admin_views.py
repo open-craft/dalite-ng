@@ -14,6 +14,15 @@ from django.views.generic.base import TemplateView
 from . import models
 
 
+class AdminIndexView(TemplateView):
+    template_name = 'admin/peerinst/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = TemplateView.get_context_data(self, **kwargs)
+        context.update(assignments=models.Assignment.objects.all())
+        return context
+
+
 def get_question_aggregates(assignment, question):
     """Get aggregate statistics for the given assignment and question.
 

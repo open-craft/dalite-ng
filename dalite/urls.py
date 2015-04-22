@@ -10,9 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 admin.site.site_header = admin.site.site_title = _('Dalite NG administration')
 
 urlpatterns = [
+    url(r'', include('peerinst.urls')),
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^lti/', include('django_lti_tool_provider.urls')),
-    # Everything else goes to the peerinst app
-    url(r'', include('peerinst.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

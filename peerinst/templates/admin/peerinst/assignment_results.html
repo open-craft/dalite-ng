@@ -9,7 +9,7 @@
 
 {% block breadcrumbs %}
 <ul>
-  <li><a href="{% url 'admin:app_list' app_label='peerinst' %}">{% trans 'Home' %}</a></li>
+  <li><a href="{% url 'admin-index' %}">{% trans 'Home' %}</a></li>
   <li>{{ assignment.identifier }} {% trans 'results' %}</li>
 </ul>
 {% endblock %}
