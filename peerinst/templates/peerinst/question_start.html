@@ -12,6 +12,7 @@
   </ul>
   {% endif %}
   <div class="container">
+    {% block pretext %}{% endblock %}
     <div id="question-text">
       {{ question.text|safe }}
     </div>
