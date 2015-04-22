@@ -4,8 +4,6 @@ from __future__ import unicode_literals
 from django.core import exceptions
 from django import forms
 from django.contrib import admin
-from django.core.urlresolvers import reverse
-from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from .models import Answer, AnswerChoice, Assignment, Question, Category
 
@@ -92,17 +90,6 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
     filter_horizontal = ['questions']
-    readonly_fields = ['review_results']
-
-    def review_results(self, obj):
-        if not obj.identifier:
-            return _('Results will not be available until the assignment is saved.')
-        else:
-            return format_html(
-                '<a href="{}">{}</a>',
-                reverse('assignment-results', kwargs={'assignment_id': obj.identifier}),
-                _('View assignment results')
-            )
 
 
 def publish_answers(modeladmin, request, queryset):
