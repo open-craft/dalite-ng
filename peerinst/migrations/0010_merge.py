@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('peerinst', '0009_answer_assignment'),
+        ('peerinst', '0009_auto_20150420_2008'),
         ('peerinst', '0009_auto_20150416_2103'),
     ]
 

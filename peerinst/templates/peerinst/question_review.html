@@ -16,13 +16,15 @@
 {% block inner_form %}
 {{ form.non_field_errors }}
 {{ form.second_answer_choice.errors }}
-<div class="rationales" id="rationales-0">
-  <p>{{ form.second_answer_choice.0 }}</p>
-  {{ form.rationale_choice_0.errors }} {{ form.rationale_choice_0 }}
-</div>
-<div class="rationales" id="rationales-1">
-  <p>{{ form.second_answer_choice.1 }}</p>
-  {{ form.rationale_choice_1.errors }} {{ form.rationale_choice_1 }}
+<div class="rationales">
+  <div class="rationale" id="rationales-0">
+    <div class="rationale-choice">{{ form.second_answer_choice.0 }}</div>
+    <div class="rationale-text-container">{{ form.rationale_choice_0.errors }} {{ form.rationale_choice_0 }}</div>
+  </div>
+  <div class="rationale" id="rationales-1">
+    <div class="rationale-choice">{{ form.second_answer_choice.1 }}</div>
+    <div class="rationale-text-container">{{ form.rationale_choice_1.errors }} {{ form.rationale_choice_1 }}</div>
+  </div>
 </div>
 {% endblock %}
 

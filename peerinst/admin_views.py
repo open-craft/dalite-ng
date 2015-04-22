@@ -13,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
 from . import models
 
+
 def get_question_aggregates(assignment, question):
     """Get aggregate statistics for the given assignment and question.
 
@@ -36,6 +37,7 @@ def get_question_aggregates(assignment, question):
     # question in an assignment.
     students = set(answers.values_list('user_token', flat=True))
     return sums, students
+
 
 def get_assignment_aggregates(assignment):
     """Get aggregate statistics for the given assignment.

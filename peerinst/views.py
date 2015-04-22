@@ -295,6 +295,7 @@ class QuestionSummaryView(QuestionView):
         try:
             chosen_rationale = models.Answer.objects.get(id=self.chosen_rationale_id)
         except models.Answer.DoesNotExist:
+            # Raises exception.
             self.start_over(_(
                 'The rationale you chose does not exist anymore.  '
                 'This should not happen.  Please start over with the question.'
