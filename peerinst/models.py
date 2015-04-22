@@ -49,7 +49,7 @@ class Question(models.Model):
     title = models.CharField(
         _('Question title'), unique=True, max_length=100,
         help_text=_(
-            'A title for the question. Presented to the user, and used for lookup when creating assignments.'
+            'A title for the question. Used for lookup when creating assignments, but not presented to the student.'
         )
     )
     text = models.TextField(
