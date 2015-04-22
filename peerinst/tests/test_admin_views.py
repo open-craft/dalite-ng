@@ -5,6 +5,7 @@ from django.test import TestCase
 from .. import admin_views
 from .. import models
 
+
 class AggregatesTestCase(TestCase):
     fixtures = ['peerinst_test_data']
 

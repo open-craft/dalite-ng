@@ -9,6 +9,7 @@ from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from .models import Answer, AnswerChoice, Assignment, Question, Category
 
+
 class AnswerChoiceInlineFormSet(forms.BaseInlineFormSet):
     def clean(self):
         forms = [
@@ -24,12 +25,14 @@ class AnswerChoiceInlineFormSet(forms.BaseInlineFormSet):
         if errors:
             raise exceptions.ValidationError(errors)
 
+
 class AnswerChoiceInline(admin.TabularInline):
     model = AnswerChoice
     formset = AnswerChoiceInlineFormSet
     max_num = 5
     extra = 5
     ordering = ['id']
+
 
 class AnswerModelForm(forms.ModelForm):
     class Meta:
@@ -40,6 +43,7 @@ class AnswerModelForm(forms.ModelForm):
             'first_answer_choice':
                 _('The number of the associated answer; 1 = first answer, 2 = second answer etc.'),
         }
+
 
 class AnswerInline(admin.StackedInline):
     model = Answer
@@ -54,6 +58,7 @@ class AnswerInline(admin.StackedInline):
         # Only include example answers not belonging to any student
         qs = admin.StackedInline.get_queryset(self, request)
         return qs.filter(user_token='', show_to_others=True)
+
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
@@ -78,9 +83,11 @@ class QuestionAdmin(admin.ModelAdmin):
             else:
                 fs.save()
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
@@ -97,9 +104,11 @@ class AssignmentAdmin(admin.ModelAdmin):
                 _('View assignment results')
             )
 
+
 def publish_answers(modeladmin, request, queryset):
     queryset.update(show_to_others=True)
 publish_answers.short_description = _('Show selected answers to students')
+
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):

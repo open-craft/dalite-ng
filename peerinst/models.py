@@ -8,9 +8,11 @@ from django.db import models
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
 
+
 def no_hyphens(value):
     if '-' in value:
         raise ValidationError(_('Hyphens may not be used in this field.'))
+
 
 class Category(models.Model):
     title = models.CharField(
@@ -32,6 +34,7 @@ class Category(models.Model):
 class QuestionManager(models.Manager):
     def get_by_natural_key(self, title):
         return self.get(title=title)
+
 
 class Question(models.Model):
     objects = QuestionManager()
@@ -135,6 +138,7 @@ class Question(models.Model):
         verbose_name = _('question')
         verbose_name_plural = _('questions')
 
+
 class AnswerChoice(models.Model):
     question = models.ForeignKey(Question)
     text = models.CharField(_('Text'), max_length=500)
@@ -146,6 +150,7 @@ class AnswerChoice(models.Model):
     class Meta:
         verbose_name = _('answer choice')
         verbose_name_plural = _('answer choices')
+
 
 class Assignment(models.Model):
     identifier = models.CharField(
@@ -161,6 +166,7 @@ class Assignment(models.Model):
     class Meta:
         verbose_name = _('assignment')
         verbose_name_plural = _('assignments')
+
 
 class Answer(models.Model):
     question = models.ForeignKey(Question)

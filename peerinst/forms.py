@@ -5,6 +5,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
+
 class FirstAnswerForm(forms.Form):
     """Form to select one of the answer choices and enter a rationale."""
 
@@ -19,6 +20,7 @@ class FirstAnswerForm(forms.Form):
         choice_texts = [mark_safe(". ".join(pair)) for pair in answer_choices]
         self.base_fields['first_answer_choice'].choices = enumerate(choice_texts, 1)
         forms.Form.__init__(self, *args, **kwargs)
+
 
 class ReviewAnswerForm(forms.Form):
     """Form on the answer review page."""
