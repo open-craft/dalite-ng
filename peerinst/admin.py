@@ -55,8 +55,8 @@ class AnswerInline(admin.StackedInline):
 
     def hint(self, obj):
         return _(
-            'After saving the question and opening this form again, you can add example '
-            'answers more comfortably by using the "Preview" button in the top right corner.'
+            'You can add example answers more comfortably by using the "Preview" button in the '
+            'top right corner.  The button appears after saving the question for the first time.'
         )
 
     def get_queryset(self, request):

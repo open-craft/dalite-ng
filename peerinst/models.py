@@ -55,9 +55,9 @@ class Question(models.Model):
     )
     text = models.TextField(
         _('Question text'), help_text=_(
-            'Enter the question text.  You can use HTML tags for formatting.  After saving and '
-            'reloading this form, you can use the "Preview" button in the top right corner to see '
-            'what the question will look like for students.'
+            'Enter the question text.  You can use HTML tags for formatting.  You can use the '
+            '"Preview" button in the top right corner to see what the question will look like for '
+            'students.  The button appears after saving the question for the first time.'
         )
     )
     image = models.ImageField(
