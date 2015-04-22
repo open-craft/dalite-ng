@@ -10,21 +10,38 @@ import random
 import time
 from django import http
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import edit
-from django.views.generic import list as list_views
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
+from django.views.generic.list import ListView
 from . import forms
 from . import models
 
 flatten = itertools.chain.from_iterable
 
 
-class AssignmentListView(list_views.ListView):
+class AssignmentListView(ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
+
+
+class QuestionListView(ListView):
+    """List of questions used for debugging purposes."""
+    model = models.Assignment
+
+    def get_queryset(self):
+        self.assignment = get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
+        return self.assignment.questions.all()
+
+    def get_context_data(self, **kwargs):
+        context = ListView.get_context_data(self, **kwargs)
+        context.update(assignment=self.assignment)
+        return context
 
 
 class QuestionRedirect(Exception):
@@ -34,7 +51,56 @@ class QuestionRedirect(Exception):
         self.target_url_name = target_url_name
 
 
-class QuestionView(edit.FormView):
+class QuestionMixin(object):
+    @xframe_options_exempt
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.user_token = self.request.user.username
+        self.assignment = get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
+        self.question = get_object_or_404(models.Question, pk=self.kwargs['question_id'])
+        self.answer_choices = self.question.get_choices()
+        try:
+            self.answer = models.Answer.objects.get(
+                assignment=self.assignment, question=self.question, user_token=self.user_token
+            )
+        except models.Answer.DoesNotExist:
+            pass
+        else:
+            if self.request.resolver_match.url_name != 'question-summary':
+                # We already have an answer for this student, so we show the summary.
+                return redirect(self.get_redirect_url('question-summary'))
+        try:
+            return super(QuestionMixin, self).dispatch(request, *args, **kwargs)
+        except QuestionRedirect as e:
+            return redirect(self.get_redirect_url(e.target_url_name))
+
+    def get_redirect_url(self, name):
+        return reverse(
+            name, kwargs=dict(assignment_id=self.assignment.pk, question_id=self.question.pk)
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionMixin, self).get_context_data(**kwargs)
+        context.update(
+            assignment=self.assignment,
+            question=self.question,
+            answer_choices=self.answer_choices,
+        )
+        return context
+
+    def start_over(self, msg=None):
+        """Start over with the current question.
+
+        This redirect is used when inconsistent data is encountered and shouldn't be called under
+        normal circumstances.
+        """
+        self.pop_session_data()
+        if msg is not None:
+            messages.add_message(self.request, messages.ERROR, msg)
+        raise QuestionRedirect('question-start')
+
+
+class QuestionFormView(QuestionMixin, FormView):
     """Base class for the views in the student UI."""
 
     def log(self, **data):
@@ -47,9 +113,9 @@ class QuestionView(edit.FormView):
             timestamp=math.trunc(time.time()),
             user=self.user_token,
             http_method=self.request.method,
-            assignment_id=self.assignment_id,
+            assignment_id=self.assignment.pk,
             assignment_title=self.assignment.title,
-            question_id=self.question.id,
+            question_id=self.question.pk,
             question_text=self.question.text,
         )
         logging.getLogger(__name__).info(json.dumps(data))
@@ -57,7 +123,7 @@ class QuestionView(edit.FormView):
     def load_session_data(self):
         self._session_data = self.request.session.setdefault('answer_dict', {})
         # Serialisation for some reason turns the key into a string.
-        self.answer_dict = self._session_data.get(unicode(self.question.id), None)
+        self.answer_dict = self._session_data.get(unicode(self.question.pk), None)
         if self.answer_dict is None:
             if self.request.resolver_match.url_name != 'question-start':
                 # We don't have session data, but are not at the first step.
@@ -73,70 +139,24 @@ class QuestionView(edit.FormView):
         # stores it after returning.  Two concurrent request can result in changes being lost.
         # This only happens if the same user sends POST requests for two different questions at
         # exactly the same time, which doesn't seem likely (or useful to support).
-        self._session_data[unicode(self.question.id)] = self.answer_dict
+        self._session_data[unicode(self.question.pk)] = self.answer_dict
         self.answer_dict.update(url_name=self.success_url_name)
         # Explicitly mark the session as modified since it can't detect nested modifications.
         self.request.session.modified = True
 
     def pop_session_data(self):
-        self._session_data.pop(unicode(self.question.id), None)
+        self._session_data.pop(unicode(self.question.pk), None)
         self.request.session.modified = True
 
     def get_form_kwargs(self):
-        self.user_token = 'test'
-        self.assignment_id = self.kwargs['assignment_id']
-        self.question_index = int(self.kwargs.get('question_index', 1))
-        self.assignment = get_object_or_404(models.Assignment, identifier=self.assignment_id)
-        try:
-            # We use one-based indexing in the public interface, so we have to subtract 1.
-            self.question = self.assignment.questions.all()[int(self.question_index) - 1]
-        except IndexError:
-            raise http.Http404(_('Question does not exist.'))
-        self.answer_choices = self.question.get_choices()
         self.load_session_data()
-        return edit.FormView.get_form_kwargs(self)
-
-    def get_context_data(self, **kwargs):
-        context = edit.FormView.get_context_data(self, **kwargs)
-        context.update(
-            question_index=self.question_index,
-            assignment=self.assignment,
-            question=self.question,
-            answer_choices=self.answer_choices,
-        )
-        return context
-
-    def get_redirect_url(self, name):
-        return reverse(
-            name,
-            kwargs=dict(assignment_id=self.assignment_id, question_index=self.question_index),
-        )
+        return super(QuestionFormView, self).get_form_kwargs()
 
     def get_success_url(self):
         return self.get_redirect_url(self.success_url_name)
 
-    @xframe_options_exempt
-    def dispatch(self, request, *args, **kwargs):
-        # We override this method to enable triggering redirects from within other methods, which
-        # is usually not possible.  This is used in the start_over() method below.
-        try:
-            return edit.FormView.dispatch(self, request, *args, **kwargs)
-        except QuestionRedirect as e:
-            return redirect(self.get_redirect_url(e.target_url_name))
 
-    def start_over(self, msg=None):
-        """Start over with the current question.
-
-        This redirect is used when inconsistent data is encountered and shouldn't be called under
-        normal circumstances.
-        """
-        self.pop_session_data()
-        if msg is not None:
-            messages.add_message(self.request, messages.ERROR, msg)
-        raise QuestionRedirect('question-start')
-
-
-class QuestionStartView(QuestionView):
+class QuestionStartView(QuestionFormView):
     """Render a question with answer choices.
 
     The user can choose one answer and enter a rationale.
@@ -147,10 +167,10 @@ class QuestionStartView(QuestionView):
     success_url_name = 'question-review'
 
     def get_form_kwargs(self):
-        kwargs = QuestionView.get_form_kwargs(self)
+        kwargs = super(QuestionStartView, self).get_form_kwargs()
         kwargs.update(answer_choices=self.answer_choices)
         if self.request.method == 'GET':
-            # Log entry when the page is first shown, mainly for the timestamp.
+            # Log when the page is first shown, mainly for the timestamp.
             self.log()
         return kwargs
 
@@ -161,10 +181,10 @@ class QuestionStartView(QuestionView):
         )
         self.log(**self.answer_dict)
         self.store_session_data()
-        return QuestionView.form_valid(self, form)
+        return super(QuestionStartView, self).form_valid(form)
 
 
-class QuestionReviewView(QuestionView):
+class QuestionReviewView(QuestionFormView):
     """Show rationales from other users and give the opportunity to reconsider the first answer."""
 
     template_name = 'peerinst/question_review.html'
@@ -172,7 +192,7 @@ class QuestionReviewView(QuestionView):
     success_url_name = 'question-summary'
 
     def get_form_kwargs(self):
-        kwargs = QuestionView.get_form_kwargs(self)
+        kwargs = super(QuestionReviewView, self).get_form_kwargs()
         self.first_answer_choice = self.answer_dict['first_answer_choice']
         self.rationale = self.answer_dict['rationale']
         kwargs.update(self.select_rationales())
@@ -190,7 +210,7 @@ class QuestionReviewView(QuestionView):
         """
         # Make the choice of rationales deterministic, so people can't see all rationales by
         # repeatedly reloading the page.
-        random.seed((self.user_token, self.assignment_id, self.question_index))
+        random.seed((self.user_token, self.assignment.pk, self.question.pk))
         first_choice = self.first_answer_choice
         answer_choices = self.question.answerchoice_set.all()
         # Find all public rationales for this question.
@@ -226,7 +246,7 @@ class QuestionReviewView(QuestionView):
     select_rationales.version = "simple_v1.0"
 
     def get_context_data(self, **kwargs):
-        context = QuestionView.get_context_data(self, **kwargs)
+        context = super(QuestionReviewView, self).get_context_data(**kwargs)
         context.update(
             first_choice_label=self.question.get_choice_label(self.first_answer_choice),
             rationale=self.rationale,
@@ -234,16 +254,12 @@ class QuestionReviewView(QuestionView):
         return context
 
     def form_valid(self, form):
-        second_answer_choice = int(form.cleaned_data['second_answer_choice'])
-        chosen_rationale_id = form.cleaned_data['chosen_rationale_id']
-        self.answer_dict.update(
-            second_answer_choice=second_answer_choice,
-            chosen_rationale_id=chosen_rationale_id,
-        )
-        self.store_session_data()
+        self.second_answer_choice = int(form.cleaned_data['second_answer_choice'])
+        self.chosen_rationale_id = form.cleaned_data['chosen_rationale_id']
+        self.save_answer()
         self.log(
-            second_answer_choice=second_answer_choice,
-            switch=self.first_answer_choice != second_answer_choice,
+            second_answer_choice=self.second_answer_choice,
+            switch=self.first_answer_choice != self.second_answer_choice,
             rationale_algorithm=dict(
                 version=self.select_rationales.version,
                 description=inspect.getdoc(self.select_rationales),
@@ -252,43 +268,10 @@ class QuestionReviewView(QuestionView):
                 {'id': r.id, 'text': r.rationale}
                 for r in flatten(self.display_rationales)
             ],
-            chosen_rationale_id=chosen_rationale_id,
+            chosen_rationale_id=self.chosen_rationale_id,
         )
-        return QuestionView.form_valid(self, form)
-
-
-class QuestionSummaryView(QuestionView):
-    """Show a summary of answers to the student and submit the data to the database."""
-
-    template_name = 'peerinst/question_summary.html'
-    form_class = forms.forms.Form
-    success_url_name = 'question-start'
-
-    def get_form_kwargs(self):
-        kwargs = QuestionView.get_form_kwargs(self)
-        self.first_answer_choice = self.answer_dict['first_answer_choice']
-        self.second_answer_choice = self.answer_dict['second_answer_choice']
-        self.rationale = self.answer_dict['rationale']
-        self.chosen_rationale_id = self.answer_dict['chosen_rationale_id']
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = QuestionView.get_context_data(self, **kwargs)
-        context.update(
-            first_choice_label=self.question.get_choice_label(self.first_answer_choice),
-            second_choice_label=self.question.get_choice_label(self.second_answer_choice),
-            rationale=self.rationale,
-        )
-        return context
-
-    def form_valid(self, form):
-        self.save_answer()
         self.pop_session_data()
-        self.question_index += 1
-        if self.question_index >= self.assignment.questions.count():
-            # TODO(smarnach): Figure out what to do when reaching the last question.
-            return redirect('assignment-list')
-        return QuestionView.form_valid(self, form)
+        return super(QuestionReviewView, self).form_valid(form)
 
     def save_answer(self):
         """Validate and save the answer defined by the arguments to the database."""
@@ -315,3 +298,18 @@ class QuestionSummaryView(QuestionView):
             user_token=self.user_token,
         )
         answer.save()
+
+
+class QuestionSummaryView(QuestionMixin, TemplateView):
+    """Show a summary of answers to the student and submit the data to the database."""
+
+    template_name = 'peerinst/question_summary.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionSummaryView, self).get_context_data(**kwargs)
+        context.update(
+            first_choice_label=self.question.get_choice_label(self.answer.first_answer_choice),
+            second_choice_label=self.question.get_choice_label(self.answer.second_answer_choice),
+            rationale=self.answer.rationale,
+        )
+        return context
