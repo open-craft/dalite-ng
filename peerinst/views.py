@@ -19,6 +19,8 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
+from django_lti_tool_provider.signals import Signals
+from django_lti_tool_provider.models import LtiUserData
 from . import forms
 from . import models
 
@@ -272,7 +274,6 @@ class QuestionReviewView(QuestionFormView):
     def form_valid(self, form):
         self.second_answer_choice = int(form.cleaned_data['second_answer_choice'])
         self.chosen_rationale_id = _int_or_None(form.cleaned_data['chosen_rationale_id'])
-        self.save_answer()
         self.log(
             second_answer_choice=self.second_answer_choice,
             switch=self.first_answer_choice != self.second_answer_choice,
@@ -286,6 +287,8 @@ class QuestionReviewView(QuestionFormView):
             ],
             chosen_rationale_id=self.chosen_rationale_id,
         )
+        self.save_answer()
+        self.send_grade()
         self.pop_session_data()
         return super(QuestionReviewView, self).form_valid(form)
 
@@ -317,6 +320,15 @@ class QuestionReviewView(QuestionFormView):
             user_token=self.user_token,
         )
         answer.save()
+
+    def send_grade(self):
+        correct = self.question.answerchoice_set.all()[self.second_answer_choice - 1].correct
+        Signals.Grade.updated.send(
+            __name__,
+            user=self.request.user,
+            custom_key=unicode(self.assignment.pk) + ':' + unicode(self.question.pk),
+            grade=float(correct),
+        )
 
 
 class QuestionSummaryView(QuestionMixin, TemplateView):
