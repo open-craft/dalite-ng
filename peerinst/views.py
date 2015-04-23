@@ -12,7 +12,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -27,12 +26,19 @@ from . import models
 flatten = itertools.chain.from_iterable
 
 
-class AssignmentListView(ListView):
+class LoginRequiredMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
+        return login_required(view)
+
+
+class AssignmentListView(LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
 
 
-class QuestionListView(ListView):
+class QuestionListView(LoginRequiredMixin, ListView):
     """List of questions used for debugging purposes."""
     model = models.Assignment
 
@@ -53,9 +59,8 @@ class QuestionRedirect(Exception):
         self.target_url_name = target_url_name
 
 
-class QuestionMixin(object):
+class QuestionMixin(LoginRequiredMixin):
     @xframe_options_exempt
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         self.user_token = self.request.user.username
         self.assignment = get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
