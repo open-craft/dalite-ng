@@ -12,25 +12,33 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
+from django_lti_tool_provider.signals import Signals
+from django_lti_tool_provider.models import LtiUserData
 from . import forms
 from . import models
 
 flatten = itertools.chain.from_iterable
 
 
-class AssignmentListView(ListView):
+class LoginRequiredMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
+        return login_required(view)
+
+
+class AssignmentListView(LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
 
 
-class QuestionListView(ListView):
+class QuestionListView(LoginRequiredMixin, ListView):
     """List of questions used for debugging purposes."""
     model = models.Assignment
 
@@ -51,9 +59,8 @@ class QuestionRedirect(Exception):
         self.target_url_name = target_url_name
 
 
-class QuestionMixin(object):
+class QuestionMixin(LoginRequiredMixin):
     @xframe_options_exempt
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         self.user_token = self.request.user.username
         self.assignment = get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
@@ -194,6 +201,12 @@ class QuestionStartView(QuestionFormView):
         return super(QuestionStartView, self).form_valid(form)
 
 
+def _int_or_None(s):
+    if s == 'None':
+        return None
+    return int(s)
+
+
 class QuestionReviewView(QuestionFormView):
     """Show rationales from other users and give the opportunity to reconsider the first answer."""
 
@@ -265,8 +278,7 @@ class QuestionReviewView(QuestionFormView):
 
     def form_valid(self, form):
         self.second_answer_choice = int(form.cleaned_data['second_answer_choice'])
-        self.chosen_rationale_id = form.cleaned_data['chosen_rationale_id']
-        self.save_answer()
+        self.chosen_rationale_id = _int_or_None(form.cleaned_data['chosen_rationale_id'])
         self.log(
             second_answer_choice=self.second_answer_choice,
             switch=self.first_answer_choice != self.second_answer_choice,
@@ -280,24 +292,29 @@ class QuestionReviewView(QuestionFormView):
             ],
             chosen_rationale_id=self.chosen_rationale_id,
         )
+        self.save_answer()
+        self.send_grade()
         self.pop_session_data()
         return super(QuestionReviewView, self).form_valid(form)
 
     def save_answer(self):
         """Validate and save the answer defined by the arguments to the database."""
-        try:
-            chosen_rationale = models.Answer.objects.get(id=self.chosen_rationale_id)
-        except models.Answer.DoesNotExist:
-            # Raises exception.
-            self.start_over(_(
-                'The rationale you chose does not exist anymore.  '
-                'This should not happen.  Please start over with the question.'
-            ))
-        if chosen_rationale.first_answer_choice != self.second_answer_choice:
-            self.start_over(_(
-                'The rationale you chose does not match your second answer choice.  '
-                'This should not happen.  Please start over with the question.'
-            ))
+        if self.chosen_rationale_id is not None:
+            try:
+                chosen_rationale = models.Answer.objects.get(id=self.chosen_rationale_id)
+            except models.Answer.DoesNotExist:
+                # Raises exception.
+                self.start_over(_(
+                    'The rationale you chose does not exist anymore.  '
+                    'This should not happen.  Please start over with the question.'
+                ))
+            if chosen_rationale.first_answer_choice != self.second_answer_choice:
+                self.start_over(_(
+                    'The rationale you chose does not match your second answer choice.  '
+                    'This should not happen.  Please start over with the question.'
+                ))
+        else:
+            chosen_rationale = None
         answer = models.Answer(
             question=self.question,
             assignment=self.assignment,
@@ -308,6 +325,15 @@ class QuestionReviewView(QuestionFormView):
             user_token=self.user_token,
         )
         answer.save()
+
+    def send_grade(self):
+        correct = self.question.answerchoice_set.all()[self.second_answer_choice - 1].correct
+        Signals.Grade.updated.send(
+            __name__,
+            user=self.request.user,
+            custom_key=unicode(self.assignment.pk) + ':' + unicode(self.question.pk),
+            grade=float(correct),
+        )
 
 
 class QuestionSummaryView(QuestionMixin, TemplateView):

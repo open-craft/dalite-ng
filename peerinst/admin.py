@@ -8,6 +8,11 @@ from django.utils.translation import ugettext_lazy as _
 from .models import Answer, AnswerChoice, Assignment, Question, Category
 
 
+class AnswerChoiceInlineForm(forms.ModelForm):
+    class Meta:
+        widgets = {'text': forms.Textarea(attrs={'style': 'width: 500px'})}
+
+
 class AnswerChoiceInlineFormSet(forms.BaseInlineFormSet):
     def clean(self):
         forms = [
@@ -26,6 +31,7 @@ class AnswerChoiceInlineFormSet(forms.BaseInlineFormSet):
 
 class AnswerChoiceInline(admin.TabularInline):
     model = AnswerChoice
+    form = AnswerChoiceInlineForm
     formset = AnswerChoiceInlineFormSet
     max_num = 5
     extra = 5

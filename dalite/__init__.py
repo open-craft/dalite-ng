@@ -10,7 +10,6 @@ from django.dispatch import receiver
 
 from django_lti_tool_provider import AbstractApplicationHookManager
 from django_lti_tool_provider.views import LTIView
-from django_lti_tool_provider.signals import Signals
 
 
 class ApplicationHookManager(AbstractApplicationHookManager):
@@ -58,20 +57,3 @@ class ApplicationHookManager(AbstractApplicationHookManager):
 
 
 LTIView.register_authentication_manager(ApplicationHookManager())
-
-
-# Signals.LTI.received is fired when LTI request is handled. Theoretically, if there are grade for user already
-# it should be obtained and sent back immediately
-@receiver(Signals.LTI.received, dispatch_uid="django_lti_received")
-def _handle_lti_updated_signal(sender, **kwargs):
-    # lti_data basically contains django_lti_tool_provider.models.LtiUserData instance
-    # You can use lti_data.send_lti_grade(grade) directly
-    # Grade must be normalized: float [0, 1] (0 and 1 allowed)
-    # django_lti_tool_provider.models.LtiUserData stores all data needed to send request back at any time.
-    user, lti_data = kwargs.get('user', None), kwargs.get('lti_data', None)
-
-    # Better way is to trigger special event. User is just a Auth.models user.
-    # It basically does LtiUserData.objects.get(user=user).send_grade(grade) with some safety checks and logging
-    # If no LTI data is stored for user so far, obviously,
-    # django_lti_tool_provider.models.LtiUserData.DoesNotExist exception will be thrown
-    Signals.Grade.updated.send(sender, user=user, custom_key=lti_data.custom_key, grade=random.random())

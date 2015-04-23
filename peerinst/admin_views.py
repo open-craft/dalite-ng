@@ -13,8 +13,18 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
-from . import models
 from . import forms
+from . import models
+from .views import LoginRequiredMixin
+
+
+class AdminIndexView(LoginRequiredMixin, TemplateView):
+    template_name = 'admin/peerinst/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = TemplateView.get_context_data(self, **kwargs)
+        context.update(assignments=models.Assignment.objects.all())
+        return context
 
 
 def get_question_aggregates(assignment, question):
@@ -62,7 +72,7 @@ def get_assignment_aggregates(assignment):
     return sums, question_data
 
 
-class AssignmentResultsView(TemplateView):
+class AssignmentResultsView(LoginRequiredMixin, TemplateView):
     template_name = "admin/peerinst/assignment_results.html"
 
     def prepare_stats(self, sums):
@@ -127,7 +137,7 @@ class AssignmentResultsView(TemplateView):
         )
         return context
 
-class QuestionPreviewView(FormView):
+class QuestionPreviewView(LoginRequiredMixin, FormView):
     template_name = 'admin/peerinst/question_preview.html'
     form_class = forms.FirstAnswerForm
 
