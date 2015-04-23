@@ -129,6 +129,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'django_lti_tool_provider.views': {
+            'handlers': ['file_debug_log'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
 
@@ -143,7 +148,6 @@ LTI_CLIENT_SECRET = os.environ.get('LTI_CLIENT_SECRET', None)
 # Used to automatically generate stable passwords from anonymous user ids coming from LTI requests - keep secret as well
 # If compromised, attackers would be able to restore any student passwords knowing his anonymous user ID from LMS
 PASSWORD_GENERATOR_NONCE = os.environ.get('PASSWORD_GENERATOR_NONCE', None)
-
 # LTI Integration end
 
 try:
