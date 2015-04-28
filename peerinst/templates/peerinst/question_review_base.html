@@ -8,7 +8,9 @@
   {% endfor %}
 </ul>
 <div id="your-answer">
-  <p>{% trans 'You answered:' %} <strong>{{ first_choice_label }} {{ second_choice_label }}</strong></p>
+  {% block your_answers %}
+  <p>{% trans 'You answered' %} <strong>{{ first_choice_label }}</strong>.</p>
+  {% endblock %}
   <div id="your-rationale">
     <p>{% trans 'Your rationale:' %}</p>
     <blockquote>{{ rationale }}</blockquote>
