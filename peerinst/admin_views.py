@@ -5,6 +5,7 @@ import collections
 import functools
 import itertools
 import urllib
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import F
@@ -15,10 +16,16 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from . import forms
 from . import models
-from .views import LoginRequiredMixin
 
 
-class AdminIndexView(LoginRequiredMixin, TemplateView):
+class StaffMemberRequiredMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(StaffMemberRequiredMixin, cls).as_view(**initkwargs)
+        return staff_member_required(view)
+
+
+class AdminIndexView(StaffMemberRequiredMixin, TemplateView):
     template_name = 'admin/peerinst/index.html'
 
     def get_context_data(self, **kwargs):
@@ -72,7 +79,7 @@ def get_assignment_aggregates(assignment):
     return sums, question_data
 
 
-class AssignmentResultsView(LoginRequiredMixin, TemplateView):
+class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
     template_name = "admin/peerinst/assignment_results.html"
 
     def prepare_stats(self, sums):
@@ -137,7 +144,7 @@ class AssignmentResultsView(LoginRequiredMixin, TemplateView):
         )
         return context
 
-class QuestionPreviewView(LoginRequiredMixin, FormView):
+class QuestionPreviewView(StaffMemberRequiredMixin, FormView):
     template_name = 'admin/peerinst/question_preview.html'
     form_class = forms.FirstAnswerForm
 
