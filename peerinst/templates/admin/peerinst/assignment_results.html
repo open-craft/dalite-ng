@@ -19,38 +19,36 @@
 {% endblock %}
 
 {% block content %}
-<div class="g-d-c">
-  <div class="g-d-24">
-    <h2>Summary</h2>
-    <table class="results-summary">
-      <tbody>
-        {% for label, item in assignment_data %}
-        <tr><th>{{ label }}</th><td>{{ item }}</td></tr>
+<div class="g-d-c-fluid">
+  <h2>Summary</h2>
+  <table class="results-summary">
+    <tbody>
+      {% for label, item in assignment_data %}
+      <tr><th>{{ label }}</th><td>{{ item }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="g-d-c-fluid">
+  <h2>Results for individual questions</h2>
+  <table class="results-question-data">
+    <thead>
+      <tr>
+        {% for label in question_data.labels %}
+        <th>{{ label }}</th>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <div class="g-d-24">
-    <h2>Results for individual questions</h2>
-    <table class="results-question-data">
-      <thead>
-        <tr>
-          {% for label in question_data.labels %}
-          <th>{{ label }}</th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for question in question_data.rows %}
-        <tr class="grp-row-{% cycle 'odd' 'even' %}">
-          {% for item in question.data %}
-          <td>{{ item }}</td>
-          {% endfor %}
-          <td><a href="{{ question.link }}">{% trans 'Show answers' %}</a></td>
-        </tr>
+      </tr>
+    </thead>
+    <tbody>
+      {% for question in question_data.rows %}
+      <tr class="grp-row-{% cycle 'odd' 'even' %}">
+        {% for item in question.data %}
+        <td>{{ item }}</td>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+        <td><a href="{{ question.link }}">{% trans 'Show answers' %}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}
