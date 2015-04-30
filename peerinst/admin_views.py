@@ -126,12 +126,14 @@ class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
     def prepare_question_data(self, question_data, switch_columns):
         rows = []
         for i, (question, sums) in enumerate(question_data, 1):
-            get_params = urllib.urlencode(
+            get_params_this = urllib.urlencode(
                 dict(assignment=self.assignment_id, question=question.id)
             )
+            get_params_all = urllib.urlencode(dict(question=question.id))
             rows.append(dict(
                 data=[i, question.title] + self.prepare_stats(sums, switch_columns),
-                link='?'.join([reverse('admin:peerinst_answer_changelist'), get_params]),
+                link_this='?'.join([reverse('admin:peerinst_answer_changelist'), get_params_this]),
+                link_all='?'.join([reverse('admin:peerinst_answer_changelist'), get_params_all]),
             ))
         labels = [
             _('No.'), _('Question ID'), _('Total answers'), _('Total students'),
@@ -140,7 +142,7 @@ class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
         ]
         for choice_index in switch_columns:
             labels.append(_('To {index}').format(index=choice_index))
-        labels.append('')  # Last columns doesn't need heading
+        labels.append(_('Show answers'))
         return dict(labels=labels, rows=rows)
         
     def get_context_data(self, **kwargs):

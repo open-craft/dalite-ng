@@ -45,7 +45,10 @@
         {% for item in question.data %}
         <td>{{ item }}</td>
         {% endfor %}
-        <td><a href="{{ question.link }}">{% trans 'Show answers' %}</a></td>
+        <td>
+          <a href="{{ question.link_this }}">[{% trans 'this assignment' %}]</a>
+          <a href="{{ question.link_all }}">[{% trans 'all' %}]</a>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
