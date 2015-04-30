@@ -83,17 +83,6 @@ class QuestionAdmin(admin.ModelAdmin):
     inlines = [AnswerChoiceInline, AnswerInline]
     list_display = ['title', 'category']
 
-    def save_related(self, request, form, formsets, change):
-        for fs in formsets:
-            if fs.model is Answer:
-                answers = fs.save(commit=False)
-                for a in answers:
-                    a.show_to_others = True
-                    a.save()
-                fs.save_m2m()
-            else:
-                fs.save()
-
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
