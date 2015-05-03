@@ -12,7 +12,6 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
@@ -57,7 +56,6 @@ class QuestionRedirect(Exception):
 
 
 class QuestionMixin(LoginRequiredMixin):
-    @xframe_options_exempt
     def dispatch(self, request, *args, **kwargs):
         self.user_token = self.request.user.username
         self.assignment = get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
