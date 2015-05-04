@@ -17,7 +17,14 @@ class ApplicationHookManager(AbstractApplicationHookManager):
 
     @classmethod
     def _compress_user_name(cls, username):
-        return base64.urlsafe_b64encode(username.decode('hex')).replace('=', '+')
+        try:
+            binary = username.decode('hex')
+        except TypeError:
+            # We didn't get a normal edX hex user id, so we don't use our custom encoding. This
+            # makes previewing questions in Studio work.
+            return username
+        else:
+            return base64.urlsafe_b64encode(binary).replace('=', '+')
 
     @classmethod
     def _generate_password(cls, base, nonce):
