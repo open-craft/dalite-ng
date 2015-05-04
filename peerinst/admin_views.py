@@ -5,6 +5,7 @@ import collections
 import functools
 import itertools
 import urllib
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import F
@@ -15,10 +16,16 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from . import forms
 from . import models
-from .views import LoginRequiredMixin
 
 
-class AdminIndexView(LoginRequiredMixin, TemplateView):
+class StaffMemberRequiredMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(StaffMemberRequiredMixin, cls).as_view(**initkwargs)
+        return staff_member_required(view)
+
+
+class AdminIndexView(StaffMemberRequiredMixin, TemplateView):
     template_name = 'admin/peerinst/index.html'
 
     def get_context_data(self, **kwargs):
@@ -39,12 +46,18 @@ def get_question_aggregates(assignment, question):
     correct_choices = list(itertools.compress(itertools.count(1), answerchoice_correct))
     # Select answers entered by students, not example answers
     answers = question.answer_set.filter(assignment=assignment).exclude(user_token='')
+    switched_answers = answers.exclude(second_answer_choice=F('first_answer_choice'))
     sums = collections.Counter(
         total_answers=answers.count(),
         correct_first_answers=answers.filter(first_answer_choice__in=correct_choices).count(),
         correct_second_answers=answers.filter(second_answer_choice__in=correct_choices).count(),
-        switches=answers.exclude(second_answer_choice=F('first_answer_choice')).count(),
+        switches=switched_answers.count(),
     )
+    for choice_index in range(1, question.answerchoice_set.count() + 1):
+        key = ('switches', choice_index)
+        count = switched_answers.filter(second_answer_choice=choice_index).count()
+        if count:
+            sums[key] = count
     # Get a set of all user tokens.  DISTINCT queries are not implemented for MySQL, so this is the
     # only way I can think of to determine the number of students who answered at least one
     # question in an assignment.
@@ -72,10 +85,10 @@ def get_assignment_aggregates(assignment):
     return sums, question_data
 
 
-class AssignmentResultsView(LoginRequiredMixin, TemplateView):
+class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
     template_name = "admin/peerinst/assignment_results.html"
 
-    def prepare_stats(self, sums):
+    def prepare_stats(self, sums, switch_columns):
         total_answers = sums['total_answers']
         if total_answers:
             def percent(enum):
@@ -83,7 +96,7 @@ class AssignmentResultsView(LoginRequiredMixin, TemplateView):
         else:
             def percent(enum):
                 return ''
-        return (
+        results = [
             total_answers,
             sums['total_students'],
             sums['correct_first_answers'],
@@ -92,10 +105,13 @@ class AssignmentResultsView(LoginRequiredMixin, TemplateView):
             percent(sums['correct_second_answers']),
             sums['switches'],
             percent(sums['switches']),
-        )
+        ]
+        for choice_index in switch_columns:
+            results.append(sums.get(('switches', choice_index), ''))
+        return results
 
-    def prepare_assignment_data(self, sums):
-        return zip((
+    def prepare_assignment_data(self, sums, switch_columns):
+        labels = [
             _('Total number of answers recorded:'),
             _('Total number of participating students:'),
             _('Correct answer choices – first attempt:'),
@@ -104,40 +120,47 @@ class AssignmentResultsView(LoginRequiredMixin, TemplateView):
             _('↳ Percentage of total answers:'),
             _('Number of answer choice switches:'),
             _('↳ Percentage of total answers:'),
-        ), self.prepare_stats(sums))
+        ]
+        for choice_index in switch_columns:
+            labels.append(_('Switches to answer {index}:').format(index=choice_index))
+        return zip(labels, self.prepare_stats(sums, switch_columns))
 
-    def prepare_question_data(self, question_data):
+    def prepare_question_data(self, question_data, switch_columns):
         rows = []
         for i, (question, sums) in enumerate(question_data, 1):
-            get_params = urllib.urlencode(
+            get_params_this = urllib.urlencode(
                 dict(assignment=self.assignment_id, question=question.id)
             )
+            get_params_all = urllib.urlencode(dict(question=question.id))
             rows.append(dict(
-                data=(i, question.title) + self.prepare_stats(sums),
-                link='?'.join([reverse('admin:peerinst_answer_changelist'), get_params]),
+                data=[i, question.title] + self.prepare_stats(sums, switch_columns),
+                link_this='?'.join([reverse('admin:peerinst_answer_changelist'), get_params_this]),
+                link_all='?'.join([reverse('admin:peerinst_answer_changelist'), get_params_all]),
             ))
-        return dict(
-            labels=(
-                _('No.'), _('Question ID'), _('Total answers'), _('Total students'),
-                _('First correct'), _('Percent'), _('Second correct'), _('Percent'),
-                _('Switches'), _('Percent'), ''
-            ),
-            rows=rows,
-        )
+        labels = [
+            _('No.'), _('Question ID'), _('Total answers'), _('Total students'),
+            _('First correct'), _('Percent'), _('Second correct'), _('Percent'),
+            _('Switches'), _('Percent')
+        ]
+        for choice_index in switch_columns:
+            labels.append(_('To {index}').format(index=choice_index))
+        labels.append(_('Show answers'))
+        return dict(labels=labels, rows=rows)
         
     def get_context_data(self, **kwargs):
         context = TemplateView.get_context_data(self, **kwargs)
         self.assignment_id = self.kwargs['assignment_id']
         assignment = get_object_or_404(models.Assignment, identifier=self.assignment_id)
         sums, question_data = get_assignment_aggregates(assignment)
+        switch_columns = sorted(k[1] for k in sums if isinstance(k, tuple) and k[0] == 'switches')
         context.update(
             assignment=assignment,
-            assignment_data=self.prepare_assignment_data(sums),
-            question_data=self.prepare_question_data(question_data),
+            assignment_data=self.prepare_assignment_data(sums, switch_columns),
+            question_data=self.prepare_question_data(question_data, switch_columns),
         )
         return context
 
-class QuestionPreviewView(LoginRequiredMixin, FormView):
+class QuestionPreviewView(StaffMemberRequiredMixin, FormView):
     template_name = 'admin/peerinst/question_preview.html'
     form_class = forms.FirstAnswerForm
 

@@ -31,12 +31,12 @@ class ReviewAnswerForm(forms.Form):
     rationale_choice_0 = forms.ChoiceField(label='', required=False, widget=forms.RadioSelect)
     rationale_choice_1 = forms.ChoiceField(label='', required=False, widget=forms.RadioSelect)
 
-    def __init__(self, answer_choices, display_rationales, *args, **kwargs):
+    def __init__(self, rationale_choices, *args, **kwargs):
+        answer_choices = []
+        for i, (choice, label, rationales) in enumerate(rationale_choices):
+            answer_choices.append((choice, label))
+            self.base_fields['rationale_choice_{}'.format(i)].choices = rationales
         self.base_fields['second_answer_choice'].choices = answer_choices
-        for i, rationales in enumerate(display_rationales):
-            self.base_fields['rationale_choice_{}'.format(i)].choices = (
-                [(r.id, r.rationale) for r in rationales] + [(None, _('None of the above choices'))]
-            )
         forms.Form.__init__(self, *args, **kwargs)
 
     def clean(self):

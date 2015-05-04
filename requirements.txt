@@ -1,8 +1,7 @@
-django==1.8
+django==1.8.1
 django-grappelli==2.6.4
-mysql-python==1.2.5
+mysql-python
 pillow
 
 -e git+https://github.com/tophatmonocle/ims_lti_py.git@979244d83c2e6420d2c1941f58e52f641c56ad12#egg=ims_lti_py-develop
--e git+https://github.com/open-craft/django-lti-tool-provider@6ffbf14ffa2790460398b2c3bf9cb742791de70b#egg=django_lti_tool_provider-master
-
+-e git+https://github.com/open-craft/django-lti-tool-provider@ae67dd6f15de7d3028b123a5981436782f6c4a0b#egg=django_lti_tool_provider-master

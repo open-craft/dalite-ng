@@ -2,11 +2,9 @@
 from __future__ import unicode_literals
 
 import inspect
-import itertools
 import json
 import logging
 import math
-import random
 import time
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -14,7 +12,6 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
@@ -22,8 +19,7 @@ from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
 from . import forms
 from . import models
-
-flatten = itertools.chain.from_iterable
+from . import rationale_choice
 
 
 class LoginRequiredMixin(object):
@@ -60,7 +56,6 @@ class QuestionRedirect(Exception):
 
 
 class QuestionMixin(LoginRequiredMixin):
-    @xframe_options_exempt
     def dispatch(self, request, *args, **kwargs):
         self.user_token = self.request.user.username
         self.assignment = get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
@@ -71,7 +66,9 @@ class QuestionMixin(LoginRequiredMixin):
                 assignment=self.assignment, question=self.question, user_token=self.user_token
             )
         except models.Answer.DoesNotExist:
-            pass
+            if self.request.resolver_match.url_name == 'question-summary':
+                # We can't show the summary if there's no answer yet
+                return redirect(self.get_redirect_url('question-start'))
         else:
             if self.request.resolver_match.url_name != 'question-summary':
                 # We already have an answer for this student, so we show the summary.
@@ -100,17 +97,6 @@ class QuestionMixin(LoginRequiredMixin):
             '<h3 class="messages-title">{}</h3>{}',
             _("There was a problem with your submission"),
             _('Check the form below.')))
-
-    def start_over(self, msg=None):
-        """Start over with the current question.
-
-        This redirect is used when inconsistent data is encountered and shouldn't be called under
-        normal circumstances.
-        """
-        self.pop_session_data()
-        if msg is not None:
-            messages.add_message(self.request, messages.ERROR, msg)
-        raise QuestionRedirect('question-start')
 
 
 class QuestionFormView(QuestionMixin, FormView):
@@ -172,6 +158,17 @@ class QuestionFormView(QuestionMixin, FormView):
         self.submission_error()
         return super(QuestionFormView, self).form_invalid(form)
 
+    def start_over(self, msg=None):
+        """Start over with the current question.
+
+        This redirect is used when inconsistent data is encountered and shouldn't be called under
+        normal circumstances.
+        """
+        self.pop_session_data()
+        if msg is not None:
+            messages.add_message(self.request, messages.ERROR, msg)
+        raise QuestionRedirect('question-start')
+
 
 class QuestionStartView(QuestionFormView):
     """Render a question with answer choices.
@@ -214,59 +211,21 @@ class QuestionReviewView(QuestionFormView):
     form_class = forms.ReviewAnswerForm
     success_url_name = 'question-summary'
 
+    # Rationale selection algorithm
+    choose_rationales = staticmethod(rationale_choice.simple)
+
     def get_form_kwargs(self):
         kwargs = super(QuestionReviewView, self).get_form_kwargs()
         self.first_answer_choice = self.answer_dict['first_answer_choice']
         self.rationale = self.answer_dict['rationale']
-        kwargs.update(self.select_rationales())
-        return kwargs
-
-    def select_rationales(self):
-        """Select the rationales to show to the user based on their answer choice.
-
-        The two answer choices presented will include the answer the user chose.  If the user's
-        answer wasn't correct, the second choice will be a correct answer.  If the user's answer
-        wasn't correct, the second choice presented will be weighted by the number of available
-        rationales, i.e. an answer that has only a few rationales available will have a low chance
-        of being shown to the user.  Up to four rationales are presented to the user for each
-        choice, if available.
-        """
-        # Make the choice of rationales deterministic, so people can't see all rationales by
-        # repeatedly reloading the page.
-        random.seed((self.user_token, self.assignment.pk, self.question.pk))
-        first_choice = self.first_answer_choice
-        answer_choices = self.question.answerchoice_set.all()
-        # Find all public rationales for this question.
-        rationales = models.Answer.objects.filter(question=self.question, show_to_others=True)
-        # Find the subset of rationales for the answer the user chose.
-        first_rationales = rationales.filter(first_answer_choice=self.first_answer_choice)
-        # Select a second answer to offer at random.  If the user's answer wasn't correct, the
-        # second answer choice offered must be correct.
-        if answer_choices[first_choice - 1].correct:
-            # We must make sure that rationales for the second answer exist.  The choice is
-            # weighted by the number of rationales available.
-            other_rationales = rationales.exclude(first_answer_choice=first_choice)
-            # We don't use random.choice to avoid fetching all rationales from the database.
-            random_rationale = other_rationales[random.randrange(other_rationales.count())]
-            second_choice = random_rationale.first_answer_choice
-        else:
-            # Select a random correct answer.  We assume that a correct answer exists.
-            second_choice = random.choice(
-                [i for i, choice in enumerate(answer_choices, 1) if choice.correct]
-            )
-        second_rationales = rationales.filter(first_answer_choice=second_choice)
-        # Select up to four rationales for each choice, if available.
-        self.display_rationales = [
-            random.sample(r, min(4, r.count())) for r in [first_rationales, second_rationales]
-        ]
-        answer_choices = [
-            (c, self.question.get_choice_label(c)) for c in [first_choice, second_choice]
-        ]
-        return dict(
-            answer_choices=answer_choices,
-            display_rationales=self.display_rationales,
+        self.rationale_choices = self.choose_rationales(
+            (self.user_token, self.assignment.pk, self.question.pk),
+            self.first_answer_choice,
+            self.rationale,
+            self.question,
         )
-    select_rationales.version = "simple_v1.0"
+        kwargs.update(rationale_choices=self.rationale_choices)
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(QuestionReviewView, self).get_context_data(**kwargs)
@@ -283,12 +242,15 @@ class QuestionReviewView(QuestionFormView):
             second_answer_choice=self.second_answer_choice,
             switch=self.first_answer_choice != self.second_answer_choice,
             rationale_algorithm=dict(
-                version=self.select_rationales.version,
-                description=inspect.getdoc(self.select_rationales),
+                name=self.choose_rationales.__name__,
+                version=self.choose_rationales.version,
+                description=inspect.getdoc(self.choose_rationales),
             ),
             rationales=[
-                {'id': r.id, 'text': r.rationale}
-                for r in flatten(self.display_rationales)
+                {'id': id, 'text': rationale}
+                for choice, label, rationales in self.rationale_choices
+                for id, rationale in rationales
+                if id is not None
             ],
             chosen_rationale_id=self.chosen_rationale_id,
         )

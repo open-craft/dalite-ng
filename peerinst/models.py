@@ -184,7 +184,7 @@ class Answer(models.Model):
     )
     chosen_rationale = models.ForeignKey('self', blank=True, null=True)
     user_token = models.CharField(max_length=100, blank=True)
-    show_to_others = models.BooleanField(_('Show to others?'), default=False)
+    show_to_others = models.BooleanField(_('Show to others?'), default=True)
 
     def first_answer_choice_label(self):
         return self.question.get_choice_label(self.first_answer_choice)

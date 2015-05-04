@@ -1,2 +1,15 @@
 {% extends 'peerinst/question_review_base.html' %}
 {% load i18n %}
+
+{% block your_answers %}
+<p>
+  {% if first_choice_label == second_choice_label %}
+  {% blocktrans %}
+  You answered <strong>{{ first_choice_label }}</strong> and stuck with your choice.
+  {% endblocktrans %}
+  {% else %}
+  You first answered <strong>{{ first_choice_label }}</strong>, then changed your answer to
+  <strong>{{ second_choice_label }}</strong>.
+  {% endif %}
+</p>
+{% endblock %}
