@@ -55,7 +55,9 @@ def get_question_aggregates(assignment, question):
     )
     for choice_index in range(1, question.answerchoice_set.count() + 1):
         key = ('switches', choice_index)
-        sums[key] = switched_answers.filter(second_answer_choice=choice_index).count()
+        count = switched_answers.filter(second_answer_choice=choice_index).count()
+        if count:
+            sums[key] = count
     # Get a set of all user tokens.  DISTINCT queries are not implemented for MySQL, so this is the
     # only way I can think of to determine the number of students who answered at least one
     # question in an assignment.
