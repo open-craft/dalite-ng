@@ -1,5 +1,7 @@
+boto
 django==1.8.1
 django-grappelli==2.6.4
+django-storages-redux
 mysql-python
 pillow
 
