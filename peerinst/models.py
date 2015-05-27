@@ -117,9 +117,9 @@ class Question(models.Model):
         The iterable doesn't stop after the current number of answer choices.
         """
         if self.answer_style == Question.ALPHA:
-            return iter(string.uppercase)
+            return iter(string.ascii_uppercase)
         elif self.answer_style == Question.NUMERIC:
-            return itertools.count(1)
+            return itertools.imap(str, itertools.count(1))
         assert False, 'The field Question.answer_style has an invalid value.'
 
     def get_choice_label(self, index):
@@ -128,7 +128,7 @@ class Question(models.Model):
         This method does not check whether index is out of bounds.
         """
         if self.answer_style == Question.ALPHA:
-            return string.uppercase[index - 1]
+            return string.ascii_uppercase[index - 1]
         elif self.answer_style == Question.NUMERIC:
             return index
         assert False, 'The field Question.answer_style has an invalid value.'
