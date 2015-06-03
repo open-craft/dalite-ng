@@ -218,12 +218,15 @@ class QuestionReviewView(QuestionFormView):
         kwargs = super(QuestionReviewView, self).get_form_kwargs()
         self.first_answer_choice = self.answer_dict['first_answer_choice']
         self.rationale = self.answer_dict['rationale']
-        self.rationale_choices = self.choose_rationales(
-            (self.user_token, self.assignment.pk, self.question.pk),
-            self.first_answer_choice,
-            self.rationale,
-            self.question,
-        )
+        try:
+            self.rationale_choices = self.choose_rationales(
+                (self.user_token, self.assignment.pk, self.question.pk),
+                self.first_answer_choice,
+                self.rationale,
+                self.question,
+            )
+        except rationale_choice.Error as e:
+            self.start_over(e.message)
         kwargs.update(rationale_choices=self.rationale_choices)
         return kwargs
 

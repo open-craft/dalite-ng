@@ -24,7 +24,14 @@ from django.utils.translation import ugettext_lazy as _
 from . import models
 
 
-def simple(rand_seed, first_answer_choice, entered_rationale, question):
+class Error(Exception):
+    """Raised when an error occurs during rationale selection.
+
+    The message attached to this exception will be shown to the user.
+    """
+
+
+def simple(rand_seed, first_answer_choice, unused_entered_rationale, question):
     """Select the rationales to show to the user based on their answer choice.
 
     The two answer choices presented will include the answer the user chose.  If the user's answer
@@ -48,7 +55,10 @@ def simple(rand_seed, first_answer_choice, entered_rationale, question):
         # weighted by the number of rationales available.
         other_rationales = all_rationales.exclude(first_answer_choice=first_choice)
         # We don't use rng.choice() to avoid fetching all rationales from the database.
-        random_rationale = other_rationales[rng.randrange(other_rationales.count())]
+        try:
+            random_rationale = other_rationales[rng.randrange(other_rationales.count())]
+        except ValueError:
+            raise Error(_("Can't proceed since the course staff did not provide example answers."))
         second_choice = random_rationale.first_answer_choice
     else:
         # Select a random correct answer.  We assume that a correct answer exists.
