@@ -292,11 +292,20 @@ class QuestionReviewView(QuestionFormView):
         answer.save()
 
     def send_grade(self):
+        custom_key = unicode(self.assignment.pk) + ':' + unicode(self.question.pk)
+        try:
+            lti_data = LtiUserData.objects.get(user=self.request.user, custom_key=custom_key)
+        except LtiUserData.DoesNotExist:
+            # We are running outside of an LTI context, so we don't need to send a grade.
+            return
+        if not lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
+            # edX didn't provide a callback URL for grading, so this is an unscored problem.
+            return
         correct = self.question.answerchoice_set.all()[self.second_answer_choice - 1].correct
         Signals.Grade.updated.send(
             __name__,
             user=self.request.user,
-            custom_key=unicode(self.assignment.pk) + ':' + unicode(self.question.pk),
+            custom_key=custom_key,
             grade=float(correct),
         )
 
