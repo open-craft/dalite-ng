@@ -24,7 +24,7 @@ from django.utils.translation import ugettext_lazy as _
 from . import models
 
 
-class Error(Exception):
+class RationaleSelectionError(Exception):
     """Raised when an error occurs during rationale selection.
 
     The message attached to this exception will be shown to the user.
@@ -58,7 +58,9 @@ def simple(rand_seed, first_answer_choice, unused_entered_rationale, question):
         try:
             random_rationale = other_rationales[rng.randrange(other_rationales.count())]
         except ValueError:
-            raise Error(_("Can't proceed since the course staff did not provide example answers."))
+            raise RationaleSelectionError(
+                _("Can't proceed since the course staff did not provide example answers.")
+            )
         second_choice = random_rationale.first_answer_choice
     else:
         # Select a random correct answer.  We assume that a correct answer exists.

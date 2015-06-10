@@ -225,7 +225,7 @@ class QuestionReviewView(QuestionFormView):
                 self.rationale,
                 self.question,
             )
-        except rationale_choice.Error as e:
+        except rationale_choice.RationaleSelectionError as e:
             self.start_over(e.message)
         kwargs.update(rationale_choices=self.rationale_choices)
         return kwargs
@@ -292,7 +292,7 @@ class QuestionReviewView(QuestionFormView):
         answer.save()
 
     def send_grade(self):
-        custom_key = unicode(self.assignment.pk) + ':' + unicode(self.question.pk)
+        custom_key = unicode(self.assignment.pk) + u':' + unicode(self.question.pk)
         try:
             lti_data = LtiUserData.objects.get(user=self.request.user, custom_key=custom_key)
         except LtiUserData.DoesNotExist:
