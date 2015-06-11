@@ -94,14 +94,15 @@ input[type='text']:focus, .form-field:focus {
     display: table-row;
 }
 .rationale-choice {
+    white-space: nowrap;
     /* Keeps things looking sane if there are no example rationales. */
     padding-bottom: 1em;
 }
 .rationale-choice, .rationale-text-container{
     display: table-cell;
 }
-.rationale-choice {
-    white-space: nowrap;
+.rationale-choice input {
+    display: none;
 }
 
 .errorlist, ul li.error {
