@@ -321,5 +321,6 @@ class QuestionSummaryView(QuestionMixin, TemplateView):
             first_choice_label=self.question.get_choice_label(self.answer.first_answer_choice),
             second_choice_label=self.question.get_choice_label(self.answer.second_answer_choice),
             rationale=self.answer.rationale,
+            chosen_rationale=self.answer.chosen_rationale,
         )
         return context

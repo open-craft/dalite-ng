@@ -1,15 +1,26 @@
 {% extends 'peerinst/question_review_base.html' %}
 {% load i18n %}
 
-{% block your_answers %}
+{% block answers %}
+{{ block.super }}
 <p>
   {% if first_choice_label == second_choice_label %}
-  {% blocktrans %}
-  You answered <strong>{{ first_choice_label }}</strong> and stuck with your choice.
-  {% endblocktrans %}
+    {% if chosen_rationale == None %}
+      {% blocktrans %}
+        You stuck with your answer choice and rationale.
+      {% endblocktrans %}
+    {% else %}
+      {% blocktrans %}
+        You stuck with your answer choice and selected this rationale:
+      {% endblocktrans %}
+      <blockquote id="chosen-rationale">{{ chosen_rationale.rationale }}</blockquote>
+    {% endif %}
   {% else %}
-  You first answered <strong>{{ first_choice_label }}</strong>, then changed your answer to
-  <strong>{{ second_choice_label }}</strong>.
+    {% blocktrans %}
+      You then changed your answer to <strong>{{ second_choice_label }}</strong>
+      and selected this rationale:
+    {% endblocktrans %}
+    <blockquote id="chosen-rationale">{{ chosen_rationale.rationale }}</blockquote>
   {% endif %}
 </p>
 {% endblock %}
