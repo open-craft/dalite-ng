@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import inspect
 import json
 import logging
 import math
+import random
 import time
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -211,19 +211,19 @@ class QuestionReviewView(QuestionFormView):
     form_class = forms.ReviewAnswerForm
     success_url_name = 'question-summary'
 
-    # Rationale selection algorithm
-    choose_rationales = staticmethod(rationale_choice.simple)
-
     def get_form_kwargs(self):
         kwargs = super(QuestionReviewView, self).get_form_kwargs()
         self.first_answer_choice = self.answer_dict['first_answer_choice']
         self.rationale = self.answer_dict['rationale']
+        self.choose_rationales = rationale_choice.algorithms[
+            self.question.rationale_selection_algorithm
+        ]
+        # Make the choice of rationales deterministic, so rationales won't change when reloading
+        # the page.
+        rng = random.Random((self.user_token, self.assignment.pk, self.question.pk))
         try:
             self.rationale_choices = self.choose_rationales(
-                (self.user_token, self.assignment.pk, self.question.pk),
-                self.first_answer_choice,
-                self.rationale,
-                self.question,
+                rng, self.first_answer_choice, self.rationale, self.question
             )
         except rationale_choice.RationaleSelectionError as e:
             self.start_over(e.message)
@@ -245,9 +245,9 @@ class QuestionReviewView(QuestionFormView):
             second_answer_choice=self.second_answer_choice,
             switch=self.first_answer_choice != self.second_answer_choice,
             rationale_algorithm=dict(
-                name=self.choose_rationales.__name__,
+                name=self.question.rationale_selection_algorithm,
                 version=self.choose_rationales.version,
-                description=inspect.getdoc(self.choose_rationales),
+                description=unicode(self.choose_rationales.description),
             ),
             rationales=[
                 {'id': id, 'text': rationale}

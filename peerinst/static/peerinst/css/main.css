@@ -2,6 +2,9 @@ body {
     color: #3C3C3C;
     font: 1em/1.6em "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
 }
+p {
+    margin: 0.25em 0;
+}
 img {
     max-width: 100%;
     height: auto;
@@ -10,7 +13,6 @@ dt  {
     clear:left;
     float:left;
 }
-
 dd {
     clear:right;
 }

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """Selection algorithms for rationales shown during question review.
 
-Each algorithm is a callable taking three arguments:
+Each algorithm is a callable taking these arguments:
 
-  rand_seed: A hashable object used to seed the random number generator.  Makes sure the same user
-      gets consistent choices when reloading the page.
+  rng: The random number generator to use.
 
   first_answer_choice: The first choice of the student.
 
@@ -15,13 +14,21 @@ Each algorithm is a callable taking three arguments:
 The callable must return a list of tuples (choice_index, choice_label, rationales), where
 rationales is a list of pairs (rationale_id, rationale_text).
 
-The callable must have an attribute 'version' with a version string for the algorithm.
+The callable must have the following attributes:
+
+  version: A version string for the algorithm.
+
+  verbose_name: A human-readable short name for use in the admin interface.
+
+  description: A long description explaining how the algorithm chooses rationales.
+
+To make an algorithm available to users, make sure to add it to the "algorithms" dictionary
+at the end of this file.
 """
 from __future__ import unicode_literals
 
-import random
+from django.db.models import Count, Max
 from django.utils.translation import ugettext_lazy as _
-from . import models
 
 
 class RationaleSelectionError(Exception):
@@ -31,19 +38,11 @@ class RationaleSelectionError(Exception):
     """
 
 
-def simple(rand_seed, first_answer_choice, unused_entered_rationale, question):
-    """Select the rationales to show to the user based on their answer choice.
-
-    The two answer choices presented will include the answer the user chose.  If the user's answer
-    wasn't correct, the second choice will be a correct answer.  If the user's answer wasn't
-    correct, the second choice presented will be weighted by the number of available rationales,
-    i.e. an answer that has only a few rationales available will have a low chance of being shown
-    to the user.  Up to four rationales are presented to the user for each choice, if available.
-    In addition, the user can choose to stick with their own rationale.
-    """
-    # Make the choice of rationales deterministic, so people can't see all rationales by
-    # repeatedly reloading the page.
-    rng = random.Random(rand_seed)
+def _base_selection_algorithm(
+        rng, first_answer_choice, unused_entered_rationale, question, selection_callback
+    ):
+    """Select the rationales at random."""
+    from . import models  # Local import to avoid circular dependency
     first_choice = first_answer_choice
     answer_choices = question.answerchoice_set.all()
     # Find all public rationales for this question.
@@ -73,11 +72,91 @@ def simple(rand_seed, first_answer_choice, unused_entered_rationale, question):
         # Get all rationales for the current choice.
         rationales = all_rationales.filter(first_answer_choice=choice)
         # Select up to four rationales for each choice, if available.
-        rationales = rng.sample(rationales, min(4, rationales.count()))
+        rationales = selection_callback(rng, rationales)
         rationales = [(r.id, r.rationale) for r in rationales]
         chosen_choices.append((choice, label, rationales))
     # Include the rationale the student entered in the choices.
     chosen_choices[0][2].append((None, _('I stick with my own rationale.')))
     return chosen_choices
 
+
+def simple(rng, first_answer_choice, entered_rationale, question):
+
+    def callback(rng, rationales):
+        return rng.sample(rationales, min(4, rationales.count()))
+
+    return _base_selection_algorithm(
+        rng, first_answer_choice, entered_rationale, question, callback
+    )
+
 simple.version = "v1.1"
+simple.verbose_name = _("Simple random rationale selection")
+simple.description = _(
+    """The two answer choices presented will include the answer the user chose.  If the user's
+    answer wasn't correct, the second choice will be a correct answer.  If the user's answer was
+    correct, the second choice presented will be weighted by the number of available rationales,
+    i.e. an answer that has only a few rationales available will have a low chance of being shown
+    to the user.  Up to four rationales are presented to the user for each choice, if available.
+    In addition, the user can choose to stick with their own rationale.
+    """
+)
+
+
+def prefer_expert_and_highly_voted(rng, first_answer_choice, entered_rationale, question):
+
+    def callback(rng, rationales):
+        chosen = []
+
+        # Add an expert rationale if one exists.
+        expert_rationales = rationales.filter(expert=True)
+        if expert_rationales:
+            chosen.append(rng.choice(expert_rationales))
+            rationales = rationales.exclude(pk=chosen[-1].pk)
+
+        # Add a highly voted rationale if one exists.
+        rationales_with_votes = rationales.annotate(votes=Count('answer'))
+        max_votes = rationales_with_votes.aggregate(Max('votes'))['votes__max']
+        highly_voted_rationales = rationales_with_votes.filter(votes__gt=max_votes // 2)
+        if highly_voted_rationales:
+            chosen.append(rng.choice(highly_voted_rationales))
+            rationales = rationales.exclude(pk=chosen[-1].pk)
+
+        # Fill up with random other rationales
+        chosen.extend(rng.sample(rationales, min(4 - len(chosen), rationales.count())))
+        rng.shuffle(chosen)
+        return chosen
+
+    return _base_selection_algorithm(
+        rng, first_answer_choice, entered_rationale, question, callback
+    )
+
+prefer_expert_and_highly_voted.version = "v1.0"
+prefer_expert_and_highly_voted.verbose_name = _("Prefer expert and highly votes rationales")
+prefer_expert_and_highly_voted.description = _(
+    """The two answer choices presented will include the answer the user chose.  If the user's
+    answer wasn't correct, the second choice will be a correct answer.  If the user's answer was
+    correct, the second choice presented will be weighted by the number of available rationales,
+    i.e. an answer that has only a few rationales available will have a low chance of being shown
+    to the user.  Up to four rationales are presented to the user for each choice, if available.
+    In addition, the user can choose to stick with their own rationale.
+
+    The four rationales will include at least one "expert" rationale, if available, and at least
+    one rationale with more than half the maximum number of votes, if available.
+    """
+)
+
+
+# The dictionary of all algorithms users can choose from.
+algorithms = {
+    'simple': simple,
+    'prefer_expert_and_highly_voted': prefer_expert_and_highly_voted,
+}
+
+
+def algorithm_choices():
+    """Return a list of algorithms to choose from in the user interface.
+
+    The choices are in a format suitable to be used as the "choices" parameter of a model
+    field, i.e. pairs of the form (value, human-readable value).
+    """
+    return [(name, fn.verbose_name) for name, fn in algorithms.viewitems()]

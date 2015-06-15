@@ -76,9 +76,12 @@ class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['title', 'text', 'category', 'id']}),
         (_('Question image or video'), {'fields': ['image', 'image_alt_text', 'video_url']}),
-        (None, {'fields': ['answer_style']}),
+        (None, {'fields': ['answer_style', 'rationale_selection_algorithm']}),
     ]
-    radio_fields = {'answer_style': admin.HORIZONTAL}
+    radio_fields = {
+        'answer_style': admin.HORIZONTAL,
+        'rationale_selection_algorithm': admin.HORIZONTAL,
+    }
     readonly_fields = ['id']
     inlines = [AnswerChoiceInline, AnswerInline]
     list_display = ['title', 'category']
@@ -101,7 +104,7 @@ publish_answers.short_description = _('Show selected answers to students')
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ['first_answer_choice_label', 'rationale', 'show_to_others']
+    list_display = ['first_answer_choice_label', 'rationale', 'show_to_others', 'expert']
     list_display_links = None
-    list_editable = ['show_to_others']
+    list_editable = ['show_to_others', 'expert']
     actions = [publish_answers]
