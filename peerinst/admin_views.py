@@ -9,12 +9,13 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import F
+from django import forms
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
-from . import forms
+from .forms import FirstAnswerForm
 from . import models
 
 
@@ -160,9 +161,14 @@ class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
         )
         return context
 
+
+class QuestionPreviewForm(FirstAnswerForm):
+    expert = forms.BooleanField(label=_('Expert answer'), initial=True, required=False)
+
+
 class QuestionPreviewView(StaffMemberRequiredMixin, FormView):
     template_name = 'admin/peerinst/question_preview.html'
-    form_class = forms.FirstAnswerForm
+    form_class = QuestionPreviewForm
 
     def get_form_kwargs(self):
         self.question = get_object_or_404(models.Question, pk=self.kwargs['question_id'])
@@ -182,6 +188,7 @@ class QuestionPreviewView(StaffMemberRequiredMixin, FormView):
             first_answer_choice=int(form.cleaned_data['first_answer_choice']),
             rationale=form.cleaned_data['rationale'],
             show_to_others=True,
+            expert=form.cleaned_data['expert'],
         )
         answer.save()
         messages.add_message(self.request, messages.INFO, _('Example answer saved.'))

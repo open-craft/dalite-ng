@@ -2,6 +2,9 @@ body {
     color: #3C3C3C;
     font: 1em/1.6em "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
 }
+p {
+    margin: 0.25em 0;
+}
 img {
     max-width: 100%;
     height: auto;
@@ -10,7 +13,6 @@ dt  {
     clear:left;
     float:left;
 }
-
 dd {
     clear:right;
 }
@@ -94,14 +96,15 @@ input[type='text']:focus, .form-field:focus {
     display: table-row;
 }
 .rationale-choice {
+    white-space: nowrap;
     /* Keeps things looking sane if there are no example rationales. */
     padding-bottom: 1em;
 }
 .rationale-choice, .rationale-text-container{
     display: table-cell;
 }
-.rationale-choice {
-    white-space: nowrap;
+.rationale-choice input {
+    display: none;
 }
 
 .errorlist, ul li.error {

@@ -31,7 +31,7 @@
     {% if form %}
     <form action="" method="post">
       {% csrf_token %}
-      {% block inner_form %}{{ form }}{% endblock %}
+      {% block inner_form %}{{ form.as_p }}{% endblock %}
       <div>
         <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
       </div>

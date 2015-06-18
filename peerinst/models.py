@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
+from . import rationale_choice
 
 
 def no_hyphens(value):
@@ -89,6 +90,13 @@ class Question(models.Model):
         )
     )
     category = models.ForeignKey(Category, blank=True, null=True)
+    rationale_selection_algorithm = models.CharField(
+        _('Rationale selection algorithm'), choices=rationale_choice.algorithm_choices(),
+        default='prefer_expert_and_highly_voted', max_length=100, help_text=_(
+            'The algorithm to use for choosing the rationales presented to students during '
+            'question review.'
+        )
+    )
 
     def __unicode__(self):
         if self.category:
@@ -185,6 +193,10 @@ class Answer(models.Model):
     chosen_rationale = models.ForeignKey('self', blank=True, null=True)
     user_token = models.CharField(max_length=100, blank=True)
     show_to_others = models.BooleanField(_('Show to others?'), default=True)
+    expert = models.BooleanField(
+        _('Expert rationale?'), default=False,
+        help_text=_('Whether this answer is a pre-seeded expert rationale.')
+    )
 
     def first_answer_choice_label(self):
         return self.question.get_choice_label(self.first_answer_choice)
