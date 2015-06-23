@@ -30,6 +30,7 @@ Setting up the development server
 
 4. Create the database tables and the superuser.
 
+        $ ./manage.py migrate auth # Needed to allow other migrations to reference `auth_user.id`
         $ ./manage.py migrate
         $ ./manage.py createsuperuser
 
