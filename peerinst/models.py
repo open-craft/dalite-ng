@@ -135,7 +135,9 @@ class Question(models.Model):
 
         This method does not check whether index is out of bounds.
         """
-        if self.answer_style == Question.ALPHA:
+        if index is None:
+            return None
+        elif self.answer_style == Question.ALPHA:
             return string.ascii_uppercase[index - 1]
         elif self.answer_style == Question.NUMERIC:
             return index
