@@ -1,5 +1,5 @@
-django==1.8.2
-django-grappelli==2.6.4
+django>=1.8.4,<1.9
+django-grappelli>=2.7.1,<2.8
 mysql-python
 pillow
 
