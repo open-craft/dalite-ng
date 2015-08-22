@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 import json
 import logging
 import math
 import random
-import time
+import re
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -17,9 +18,12 @@ from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
+from opaque_keys.edx.keys import CourseKey
 from . import forms
 from . import models
 from . import rationale_choice
+
+LOGGER = logging.getLogger(__name__)
 
 
 class LoginRequiredMixin(object):
@@ -73,6 +77,13 @@ class QuestionMixin(LoginRequiredMixin):
             if self.request.resolver_match.url_name != 'question-summary':
                 # We already have an answer for this student, so we show the summary.
                 return redirect(self.get_redirect_url('question-summary'))
+        self.lti_custom_key = unicode(self.assignment.pk) + u':' + unicode(self.question.pk)
+        try:
+            self.lti_data = LtiUserData.objects.get(
+                user=self.request.user, custom_key=self.lti_custom_key
+            )
+        except LtiUserData.DoesNotExist:
+            self.lti_data = None
         try:
             return super(QuestionMixin, self).dispatch(request, *args, **kwargs)
         except QuestionRedirect as e:
@@ -92,32 +103,62 @@ class QuestionMixin(LoginRequiredMixin):
         )
         return context
 
-    def submission_error(self):
-        messages.error(self.request, format_html(
-            '<h3 class="messages-title">{}</h3>{}',
-            _("There was a problem with your submission"),
-            _('Check the form below.')))
-
 
 class QuestionFormView(QuestionMixin, FormView):
     """Base class for the views in the student UI."""
 
-    def log(self, **data):
-        """Log a record in JSON format.
-
-        The passed in data is supplemented by some standard entries that are available for every
-        request.
+    def emit_event(self, name, **data):
+        """Log an event in a JSON format similar to the edx-platform tracking logs.
         """
+        if not self.lti_data:
+            # Only log when running within an LTI context.
+            return
+
+        # Extract information from LTI parameters.
+        course_id = self.lti_data.edx_lti_parameters.get('context_id')
+        course_key = CourseKey.from_string(course_id)
+        grade_handler_re = re.compile(
+            'https?://[^/]+/courses/{course_id}/xblock/(?P<usage_key>[^/]+)/'.format(
+                course_id=re.escape(course_id)
+            )
+        )
+        usage_key = grade_handler_re.match(
+            self.lti_data.edx_lti_parameters.get('lis_outcome_service_url')
+        )
+        if usage_key:
+            usage_key = usage_key.group('usage_key')
+
+        # Add common fields to event data
         data.update(
-            timestamp=math.trunc(time.time()),
-            user=self.user_token,
-            http_method=self.request.method,
             assignment_id=self.assignment.pk,
             assignment_title=self.assignment.title,
             question_id=self.question.pk,
             question_text=self.question.text,
         )
-        logging.getLogger(__name__).info(json.dumps(data))
+
+        # Build event dictionary.
+        event = dict(
+            accept_language=self.request.META.get('HTTP_ACCEPT_LANGUAGE'),
+            agent=self.request.META.get('HTTP_USER_AGENT'),
+            context=dict(
+                course_id=course_id,
+                module=dict(
+                    usage_key=usage_key,
+                ),
+                org_id=course_key.org,
+            ),
+            event=data,
+            event_source='server',
+            event_type=name,
+            host=self.request.META['SERVER_NAME'],
+            ip=self.request.META['REMOTE_ADDR'],
+            referer=self.request.META.get('HTTP_REFERER'),
+            time=datetime.datetime.now().isoformat(),
+            username=self.user_token,
+        )
+
+        # Write JSON to log file
+        LOGGER.info(json.dumps(event))
 
     def load_session_data(self):
         self._session_data = self.request.session.setdefault('answer_dict', {})
@@ -154,6 +195,12 @@ class QuestionFormView(QuestionMixin, FormView):
     def get_success_url(self):
         return self.get_redirect_url(self.success_url_name)
 
+    def submission_error(self):
+        messages.error(self.request, format_html(
+            '<h3 class="messages-title">{}</h3>{}',
+            _("There was a problem with your submission"),
+            _('Check the form below.')))
+
     def form_invalid(self, form):
         self.submission_error()
         return super(QuestionFormView, self).form_invalid(form)
@@ -185,15 +232,21 @@ class QuestionStartView(QuestionFormView):
         kwargs.update(answer_choices=self.answer_choices)
         if self.request.method == 'GET':
             # Log when the page is first shown, mainly for the timestamp.
-            self.log()
+            self.emit_event('problem_show')
         return kwargs
 
     def form_valid(self, form):
+        first_answer_choice = int(form.cleaned_data['first_answer_choice'])
+        correct = self.question.answerchoice_set.all()[first_answer_choice - 1].correct
         self.answer_dict = dict(
-            first_answer_choice=int(form.cleaned_data['first_answer_choice']),
+            first_answer_choice=first_answer_choice,
             rationale=form.cleaned_data['rationale'],
         )
-        self.log(**self.answer_dict)
+        self.emit_event(
+            'problem_check',
+            first_answer_correct=correct,
+            **self.answer_dict
+        )
         self.store_session_data()
         return super(QuestionStartView, self).form_valid(form)
 
@@ -241,7 +294,7 @@ class QuestionReviewView(QuestionFormView):
     def form_valid(self, form):
         self.second_answer_choice = int(form.cleaned_data['second_answer_choice'])
         self.chosen_rationale_id = _int_or_None(form.cleaned_data['chosen_rationale_id'])
-        self.log(
+        event_data = dict(
             second_answer_choice=self.second_answer_choice,
             switch=self.first_answer_choice != self.second_answer_choice,
             rationale_algorithm=dict(
@@ -257,6 +310,8 @@ class QuestionReviewView(QuestionFormView):
             ],
             chosen_rationale_id=self.chosen_rationale_id,
         )
+        self.emit_event('problem_check', **event_data)
+        self.emit_event('save_problem_success', **event_data)
         self.save_answer()
         self.send_grade()
         self.pop_session_data()
@@ -292,20 +347,17 @@ class QuestionReviewView(QuestionFormView):
         answer.save()
 
     def send_grade(self):
-        custom_key = unicode(self.assignment.pk) + u':' + unicode(self.question.pk)
-        try:
-            lti_data = LtiUserData.objects.get(user=self.request.user, custom_key=custom_key)
-        except LtiUserData.DoesNotExist:
+        if not self.lti_data:
             # We are running outside of an LTI context, so we don't need to send a grade.
             return
-        if not lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
+        if not self.lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
             # edX didn't provide a callback URL for grading, so this is an unscored problem.
             return
         correct = self.question.answerchoice_set.all()[self.second_answer_choice - 1].correct
         Signals.Grade.updated.send(
             __name__,
             user=self.request.user,
-            custom_key=custom_key,
+            custom_key=self.lti_custom_key,
             grade=float(correct),
         )
 
