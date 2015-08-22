@@ -30,10 +30,21 @@ Setting up the development server
 
 4. Create the database tables and the superuser.
 
-        $ ./manage.py migrate auth # Needed to allow other migrations to reference `auth_user.id`
         $ ./manage.py migrate
         $ ./manage.py createsuperuser
 
 5. Run the Django development server.
 
         $ ./manage.py runserver
+
+Running the tests
+-----------------
+
+The tests can be run with
+
+    $ pip install -r test-requirements.txt
+    $ coverage run --source=. manage.py test
+
+The coverage report can be shown as usual:
+
+    $ coverage report -m
