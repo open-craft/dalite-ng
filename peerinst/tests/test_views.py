@@ -31,6 +31,9 @@ class QuestionViewTestCase(TestCase):
         )
         self.assignment.questions.add(self.question)
         self.user = factories.UserFactory()
+        self.question_url = reverse(
+            'question', kwargs=dict(assignment_id=self.assignment.pk, question_id=self.question.pk)
+        )
 
     def log_in_with_lti(self, user=None, password=None, lti_params=None):
         """Log a user in with fake LTI data."""
@@ -44,11 +47,6 @@ class QuestionViewTestCase(TestCase):
         lti_params['custom_question_id'] = unicode(self.question.pk)
         LtiUserData.store_lti_parameters(user, LTIView.authentication_manager, lti_params)
         self.client.login(username=user.username, password=password or 'test')
-
-    def get_url(self, name):
-        return reverse(
-            name, kwargs=dict(assignment_id=self.assignment.pk, question_id=self.question.pk)
-        )
 
 
 class EventLogTest(QuestionViewTestCase):
@@ -70,7 +68,7 @@ class EventLogTest(QuestionViewTestCase):
         self.log_in_with_lti()
 
         # Show the question and verify the logged event.
-        response = self.client.get(self.get_url('question-start'))
+        response = self.client.get(self.question_url)
         self.assertEqual(response.status_code, 200)
         event = self.verify_event(logger)
         self.assertEqual(event['event_type'], 'problem_show')
@@ -81,7 +79,7 @@ class EventLogTest(QuestionViewTestCase):
             first_answer_choice=2,
             rationale='my rationale text',
         )
-        response = self.client.post(self.get_url('question-start'), form_data, follow=True)
+        response = self.client.post(self.question_url, form_data, follow=True)
         self.assertEqual(response.status_code, 200)
         event = self.verify_event(logger)
         self.assertEqual(event['event_type'], 'problem_check')
@@ -95,7 +93,7 @@ class EventLogTest(QuestionViewTestCase):
             second_answer_choice=2,
             rationale_choice_0=None,
         )
-        response = self.client.post(self.get_url('question-review'), form_data, follow=True)
+        response = self.client.post(self.question_url, form_data, follow=True)
         self.assertEqual(response.status_code, 200)
         event = self.verify_event(logger)
         self.assertEqual(logger.info.call_count, 2)
