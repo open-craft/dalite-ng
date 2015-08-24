@@ -37,7 +37,7 @@ class QuestionViewTestCase(TestCase):
         if user is None:
             user = self.user
         if lti_params is None:
-            lti_params = self.LTI_PARAMS
+            lti_params = self.LTI_PARAMS.copy()
         lti_params['lis_person_sourcedid'] = user.username
         lti_params['lis_person_contact_email_primary'] = user.email
         lti_params['custom_assignment_id'] = unicode(self.assignment.pk)
