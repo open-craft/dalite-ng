@@ -135,6 +135,6 @@ li.first-choice{
 li.second-choice{
     font-style: italic;
 }
-#rationales-1 {
+.rationale:not(:first-child) {
     border-top: 1px solid lightgray;
 }
