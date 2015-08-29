@@ -1,5 +1,6 @@
 *.py[cdo]
 .coverage
+.*requirements-timestamp
 /dalite/local_settings.py
 /log
 /media
