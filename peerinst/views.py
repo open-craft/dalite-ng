@@ -206,8 +206,27 @@ class QuestionReviewBaseView(QuestionFormView):
             )
         except rationale_choice.RationaleSelectionError as e:
             self.start_over(e.message)
-        else:
-            self.stage_data.update(rationale_choices=self.rationale_choices)
+        if self.question.fake_attributions:
+            self.add_fake_attributions(rng)
+        self.stage_data.update(rationale_choices=self.rationale_choices)
+
+    def add_fake_attributions(self, rng):
+        usernames = models.FakeUsername.objects.values_list('name', flat=True)
+        countries = models.FakeCountry.objects.values_list('name', flat=True)
+        fake_attributions = {}
+        for choice, label, rationales in self.rationale_choices:
+            attributed_rationales = []
+            for id, text in rationales:
+                if id is None:
+                    # This is the "I stick with my own rationale" option.  Don't add a fake
+                    # attribution, it might blow our cover.
+                    attributed_rationales.append((id, text))
+                    continue
+                attribution = rng.choice(usernames), rng.choice(countries)
+                fake_attributions[id] = attribution
+                attributed_rationales.append((id, '"{}" ({}, {})'.format(text, *attribution)))
+            rationales[:] = attributed_rationales
+        self.stage_data.update(fake_attributions=fake_attributions)
 
     def get_form_kwargs(self):
         kwargs = super(QuestionReviewBaseView, self).get_form_kwargs()

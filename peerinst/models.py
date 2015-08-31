@@ -90,6 +90,13 @@ class Question(models.Model):
         )
     )
     category = models.ForeignKey(Category, blank=True, null=True)
+    fake_attributions = models.BooleanField(
+        _('Add fake attributions'), default=False, help_text=_(
+            'Add random fake attributions consisting of username and country to rationales.  You '
+            'can configure the lists of fake values and countries from the start page of the '
+            'admin interface.'
+        )
+    )
     sequential_review = models.BooleanField(
         _('Sequential rationale review'), default=False, help_text=_(
             'Show rationales sequentially and allow to vote on them before the final review.'

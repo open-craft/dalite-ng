@@ -76,7 +76,10 @@ class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['title', 'text', 'category', 'id']}),
         (_('Question image or video'), {'fields': ['image', 'image_alt_text', 'video_url']}),
-        (None, {'fields': ['answer_style', 'sequential_review', 'rationale_selection_algorithm']}),
+        (None, {'fields': [
+            'answer_style', 'fake_attributions', 'sequential_review',
+            'rationale_selection_algorithm'
+        ]}),
     ]
     radio_fields = {
         'answer_style': admin.HORIZONTAL,
