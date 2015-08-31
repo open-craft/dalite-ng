@@ -29,6 +29,7 @@
     {% endif %}
     {% block answers %}{% endblock %}
     {% if form %}
+    {% block form %}
     <form action="" method="post">
       {% csrf_token %}
       {% block inner_form %}{{ form.as_p }}{% endblock %}
@@ -36,6 +37,7 @@
         <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
       </div>
     </form>
+    {% endblock %}
     {% endif %}
   </div>
 </div>

@@ -22,7 +22,8 @@ from opaque_keys.edx.keys import CourseKey
 from . import forms
 from . import models
 from . import rationale_choice
-from .util import SessionStageData, get_object_or_none, int_or_none
+from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -174,7 +175,7 @@ class QuestionStartView(QuestionFormView):
         self.stage_data.update(
             first_answer_choice=first_answer_choice,
             rationale=rationale,
-            next_stage='review',
+            completed_stage='start',
         )
         self.emit_event(
             'problem_check',
@@ -185,21 +186,19 @@ class QuestionStartView(QuestionFormView):
         return super(QuestionStartView, self).form_valid(form)
 
 
-class QuestionReviewView(QuestionFormView):
-    """Show rationales from other users and give the opportunity to reconsider the first answer."""
+class QuestionReviewBaseView(QuestionFormView):
+    """Common base class for sequential and non-sequential review types."""
 
-    template_name = 'peerinst/question_review.html'
-    form_class = forms.ReviewAnswerForm
-
-    def get_form_kwargs(self):
-        kwargs = super(QuestionReviewView, self).get_form_kwargs()
-        self.first_answer_choice = self.stage_data.get('first_answer_choice')
-        self.rationale = self.stage_data.get('rationale')
-        self.choose_rationales = rationale_choice.algorithms[
-            self.question.rationale_selection_algorithm
-        ]
+    def determine_rationale_choices(self):
+        if not hasattr(self, 'choose_rationales'):
+            self.choose_rationales = rationale_choice.algorithms[
+                self.question.rationale_selection_algorithm
+            ]
+        self.rationale_choices = self.stage_data.get('rationale_choices')
+        if self.rationale_choices is not None:
+            return
         # Make the choice of rationales deterministic, so rationales won't change when reloading
-        # the page.
+        # the page after clearing the session.
         rng = random.Random((self.user_token, self.assignment.pk, self.question.pk))
         try:
             self.rationale_choices = self.choose_rationales(
@@ -207,24 +206,98 @@ class QuestionReviewView(QuestionFormView):
             )
         except rationale_choice.RationaleSelectionError as e:
             self.start_over(e.message)
-        kwargs.update(rationale_choices=self.rationale_choices)
+        else:
+            self.stage_data.update(rationale_choices=self.rationale_choices)
+
+    def get_form_kwargs(self):
+        kwargs = super(QuestionReviewBaseView, self).get_form_kwargs()
+        self.first_answer_choice = self.stage_data.get('first_answer_choice')
+        self.rationale = self.stage_data.get('rationale')
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(QuestionReviewView, self).get_context_data(**kwargs)
+        context = super(QuestionReviewBaseView, self).get_context_data(**kwargs)
         context.update(
             first_choice_label=self.question.get_choice_label(self.first_answer_choice),
             rationale=self.rationale,
+            sequential_review=self.stage_data.get('completed_stage') == 'sequential-review',
         )
         return context
+
+
+class QuestionSequentialReviewView(QuestionReviewBaseView):
+
+    template_name = 'peerinst/question_sequential_review.html'
+    form_class = forms.SequentialReviewForm
+
+    def select_next_rationale(self):
+        rationale_sequence = self.stage_data.get('rationale_sequence')
+        if rationale_sequence:
+            # We already have selected the rationales – just take the next one.
+            self.current_rationale = rationale_sequence[self.stage_data.get('rationale_index')]
+            return
+        self.choose_rationales = rationale_choice.simple_sequential
+        self.determine_rationale_choices()
+        # Select alternating rationales from the lists of rationales for the different answer
+        # choices.  Skip the "I stick with my own rationale" option marked by id == None.
+        rationale_sequence = list(roundrobin(
+            [(id, label, rationale) for id, rationale in rationales if id is not None]
+            for choice, label, rationales in self.rationale_choices
+        ))
+        self.current_rationale = rationale_sequence[0]
+        self.stage_data.update(
+            rationale_sequence=rationale_sequence,
+            rationale_votes={},
+            rationale_index=0,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionSequentialReviewView, self).get_context_data(**kwargs)
+        self.select_next_rationale()
+        context.update(
+            current_rationale=self.current_rationale,
+        )
+        return context
+
+    def form_valid(self, form):
+        rationale_sequence = self.stage_data.get('rationale_sequence')
+        rationale_votes = self.stage_data.get('rationale_votes')
+        rationale_index = self.stage_data.get('rationale_index')
+        current_rationale = rationale_sequence[rationale_index]
+        rationale_votes[current_rationale[0]] = form.cleaned_data['vote']
+        rationale_index += 1
+        self.stage_data.update(
+            rationale_index=rationale_index,
+            rationale_votes=rationale_votes,
+        )
+        if rationale_index == len(rationale_sequence):
+            # We've shown all rationales – mark the stage as finished.
+            self.stage_data.update(completed_stage='sequential-review')
+        return super(QuestionSequentialReviewView, self).form_valid(form)
+
+
+class QuestionReviewView(QuestionReviewBaseView):
+    """The standard version of the review, showing all alternative rationales simultaneously."""
+
+    template_name = 'peerinst/question_review.html'
+    form_class = forms.ReviewAnswerForm
+
+    def get_form_kwargs(self):
+        kwargs = super(QuestionReviewView, self).get_form_kwargs()
+        self.determine_rationale_choices()
+        kwargs.update(
+            rationale_choices=self.rationale_choices,
+        )
+        return kwargs
 
     def form_valid(self, form):
         self.second_answer_choice = int(form.cleaned_data['second_answer_choice'])
         self.chosen_rationale_id = int_or_none(form.cleaned_data['chosen_rationale_id'])
         self.emit_check_events()
         self.save_answer()
+        self.save_votes()
+        self.stage_data.clear()
         self.send_grade()
-        self.stage_data.pop()
         return super(QuestionReviewView, self).form_valid(form)
 
     def emit_check_events(self):
@@ -275,6 +348,23 @@ class QuestionReviewView(QuestionFormView):
             user_token=self.user_token,
         )
         answer.save()
+
+    def save_votes(self):
+        rationale_votes = self.stage_data.get('rationale_votes')
+        if rationale_votes is None:
+            return
+        for rationale_id, vote in rationale_votes.iteritems():
+            try:
+                rationale = models.Answer.objects.get(id=rationale_id)
+            except models.Answer.DoesNotExist:
+                # This corner case can only happen if an answer was deleted while the student was
+                # answering the question.  Simply ignore these votes.
+                continue
+            if vote == 'up':
+                rationale.upvotes += 1
+            elif vote == 'down':
+                rationale.downvotes += 1
+            rationale.save()
 
     def send_grade(self):
         if not self.lti_data:
@@ -338,7 +428,12 @@ def question(request, assignment_id, question_id):
     # Determine stage and view class
     if view_data['answer'] is not None:
         stage_class = QuestionSummaryView
-    elif stage_data.get('next_stage') == 'review':
+    elif stage_data.get('completed_stage') == 'start':
+        if question.sequential_review:
+            stage_class = QuestionSequentialReviewView
+        else:
+            stage_class = QuestionReviewView
+    elif stage_data.get('completed_stage') == 'sequential-review':
         stage_class = QuestionReviewView
     else:
         stage_class = QuestionStartView
@@ -349,7 +444,7 @@ def question(request, assignment_id, question_id):
         result = stage.dispatch(request)
     except QuestionReload:
         # Something went wrong.  Discard all data and reload.
-        stage_data.pop()
+        stage_data.clear()
         return redirect(request.path)
     stage_data.store()
     return result

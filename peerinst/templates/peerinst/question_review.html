@@ -5,11 +5,17 @@
 {% block answers %}
 {{ block.super }}
 <p>
+  {% if sequential_review %}
+  {% blocktrans %}
+  Consider the problem again, and select the most convincing rationale.
+  {% endblocktrans %}
+  {% else %}
   {% blocktrans %}
   Consider the problem again, noting the rationales below that have been provided by other
   students.  They may, or may not, cause you to reconsider your answer.  Read them, and select your
   final answer.
   {% endblocktrans %}
+  {% endif %}
 </p>
 {% endblock %}
 

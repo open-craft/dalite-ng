@@ -90,11 +90,16 @@ class Question(models.Model):
         )
     )
     category = models.ForeignKey(Category, blank=True, null=True)
+    sequential_review = models.BooleanField(
+        _('Sequential rationale review'), default=False, help_text=_(
+            'Show rationales sequentially and allow to vote on them before the final review.'
+        )
+    )
     rationale_selection_algorithm = models.CharField(
         _('Rationale selection algorithm'), choices=rationale_choice.algorithm_choices(),
         default='prefer_expert_and_highly_voted', max_length=100, help_text=_(
             'The algorithm to use for choosing the rationales presented to students during '
-            'question review.'
+            'question review.  This option is ignored if you selected sequential review.'
         )
     )
 
@@ -199,6 +204,8 @@ class Answer(models.Model):
         _('Expert rationale?'), default=False,
         help_text=_('Whether this answer is a pre-seeded expert rationale.')
     )
+    upvotes = models.PositiveIntegerField(default=0)
+    downvotes = models.PositiveIntegerField(default=0)
 
     def first_answer_choice_label(self):
         return self.question.get_choice_label(self.first_answer_choice)

@@ -138,3 +138,7 @@ li.second-choice{
 .rationale:not(:first-child) {
     border-top: 1px solid lightgray;
 }
+input[type="submit"].thumbs-button {
+    font-size: 150%;
+    font-weight: normal;
+}

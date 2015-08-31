@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import itertools
+
 
 def get_object_or_none(model_class, *args, **kwargs):
     try:
@@ -13,6 +15,21 @@ def int_or_none(s):
     if s == 'None':
         return None
     return int(s)
+
+
+def roundrobin(iterables):
+    "roundrobin(['ABC', 'D', 'EF']) --> A D E B F C"
+    # Recipe taken from the itertools documentation.
+    iterables = list(iterables)
+    pending = len(iterables)
+    nexts = itertools.cycle(iter(it).next for it in iterables)
+    while pending:
+        try:
+            for next in nexts:
+                yield next()
+        except StopIteration:
+            pending -= 1
+            nexts = itertools.cycle(itertools.islice(nexts, pending))
 
 
 class SessionStageData(object):
@@ -48,7 +65,7 @@ class SessionStageData(object):
             return None
         return self.data.get(key, default)
 
-    def pop(self):
+    def clear(self):
         self.data = None
         self.data_dict.pop(self.custom_key, None)
         self.session.modified = True

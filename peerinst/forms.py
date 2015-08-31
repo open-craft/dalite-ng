@@ -55,3 +55,16 @@ class ReviewAnswerForm(forms.Form):
         chosen_rationale_id = next(value for value in rationale_choices if value)
         cleaned_data.update(chosen_rationale_id=chosen_rationale_id)
         return cleaned_data
+
+
+class SequentialReviewForm(forms.Form):
+    """Form to vote on a single rationale."""
+    def clean(self):
+        cleaned_data = forms.Form.clean(self)
+        if 'upvote' in self.data:
+            cleaned_data['vote'] = 'up'
+        elif 'downvote' in self.data:
+            cleaned_data['vote'] = 'down'
+        else:
+            raise forms.ValidationError(_('Please vote up or down.'))
+        return cleaned_data
