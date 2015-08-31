@@ -219,3 +219,17 @@ class Answer(models.Model):
 
     def __unicode__(self):
         return unicode(_('{} for question {}').format(self.id, self.question.title))
+
+
+class FakeUsername(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name = _('fake username')
+        verbose_name_plural = _('fake usernames')
+
+
+class FakeCountry(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name = _('fake country')
+        verbose_name_plural = _('fake countries')

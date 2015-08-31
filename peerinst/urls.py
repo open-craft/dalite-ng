@@ -21,5 +21,7 @@ urlpatterns = [
         ])),
         url(r'^question_preview/(?P<question_id>[^/]+)$',
             admin_views.QuestionPreviewView.as_view(), name='question-preview'),
+        url(r'^fake_usernames/$', admin_views.FakeUsernames.as_view(), name='fake-usernames'),
+        url(r'^fake_countries/$', admin_views.FakeCountries.as_view(), name='fake-countries'),
     ])),
 ]

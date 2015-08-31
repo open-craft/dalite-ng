@@ -13,3 +13,7 @@
     border: 0px;
     padding: 0.6ex;
 }
+
+.string-list textarea {
+    height: 500px;
+}

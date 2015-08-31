@@ -196,3 +196,66 @@ class QuestionPreviewView(StaffMemberRequiredMixin, FormView):
 
     def get_success_url(self):
         return reverse('question-preview', kwargs=dict(question_id=self.question.pk))
+
+
+class StringListForm(forms.Form):
+    """Simple form to allow entering a list of strings in a textarea widget."""
+
+    strings = forms.CharField(widget=forms.Textarea)
+
+    def __init__(self, initial, *args, **kwargs):
+        if 'strings' in initial:
+            initial['strings'] = '\n'.join(initial['strings'])
+        forms.Form.__init__(self, initial=initial, *args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super(StringListForm, self).clean()
+        strings = []
+        for s in cleaned_data['strings'].splitlines():
+            s = s.strip()
+            if s:
+                strings.append(s)
+        cleaned_data['strings'] = strings
+        return cleaned_data
+
+
+class StringListView(StaffMemberRequiredMixin, FormView):
+    template_name = 'admin/peerinst/string_list.html'
+    form_class = StringListForm
+    model_class = None   # to be set on subclasses
+
+    def get_form_kwargs(self):
+        kwargs = super(StringListView, self).get_form_kwargs()
+        self.initial_strings = self.model_class.objects.values_list('name', flat=True)
+        kwargs.update(initial={'strings': self.initial_strings})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super(StringListView, self).get_context_data(**kwargs)
+        context.update(model_name_plural=self.model_class._meta.verbose_name_plural)
+        return context
+
+    def form_valid(self, form):
+        new_strings = form.cleaned_data['strings']
+        already_added = set(self.initial_strings)
+        self.model_class.objects.filter(name__in=already_added - set(new_strings)).delete()
+        for new in new_strings:
+            if new in already_added:
+                continue
+            self.model_class(name=new).save()
+            already_added.add(new)
+        messages.add_message(self.request, messages.INFO, _('List of {model_name} saved.').format(
+            model_name=self.model_class._meta.verbose_name_plural
+        ))
+        return super(StringListView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('admin-index')
+
+
+class FakeUsernames(StringListView):
+    model_class = models.FakeUsername
+
+
+class FakeCountries(StringListView):
+    model_class = models.FakeCountry
