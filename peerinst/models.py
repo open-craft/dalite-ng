@@ -240,3 +240,21 @@ class FakeCountry(models.Model):
     class Meta:
         verbose_name = _('fake country')
         verbose_name_plural = _('fake countries')
+
+
+class AnswerVote(models.Model):
+    """Vote on a rationale with attached fake attribution."""
+    answer = models.ForeignKey(Answer)
+    assignment = models.ForeignKey(Assignment)
+    user_token = models.CharField(max_length=100)
+    fake_username = models.CharField(max_length=100)
+    fake_country = models.CharField(max_length=100)
+    UPVOTE = 0
+    DOWNVOTE = 1
+    FINAL_CHOICE = 2
+    VOTE_TYPE_CHOICES = (
+        (UPVOTE, 'upvote'),
+        (DOWNVOTE, 'downvote'),
+        (FINAL_CHOICE, 'final_choice'),
+    )
+    vote_type = models.PositiveSmallIntegerField(_('Vote type'), choices=VOTE_TYPE_CHOICES)

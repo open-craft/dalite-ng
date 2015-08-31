@@ -356,6 +356,7 @@ class QuestionReviewView(QuestionReviewBaseView):
                     'This should not happen.  Please start over with the question.'
                 ))
         else:
+            # We stuck with our own rationale.
             chosen_rationale = None
         answer = models.Answer(
             question=self.question,
@@ -367,6 +368,8 @@ class QuestionReviewView(QuestionReviewBaseView):
             user_token=self.user_token,
         )
         answer.save()
+        if chosen_rationale is not None:
+            self.record_fake_attribution_vote(chosen_rationale, models.AnswerVote.FINAL_CHOICE)
 
     def save_votes(self):
         rationale_votes = self.stage_data.get('rationale_votes')
@@ -381,9 +384,25 @@ class QuestionReviewView(QuestionReviewBaseView):
                 continue
             if vote == 'up':
                 rationale.upvotes += 1
+                self.record_fake_attribution_vote(rationale, models.AnswerVote.UPVOTE)
             elif vote == 'down':
                 rationale.downvotes += 1
+                self.record_fake_attribution_vote(rationale, models.AnswerVote.DOWNVOTE)
             rationale.save()
+
+    def record_fake_attribution_vote(self, answer, vote_type):
+        fake_attributions = self.stage_data.get('fake_attributions')
+        if fake_attributions is None:
+            return
+        fake_username, fake_country = fake_attributions[unicode(answer.id)]
+        models.AnswerVote(
+            answer=answer,
+            assignment=self.assignment,
+            user_token=self.user_token,
+            fake_username=fake_username,
+            fake_country=fake_country,
+            vote_type=vote_type,
+        ).save()
 
     def send_grade(self):
         if not self.lti_data:
