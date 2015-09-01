@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<table class="attribution-stats-data">
+  <thead>
+    <tr>
+      <th>{% trans 'Name' %}</th>
+      <th>{% trans 'Total attributions' %}</th>
+      <th>{% trans 'Upvotes' %}</th>
+      <th>{% trans 'Percent' %}</th>
+      <th>{% trans 'Downvotes' %}</th>
+      <th>{% trans 'Percent' %}</th>
+      <th>{% trans 'Final choices' %}</th>
+      <th>{% trans 'Percent' %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in data %}
+    <tr class="grp-row-{% cycle 'odd' 'even' %}">
+      {% for item in row %}
+      <td>{{ item }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

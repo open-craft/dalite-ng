@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
 
 import itertools
+
+from django.utils.safestring import mark_safe
 
 
 def get_object_or_none(model_class, *args, **kwargs):
@@ -30,6 +32,16 @@ def roundrobin(iterables):
         except StopIteration:
             pending -= 1
             nexts = itertools.cycle(itertools.islice(nexts, pending))
+
+
+def make_percent_function(total):
+    if total:
+        def percent(enum):
+            return mark_safe('{:.1f}&nbsp;%'.format(100 * enum / total))
+    else:
+        def percent(enum):
+            return ''
+    return percent
 
 
 class SessionStageData(object):

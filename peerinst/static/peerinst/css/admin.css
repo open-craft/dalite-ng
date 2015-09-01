@@ -17,3 +17,7 @@
 .string-list textarea {
     height: 500px;
 }
+
+.attribution-stats-container {
+    margin-top: 2ex;
+}

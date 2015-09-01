@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import division, unicode_literals
+from __future__ import unicode_literals
 
 import collections
 import functools
@@ -11,12 +11,12 @@ from django.core.urlresolvers import reverse
 from django.db.models import F
 from django import forms
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from .forms import FirstAnswerForm
 from . import models
+from .util import make_percent_function
 
 
 class StaffMemberRequiredMixin(object):
@@ -91,12 +91,7 @@ class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
 
     def prepare_stats(self, sums, switch_columns):
         total_answers = sums['total_answers']
-        if total_answers:
-            def percent(enum):
-                return mark_safe('{:.1f}&nbsp;%'.format(100 * enum / total_answers))
-        else:
-            def percent(enum):
-                return ''
+        percent = make_percent_function(total_answers)
         results = [
             total_answers,
             sums['total_students'],
@@ -147,7 +142,7 @@ class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
             labels.append(_('To {index}').format(index=choice_index))
         labels.append(_('Show answers'))
         return dict(labels=labels, rows=rows)
-        
+
     def get_context_data(self, **kwargs):
         context = TemplateView.get_context_data(self, **kwargs)
         self.assignment_id = self.kwargs['assignment_id']
@@ -224,11 +219,9 @@ class StringListView(StaffMemberRequiredMixin, FormView):
     form_class = StringListForm
     model_class = None   # to be set on subclasses
 
-    def get_form_kwargs(self):
-        kwargs = super(StringListView, self).get_form_kwargs()
+    def get_initial(self):
         self.initial_strings = self.model_class.objects.values_list('name', flat=True)
-        kwargs.update(initial={'strings': self.initial_strings})
-        return kwargs
+        return {'strings': self.initial_strings}
 
     def get_context_data(self, **kwargs):
         context = super(StringListView, self).get_context_data(**kwargs)
@@ -259,3 +252,82 @@ class FakeUsernames(StringListView):
 
 class FakeCountries(StringListView):
     model_class = models.FakeCountry
+
+
+def aggregate_fake_attribution_data(votes_qs):
+
+    def update_aggregates(data, key, vote_type):
+        aggregates = data.get(key)
+        if aggregates is None:
+            aggregates = data[key] = {
+                'total': 0,
+                models.AnswerVote.UPVOTE: 0,
+                models.AnswerVote.DOWNVOTE: 0,
+                models.AnswerVote.FINAL_CHOICE: 0,
+            }
+        aggregates['total'] += 1
+        aggregates[vote_type] += 1
+
+    # We are using plain dictionaries instead of collections.defaultdict for perfromance reasons.
+    username_data = {}
+    country_data = {}
+    for answer_vote in votes_qs.iterator():
+        vote_type = answer_vote.vote_type
+        update_aggregates(username_data, answer_vote.fake_username, vote_type)
+        update_aggregates(country_data, answer_vote.fake_country, vote_type)
+    return username_data, country_data
+
+
+class AttributionAnalysisFilterForm(forms.Form):
+    assignment = forms.ModelChoiceField(
+        models.Assignment.objects.all(), empty_label=_('---all---'), required=False
+    )
+    question = forms.ModelChoiceField(
+        models.Question.objects.all(), empty_label=_('---all---'), required=False
+    )
+
+
+class AttributionAnalysis(TemplateView):
+    template_name = "admin/peerinst/attribution_analysis.html"
+
+    def get_aggregates(self, form_data):
+
+        def extract_columns(name, stats):
+            percent = make_percent_function(stats['total'])
+            return (
+                name,
+                stats['total'],
+                stats[models.AnswerVote.UPVOTE],
+                percent(stats[models.AnswerVote.UPVOTE]),
+                stats[models.AnswerVote.DOWNVOTE],
+                percent(stats[models.AnswerVote.DOWNVOTE]),
+                stats[models.AnswerVote.FINAL_CHOICE],
+                percent(stats[models.AnswerVote.FINAL_CHOICE]),
+            )
+
+        assignment = form_data['assignment']
+        question = form_data['question']
+        filters = {}
+        if assignment is not None:
+            filters['assignment'] = assignment
+        if question is not None:
+            filters['answer__question'] = question
+        votes_qs = models.AnswerVote.objects.filter(**filters)
+        username_data, country_data = aggregate_fake_attribution_data(votes_qs)
+        username_data_table = list(itertools.starmap(
+            extract_columns, sorted(username_data.iteritems())
+        ))
+        country_data_table = list(itertools.starmap(
+            extract_columns, sorted(country_data.iteritems())
+        ))
+        return username_data_table, country_data_table
+
+    def get_context_data(self, **kwargs):
+        context = TemplateView.get_context_data(self, **kwargs)
+        form = AttributionAnalysisFilterForm(data=self.request.GET)
+        if form.is_valid() and self.request.GET:
+            context['username_data'], context['country_data'] = self.get_aggregates(
+                form.cleaned_data.copy()
+            )
+        context.update(form=form)
+        return context

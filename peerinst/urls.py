@@ -23,5 +23,7 @@ urlpatterns = [
             admin_views.QuestionPreviewView.as_view(), name='question-preview'),
         url(r'^fake_usernames/$', admin_views.FakeUsernames.as_view(), name='fake-usernames'),
         url(r'^fake_countries/$', admin_views.FakeCountries.as_view(), name='fake-countries'),
+        url(r'^attribution_analysis/$', admin_views.AttributionAnalysis.as_view(),
+            name='attribution-analysis'),
     ])),
 ]
