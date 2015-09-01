@@ -142,3 +142,6 @@ input[type="submit"].thumbs-button {
     font-size: 150%;
     font-weight: normal;
 }
+.votable-rationale q {
+    font-style: italic;
+}

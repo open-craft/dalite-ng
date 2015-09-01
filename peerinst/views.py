@@ -11,7 +11,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.html import format_html
+from django.utils.html import escape, format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
@@ -196,6 +197,9 @@ class QuestionReviewBaseView(QuestionFormView):
             ]
         self.rationale_choices = self.stage_data.get('rationale_choices')
         if self.rationale_choices is not None:
+            # The rationales we stored in the session have already been HTML-escaped – mark them as
+            # safe to avoid double-escaping
+            self.mark_rationales_safe(escape_html=False)
             return
         # Make the choice of rationales deterministic, so rationales won't change when reloading
         # the page after clearing the session.
@@ -208,7 +212,17 @@ class QuestionReviewBaseView(QuestionFormView):
             self.start_over(e.message)
         if self.question.fake_attributions:
             self.add_fake_attributions(rng)
+        else:
+            self.mark_rationales_safe(escape_html=True)
         self.stage_data.update(rationale_choices=self.rationale_choices)
+
+    def mark_rationales_safe(self, escape_html):
+        if escape_html:
+            processor = escape
+        else:
+            processor = mark_safe
+        for choice, label, rationales in self.rationale_choices:
+            rationales[:] = [(id, processor(text)) for id, text in rationales]
 
     def add_fake_attributions(self, rng):
         usernames = models.FakeUsername.objects.values_list('name', flat=True)
@@ -224,7 +238,8 @@ class QuestionReviewBaseView(QuestionFormView):
                     continue
                 attribution = rng.choice(usernames), rng.choice(countries)
                 fake_attributions[id] = attribution
-                attributed_rationales.append((id, '"{}" ({}, {})'.format(text, *attribution)))
+                formatted_rationale = format_html('<q>{}</q> ({}, {})', text, *attribution)
+                attributed_rationales.append((id, formatted_rationale))
             rationales[:] = attributed_rationales
         self.stage_data.update(fake_attributions=fake_attributions)
 
@@ -254,6 +269,7 @@ class QuestionSequentialReviewView(QuestionReviewBaseView):
         if rationale_sequence:
             # We already have selected the rationales – just take the next one.
             self.current_rationale = rationale_sequence[self.stage_data.get('rationale_index')]
+            self.current_rationale[2] = mark_safe(self.current_rationale[2])
             return
         self.choose_rationales = rationale_choice.simple_sequential
         self.determine_rationale_choices()
