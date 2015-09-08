@@ -227,6 +227,11 @@ class QuestionReviewBaseView(QuestionFormView):
     def add_fake_attributions(self, rng):
         usernames = models.FakeUsername.objects.values_list('name', flat=True)
         countries = models.FakeCountry.objects.values_list('name', flat=True)
+        if not usernames or not countries:
+            # No usernames or no countries were supplied, so we silently refrain from adding fake
+            # attributions.  We need to ensure, though, that the rationales get properly escaped.
+            self.mark_rationales_safe(escape_html=True)
+            return
         fake_attributions = {}
         for choice, label, rationales in self.rationale_choices:
             attributed_rationales = []
