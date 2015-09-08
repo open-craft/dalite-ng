@@ -47,3 +47,11 @@ The tests can be run with
 After the tests have finished, you can view the coverage report using:
 
     $ make coverage-report
+
+Attributions
+------------
+
+The thumbs up and down icons were taken from the [Entypo pictograms by Daniel
+Bruce][entypo].
+
+[entypo]: http://www.entypo.com/

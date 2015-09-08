@@ -139,8 +139,18 @@ li.second-choice{
     border-top: 1px solid lightgray;
 }
 input[type="submit"].thumbs-button {
-    font-size: 150%;
-    font-weight: normal;
+    font-size: 0;  /* Make text invisible */
+    width: 80px;
+    height: 40px;
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+input[type="submit"].thumbs-up {
+    background-image: url("/static/peerinst/img/thumbs-up.svg");
+}
+input[type="submit"].thumbs-down {
+    background-image: url("/static/peerinst/img/thumbs-down.svg");
 }
 .votable-rationale q {
     font-style: italic;
