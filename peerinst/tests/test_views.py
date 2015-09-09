@@ -214,7 +214,7 @@ class EventLogTest(QuestionViewTestCase):
         event = self.verify_event(logger)
         self.assertEqual(event['event_type'], 'problem_check')
         self.assertEqual(event['event']['first_answer_choice'], 2)
-        self.assertTrue(event['event']['first_answer_correct'])
+        self.assertEqual(event['event']['success'], 'correct')
         self.assertEqual(event['event']['rationale'], 'my rationale text')
         logger.reset_mock()
 
@@ -223,3 +223,5 @@ class EventLogTest(QuestionViewTestCase):
         event = self.verify_event(logger)
         self.assertEqual(logger.info.call_count, 2)
         self.assertEqual(event['event_type'], 'save_problem_success')
+        self.assertEqual(event['event']['success'], 'correct')
+        self.assertEqual(event['event']['grade'], 1.0)

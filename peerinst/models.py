@@ -162,6 +162,9 @@ class Question(models.Model):
             for label, choice in zip(self.get_choice_label_iter(), self.answerchoice_set.all())
         ]
 
+    def is_correct(self, index):
+        return self.answerchoice_set.all()[index - 1].correct
+
     class Meta:
         verbose_name = _('question')
         verbose_name_plural = _('questions')
