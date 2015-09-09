@@ -42,9 +42,16 @@ Running the tests
 
 The tests can be run with
 
-    $ pip install -r test-requirements.txt
-    $ coverage run --source=. manage.py test
+    $ make test
 
-The coverage report can be shown as usual:
+After the tests have finished, you can view the coverage report using:
 
-    $ coverage report -m
+    $ make coverage-report
+
+Attributions
+------------
+
+The thumbs up and down icons were taken from the [Entypo pictograms by Daniel
+Bruce][entypo].
+
+[entypo]: http://www.entypo.com/

@@ -90,11 +90,23 @@ class Question(models.Model):
         )
     )
     category = models.ForeignKey(Category, blank=True, null=True)
+    fake_attributions = models.BooleanField(
+        _('Add fake attributions'), default=False, help_text=_(
+            'Add random fake attributions consisting of username and country to rationales.  You '
+            'can configure the lists of fake values and countries from the start page of the '
+            'admin interface.'
+        )
+    )
+    sequential_review = models.BooleanField(
+        _('Sequential rationale review'), default=False, help_text=_(
+            'Show rationales sequentially and allow to vote on them before the final review.'
+        )
+    )
     rationale_selection_algorithm = models.CharField(
         _('Rationale selection algorithm'), choices=rationale_choice.algorithm_choices(),
         default='prefer_expert_and_highly_voted', max_length=100, help_text=_(
             'The algorithm to use for choosing the rationales presented to students during '
-            'question review.'
+            'question review.  This option is ignored if you selected sequential review.'
         )
     )
 
@@ -199,6 +211,8 @@ class Answer(models.Model):
         _('Expert rationale?'), default=False,
         help_text=_('Whether this answer is a pre-seeded expert rationale.')
     )
+    upvotes = models.PositiveIntegerField(default=0)
+    downvotes = models.PositiveIntegerField(default=0)
 
     def first_answer_choice_label(self):
         return self.question.get_choice_label(self.first_answer_choice)
@@ -212,3 +226,35 @@ class Answer(models.Model):
 
     def __unicode__(self):
         return unicode(_('{} for question {}').format(self.id, self.question.title))
+
+
+class FakeUsername(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name = _('fake username')
+        verbose_name_plural = _('fake usernames')
+
+
+class FakeCountry(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name = _('fake country')
+        verbose_name_plural = _('fake countries')
+
+
+class AnswerVote(models.Model):
+    """Vote on a rationale with attached fake attribution."""
+    answer = models.ForeignKey(Answer)
+    assignment = models.ForeignKey(Assignment)
+    user_token = models.CharField(max_length=100)
+    fake_username = models.CharField(max_length=100)
+    fake_country = models.CharField(max_length=100)
+    UPVOTE = 0
+    DOWNVOTE = 1
+    FINAL_CHOICE = 2
+    VOTE_TYPE_CHOICES = (
+        (UPVOTE, 'upvote'),
+        (DOWNVOTE, 'downvote'),
+        (FINAL_CHOICE, 'final_choice'),
+    )
+    vote_type = models.PositiveSmallIntegerField(_('Vote type'), choices=VOTE_TYPE_CHOICES)

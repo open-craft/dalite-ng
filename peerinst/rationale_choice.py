@@ -28,7 +28,7 @@ at the end of this file.
 from __future__ import unicode_literals
 
 from django.db.models import Count, Max
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 
 
 class RationaleSelectionError(Exception):
@@ -58,7 +58,7 @@ def _base_selection_algorithm(
             random_rationale = other_rationales[rng.randrange(other_rationales.count())]
         except ValueError:
             raise RationaleSelectionError(
-                _("Can't proceed since the course staff did not provide example answers.")
+                ugettext("Can't proceed since the course staff did not provide example answers.")
             )
         second_choice = random_rationale.first_answer_choice
     else:
@@ -72,18 +72,21 @@ def _base_selection_algorithm(
         # Get all rationales for the current choice.
         rationales = all_rationales.filter(first_answer_choice=choice)
         # Select up to four rationales for each choice, if available.
-        rationales = selection_callback(rng, rationales)
-        rationales = [(r.id, r.rationale) for r in rationales]
+        if rationales:
+            rationales = selection_callback(rng, rationales)
+            rationales = [(r.id, r.rationale) for r in rationales]
+        else:
+            rationales = []
         chosen_choices.append((choice, label, rationales))
     # Include the rationale the student entered in the choices.
-    chosen_choices[0][2].append((None, _('I stick with my own rationale.')))
+    chosen_choices[0][2].append((None, ugettext('I stick with my own rationale.')))
     return chosen_choices
 
 
-def simple(rng, first_answer_choice, entered_rationale, question):
+def simple(rng, first_answer_choice, entered_rationale, question, max_rationales=4):
 
     def callback(rng, rationales):
-        return rng.sample(rationales, min(4, rationales.count()))
+        return rng.sample(rationales, min(max_rationales, rationales.count()))
 
     return _base_selection_algorithm(
         rng, first_answer_choice, entered_rationale, question, callback
@@ -92,6 +95,23 @@ def simple(rng, first_answer_choice, entered_rationale, question):
 simple.version = "v1.1"
 simple.verbose_name = _("Simple random rationale selection")
 simple.description = _(
+    """The two answer choices presented will include the answer the user chose.  If the user's
+    answer wasn't correct, the second choice will be a correct answer.  If the user's answer was
+    correct, the second choice presented will be weighted by the number of available rationales,
+    i.e. an answer that has only a few rationales available will have a low chance of being shown
+    to the user.  Up to four rationales are presented to the user for each choice, if available.
+    In addition, the user can choose to stick with their own rationale.
+    """
+)
+
+
+def simple_sequential(rng, first_answer_choice, entered_rationale, question):
+    return simple(rng, first_answer_choice, entered_rationale, question, max_rationales=3)
+
+
+simple_sequential.version = "v1.0"
+simple_sequential.verbose_name = _("Simple random rationale selection for sequential review")
+simple_sequential.description = _(
     """The two answer choices presented will include the answer the user chose.  If the user's
     answer wasn't correct, the second choice will be a correct answer.  If the user's answer was
     correct, the second choice presented will be weighted by the number of available rationales,

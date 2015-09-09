@@ -1,0 +1,33 @@
+{% extends 'peerinst/question_review_base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block answers %}
+{{ block.super }}
+<p>
+  {% blocktrans %}
+  Below is an answer provided by another student.  Please indicate whether you think this answer is
+  correct using the vote buttons below.  You will be able to select your preferred rationale in the
+  final review.
+  {% endblocktrans %}
+</p>
+{% endblock %}
+
+{% block form %}
+<form action="" method="post">
+  {% csrf_token %}
+  <div class="votable-rationale">
+    <p>{% trans "Answer " %}<strong>{{ current_rationale.1 }}:</strong></p>
+    <p>{{ current_rationale.2 }}</p>
+  </div>
+  <div>
+    <input type="submit" class="thumbs-button thumbs-up" name="upvote" value="Thumbs up" />
+    <input type="submit" class="thumbs-button thumbs-down" name="downvote" value="Thumbs down" />
+  </div>
+</form>
+{% endblock %}
+
+
+{% block scripts %}
+  <script src="{% static 'peerinst/js/question_review.js' %}"></script>
+{% endblock %}

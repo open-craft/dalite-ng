@@ -11,9 +11,7 @@ urlpatterns = [
     url(r'^assignment/(?P<assignment_id>[^/]+)/', include([
         url(r'^$', views.QuestionListView.as_view(), name='question-list'),
         url(r'(?P<question_id>\d+)/', include([
-            url(r'^$', views.QuestionStartView.as_view(), name='question-start'),
-            url(r'^review$', views.QuestionReviewView.as_view(), name='question-review'),
-            url(r'^summary$', views.QuestionSummaryView.as_view(), name='question-summary'),
+            url(r'^$', views.question, name='question'),
         ])),
     ])),
     url(r'^admin/$', admin_views.AdminIndexView.as_view(), name='admin-index'),
@@ -23,5 +21,9 @@ urlpatterns = [
         ])),
         url(r'^question_preview/(?P<question_id>[^/]+)$',
             admin_views.QuestionPreviewView.as_view(), name='question-preview'),
+        url(r'^fake_usernames/$', admin_views.FakeUsernames.as_view(), name='fake-usernames'),
+        url(r'^fake_countries/$', admin_views.FakeCountries.as_view(), name='fake-countries'),
+        url(r'^attribution_analysis/$', admin_views.AttributionAnalysis.as_view(),
+            name='attribution-analysis'),
     ])),
 ]

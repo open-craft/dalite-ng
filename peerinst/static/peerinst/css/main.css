@@ -135,6 +135,23 @@ li.first-choice{
 li.second-choice{
     font-style: italic;
 }
-#rationales-1 {
+.rationale:not(:first-child) {
     border-top: 1px solid lightgray;
+}
+input[type="submit"].thumbs-button {
+    font-size: 0;  /* Make text invisible */
+    width: 80px;
+    height: 40px;
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+input[type="submit"].thumbs-up {
+    background-image: url("/static/peerinst/img/thumbs-up.svg");
+}
+input[type="submit"].thumbs-down {
+    background-image: url("/static/peerinst/img/thumbs-down.svg");
+}
+.votable-rationale q {
+    font-style: italic;
 }

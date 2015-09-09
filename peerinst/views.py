@@ -11,7 +11,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.html import format_html
+from django.utils.html import escape, format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
@@ -22,6 +23,8 @@ from opaque_keys.edx.keys import CourseKey
 from . import forms
 from . import models
 from . import rationale_choice
+from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -52,48 +55,7 @@ class QuestionListView(LoginRequiredMixin, ListView):
         return context
 
 
-class QuestionRedirect(Exception):
-    """Raised to cause a redirect to target url within the question views."""
-
-    def __init__(self, target_url_name):
-        self.target_url_name = target_url_name
-
-
 class QuestionMixin(LoginRequiredMixin):
-    def dispatch(self, request, *args, **kwargs):
-        self.user_token = self.request.user.username
-        self.assignment = get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
-        self.question = get_object_or_404(models.Question, pk=self.kwargs['question_id'])
-        self.answer_choices = self.question.get_choices()
-        try:
-            self.answer = models.Answer.objects.get(
-                assignment=self.assignment, question=self.question, user_token=self.user_token
-            )
-        except models.Answer.DoesNotExist:
-            if self.request.resolver_match.url_name == 'question-summary':
-                # We can't show the summary if there's no answer yet
-                return redirect(self.get_redirect_url('question-start'))
-        else:
-            if self.request.resolver_match.url_name != 'question-summary':
-                # We already have an answer for this student, so we show the summary.
-                return redirect(self.get_redirect_url('question-summary'))
-        self.lti_custom_key = unicode(self.assignment.pk) + u':' + unicode(self.question.pk)
-        try:
-            self.lti_data = LtiUserData.objects.get(
-                user=self.request.user, custom_key=self.lti_custom_key
-            )
-        except LtiUserData.DoesNotExist:
-            self.lti_data = None
-        try:
-            return super(QuestionMixin, self).dispatch(request, *args, **kwargs)
-        except QuestionRedirect as e:
-            return redirect(self.get_redirect_url(e.target_url_name))
-
-    def get_redirect_url(self, name):
-        return reverse(
-            name, kwargs=dict(assignment_id=self.assignment.pk, question_id=self.question.pk)
-        )
-
     def get_context_data(self, **kwargs):
         context = super(QuestionMixin, self).get_context_data(**kwargs)
         context.update(
@@ -104,8 +66,12 @@ class QuestionMixin(LoginRequiredMixin):
         return context
 
 
+class QuestionReload(Exception):
+    """Raised to cause a reload of the page, usually to start over in case of an error."""
+
+
 class QuestionFormView(QuestionMixin, FormView):
-    """Base class for the views in the student UI."""
+    """Base class for the form views in the student UI."""
 
     def emit_event(self, name, **data):
         """Log an event in a JSON format similar to the edx-platform tracking logs.
@@ -160,41 +126,6 @@ class QuestionFormView(QuestionMixin, FormView):
         # Write JSON to log file
         LOGGER.info(json.dumps(event))
 
-    def load_session_data(self):
-        self._session_data = self.request.session.setdefault('answer_dict', {})
-        # Serialisation for some reason turns the key into a string.
-        self.answer_dict = self._session_data.get(unicode(self.question.pk), None)
-        if self.answer_dict is None:
-            if self.request.resolver_match.url_name != 'question-start':
-                # We don't have session data, but are not at the first step.
-                self.start_over()
-        else:
-            if self.request.resolver_match.url_name != self.answer_dict['url_name']:
-                # We have data for the current question, but a different step, so let's redirect
-                # there.  This mostly disables the back button while processing a question.
-                raise QuestionRedirect(self.answer_dict['url_name'])
-
-    def store_session_data(self):
-        # There is a race condition here:  Django loads the session before calling the view, and
-        # stores it after returning.  Two concurrent request can result in changes being lost.
-        # This only happens if the same user sends POST requests for two different questions at
-        # exactly the same time, which doesn't seem likely (or useful to support).
-        self._session_data[unicode(self.question.pk)] = self.answer_dict
-        self.answer_dict.update(url_name=self.success_url_name)
-        # Explicitly mark the session as modified since it can't detect nested modifications.
-        self.request.session.modified = True
-
-    def pop_session_data(self):
-        self._session_data.pop(unicode(self.question.pk), None)
-        self.request.session.modified = True
-
-    def get_form_kwargs(self):
-        self.load_session_data()
-        return super(QuestionFormView, self).get_form_kwargs()
-
-    def get_success_url(self):
-        return self.get_redirect_url(self.success_url_name)
-
     def submission_error(self):
         messages.error(self.request, format_html(
             '<h3 class="messages-title">{}</h3>{}',
@@ -205,16 +136,20 @@ class QuestionFormView(QuestionMixin, FormView):
         self.submission_error()
         return super(QuestionFormView, self).form_invalid(form)
 
+    def get_success_url(self):
+        # We always redirect to the same HTTP endpoint.  The actual view is selected based on the
+        # session state.
+        return self.request.path
+
     def start_over(self, msg=None):
         """Start over with the current question.
 
         This redirect is used when inconsistent data is encountered and shouldn't be called under
         normal circumstances.
         """
-        self.pop_session_data()
         if msg is not None:
-            messages.add_message(self.request, messages.ERROR, msg)
-        raise QuestionRedirect('question-start')
+            messages.error(self.request, msg)
+        raise QuestionReload()
 
 
 class QuestionStartView(QuestionFormView):
@@ -225,7 +160,6 @@ class QuestionStartView(QuestionFormView):
 
     template_name = 'peerinst/question_start.html'
     form_class = forms.FirstAnswerForm
-    success_url_name = 'question-review'
 
     def get_form_kwargs(self):
         kwargs = super(QuestionStartView, self).get_form_kwargs()
@@ -238,41 +172,37 @@ class QuestionStartView(QuestionFormView):
     def form_valid(self, form):
         first_answer_choice = int(form.cleaned_data['first_answer_choice'])
         correct = self.question.answerchoice_set.all()[first_answer_choice - 1].correct
-        self.answer_dict = dict(
+        rationale = form.cleaned_data['rationale']
+        self.stage_data.update(
             first_answer_choice=first_answer_choice,
-            rationale=form.cleaned_data['rationale'],
+            rationale=rationale,
+            completed_stage='start',
         )
         self.emit_event(
             'problem_check',
+            first_answer_choice=first_answer_choice,
             first_answer_correct=correct,
-            **self.answer_dict
+            rationale=rationale,
         )
-        self.store_session_data()
         return super(QuestionStartView, self).form_valid(form)
 
 
-def _int_or_None(s):
-    if s == 'None':
-        return None
-    return int(s)
+class QuestionReviewBaseView(QuestionFormView):
+    """Common base class for sequential and non-sequential review types."""
 
-
-class QuestionReviewView(QuestionFormView):
-    """Show rationales from other users and give the opportunity to reconsider the first answer."""
-
-    template_name = 'peerinst/question_review.html'
-    form_class = forms.ReviewAnswerForm
-    success_url_name = 'question-summary'
-
-    def get_form_kwargs(self):
-        kwargs = super(QuestionReviewView, self).get_form_kwargs()
-        self.first_answer_choice = self.answer_dict['first_answer_choice']
-        self.rationale = self.answer_dict['rationale']
-        self.choose_rationales = rationale_choice.algorithms[
-            self.question.rationale_selection_algorithm
-        ]
+    def determine_rationale_choices(self):
+        if not hasattr(self, 'choose_rationales'):
+            self.choose_rationales = rationale_choice.algorithms[
+                self.question.rationale_selection_algorithm
+            ]
+        self.rationale_choices = self.stage_data.get('rationale_choices')
+        if self.rationale_choices is not None:
+            # The rationales we stored in the session have already been HTML-escaped – mark them as
+            # safe to avoid double-escaping
+            self.mark_rationales_safe(escape_html=False)
+            return
         # Make the choice of rationales deterministic, so rationales won't change when reloading
-        # the page.
+        # the page after clearing the session.
         rng = random.Random((self.user_token, self.assignment.pk, self.question.pk))
         try:
             self.rationale_choices = self.choose_rationales(
@@ -280,20 +210,137 @@ class QuestionReviewView(QuestionFormView):
             )
         except rationale_choice.RationaleSelectionError as e:
             self.start_over(e.message)
-        kwargs.update(rationale_choices=self.rationale_choices)
+        if self.question.fake_attributions:
+            self.add_fake_attributions(rng)
+        else:
+            self.mark_rationales_safe(escape_html=True)
+        self.stage_data.update(rationale_choices=self.rationale_choices)
+
+    def mark_rationales_safe(self, escape_html):
+        if escape_html:
+            processor = escape
+        else:
+            processor = mark_safe
+        for choice, label, rationales in self.rationale_choices:
+            rationales[:] = [(id, processor(text)) for id, text in rationales]
+
+    def add_fake_attributions(self, rng):
+        usernames = models.FakeUsername.objects.values_list('name', flat=True)
+        countries = models.FakeCountry.objects.values_list('name', flat=True)
+        if not usernames or not countries:
+            # No usernames or no countries were supplied, so we silently refrain from adding fake
+            # attributions.  We need to ensure, though, that the rationales get properly escaped.
+            self.mark_rationales_safe(escape_html=True)
+            return
+        fake_attributions = {}
+        for choice, label, rationales in self.rationale_choices:
+            attributed_rationales = []
+            for id, text in rationales:
+                if id is None:
+                    # This is the "I stick with my own rationale" option.  Don't add a fake
+                    # attribution, it might blow our cover.
+                    attributed_rationales.append((id, text))
+                    continue
+                attribution = rng.choice(usernames), rng.choice(countries)
+                fake_attributions[id] = attribution
+                formatted_rationale = format_html('<q>{}</q> ({}, {})', text, *attribution)
+                attributed_rationales.append((id, formatted_rationale))
+            rationales[:] = attributed_rationales
+        self.stage_data.update(fake_attributions=fake_attributions)
+
+    def get_form_kwargs(self):
+        kwargs = super(QuestionReviewBaseView, self).get_form_kwargs()
+        self.first_answer_choice = self.stage_data.get('first_answer_choice')
+        self.rationale = self.stage_data.get('rationale')
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(QuestionReviewView, self).get_context_data(**kwargs)
+        context = super(QuestionReviewBaseView, self).get_context_data(**kwargs)
         context.update(
             first_choice_label=self.question.get_choice_label(self.first_answer_choice),
             rationale=self.rationale,
+            sequential_review=self.stage_data.get('completed_stage') == 'sequential-review',
+        )
+        return context
+
+
+class QuestionSequentialReviewView(QuestionReviewBaseView):
+
+    template_name = 'peerinst/question_sequential_review.html'
+    form_class = forms.SequentialReviewForm
+
+    def select_next_rationale(self):
+        rationale_sequence = self.stage_data.get('rationale_sequence')
+        if rationale_sequence:
+            # We already have selected the rationales – just take the next one.
+            self.current_rationale = rationale_sequence[self.stage_data.get('rationale_index')]
+            self.current_rationale[2] = mark_safe(self.current_rationale[2])
+            return
+        self.choose_rationales = rationale_choice.simple_sequential
+        self.determine_rationale_choices()
+        # Select alternating rationales from the lists of rationales for the different answer
+        # choices.  Skip the "I stick with my own rationale" option marked by id == None.
+        rationale_sequence = list(roundrobin(
+            [(id, label, rationale) for id, rationale in rationales if id is not None]
+            for choice, label, rationales in self.rationale_choices
+        ))
+        self.current_rationale = rationale_sequence[0]
+        self.stage_data.update(
+            rationale_sequence=rationale_sequence,
+            rationale_votes={},
+            rationale_index=0,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionSequentialReviewView, self).get_context_data(**kwargs)
+        self.select_next_rationale()
+        context.update(
+            current_rationale=self.current_rationale,
         )
         return context
 
     def form_valid(self, form):
+        rationale_sequence = self.stage_data.get('rationale_sequence')
+        rationale_votes = self.stage_data.get('rationale_votes')
+        rationale_index = self.stage_data.get('rationale_index')
+        current_rationale = rationale_sequence[rationale_index]
+        rationale_votes[current_rationale[0]] = form.cleaned_data['vote']
+        rationale_index += 1
+        self.stage_data.update(
+            rationale_index=rationale_index,
+            rationale_votes=rationale_votes,
+        )
+        if rationale_index == len(rationale_sequence):
+            # We've shown all rationales – mark the stage as finished.
+            self.stage_data.update(completed_stage='sequential-review')
+        return super(QuestionSequentialReviewView, self).form_valid(form)
+
+
+class QuestionReviewView(QuestionReviewBaseView):
+    """The standard version of the review, showing all alternative rationales simultaneously."""
+
+    template_name = 'peerinst/question_review.html'
+    form_class = forms.ReviewAnswerForm
+
+    def get_form_kwargs(self):
+        kwargs = super(QuestionReviewView, self).get_form_kwargs()
+        self.determine_rationale_choices()
+        kwargs.update(
+            rationale_choices=self.rationale_choices,
+        )
+        return kwargs
+
+    def form_valid(self, form):
         self.second_answer_choice = int(form.cleaned_data['second_answer_choice'])
-        self.chosen_rationale_id = _int_or_None(form.cleaned_data['chosen_rationale_id'])
+        self.chosen_rationale_id = int_or_none(form.cleaned_data['chosen_rationale_id'])
+        self.emit_check_events()
+        self.save_answer()
+        self.save_votes()
+        self.stage_data.clear()
+        self.send_grade()
+        return super(QuestionReviewView, self).form_valid(form)
+
+    def emit_check_events(self):
         event_data = dict(
             second_answer_choice=self.second_answer_choice,
             switch=self.first_answer_choice != self.second_answer_choice,
@@ -312,10 +359,6 @@ class QuestionReviewView(QuestionFormView):
         )
         self.emit_event('problem_check', **event_data)
         self.emit_event('save_problem_success', **event_data)
-        self.save_answer()
-        self.send_grade()
-        self.pop_session_data()
-        return super(QuestionReviewView, self).form_valid(form)
 
     def save_answer(self):
         """Validate and save the answer defined by the arguments to the database."""
@@ -334,6 +377,7 @@ class QuestionReviewView(QuestionFormView):
                     'This should not happen.  Please start over with the question.'
                 ))
         else:
+            # We stuck with our own rationale.
             chosen_rationale = None
         answer = models.Answer(
             question=self.question,
@@ -345,6 +389,41 @@ class QuestionReviewView(QuestionFormView):
             user_token=self.user_token,
         )
         answer.save()
+        if chosen_rationale is not None:
+            self.record_fake_attribution_vote(chosen_rationale, models.AnswerVote.FINAL_CHOICE)
+
+    def save_votes(self):
+        rationale_votes = self.stage_data.get('rationale_votes')
+        if rationale_votes is None:
+            return
+        for rationale_id, vote in rationale_votes.iteritems():
+            try:
+                rationale = models.Answer.objects.get(id=rationale_id)
+            except models.Answer.DoesNotExist:
+                # This corner case can only happen if an answer was deleted while the student was
+                # answering the question.  Simply ignore these votes.
+                continue
+            if vote == 'up':
+                rationale.upvotes += 1
+                self.record_fake_attribution_vote(rationale, models.AnswerVote.UPVOTE)
+            elif vote == 'down':
+                rationale.downvotes += 1
+                self.record_fake_attribution_vote(rationale, models.AnswerVote.DOWNVOTE)
+            rationale.save()
+
+    def record_fake_attribution_vote(self, answer, vote_type):
+        fake_attributions = self.stage_data.get('fake_attributions')
+        if fake_attributions is None:
+            return
+        fake_username, fake_country = fake_attributions[unicode(answer.id)]
+        models.AnswerVote(
+            answer=answer,
+            assignment=self.assignment,
+            user_token=self.user_token,
+            fake_username=fake_username,
+            fake_country=fake_country,
+            vote_type=vote_type,
+        ).save()
 
     def send_grade(self):
         if not self.lti_data:
@@ -357,7 +436,7 @@ class QuestionReviewView(QuestionFormView):
         Signals.Grade.updated.send(
             __name__,
             user=self.request.user,
-            custom_key=self.lti_custom_key,
+            custom_key=self.custom_key,
             grade=float(correct),
         )
 
@@ -376,3 +455,55 @@ class QuestionSummaryView(QuestionMixin, TemplateView):
             chosen_rationale=self.answer.chosen_rationale,
         )
         return context
+
+
+@login_required
+def question(request, assignment_id, question_id):
+    """Load common question data and dispatch to the right question stage.
+
+    This dispatcher loads the session state and relevant database objects.  Based on the available
+    data, it delegates to the correct view class.
+    """
+    # Collect common objects required for the view
+    assignment = get_object_or_404(models.Assignment, pk=assignment_id)
+    question = get_object_or_404(models.Question, pk=question_id)
+    custom_key = unicode(assignment.pk) + ':' + unicode(question.pk)
+    stage_data = SessionStageData(request.session, custom_key)
+    user_token = request.user.username
+    view_data = dict(
+        request=request,
+        assignment=assignment,
+        question=question,
+        user_token=user_token,
+        answer_choices=question.get_choices(),
+        custom_key=custom_key,
+        stage_data=stage_data,
+        lti_data=get_object_or_none(LtiUserData, user=request.user, custom_key=custom_key),
+        answer=get_object_or_none(
+            models.Answer, assignment=assignment, question=question, user_token=user_token
+        )
+    )
+
+    # Determine stage and view class
+    if view_data['answer'] is not None:
+        stage_class = QuestionSummaryView
+    elif stage_data.get('completed_stage') == 'start':
+        if question.sequential_review:
+            stage_class = QuestionSequentialReviewView
+        else:
+            stage_class = QuestionReviewView
+    elif stage_data.get('completed_stage') == 'sequential-review':
+        stage_class = QuestionReviewView
+    else:
+        stage_class = QuestionStartView
+
+    # Delegate to the view
+    stage = stage_class(**view_data)
+    try:
+        result = stage.dispatch(request)
+    except QuestionReload:
+        # Something went wrong.  Discard all data and reload.
+        stage_data.clear()
+        return redirect(request.path)
+    stage_data.store()
+    return result
