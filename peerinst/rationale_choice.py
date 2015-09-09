@@ -72,8 +72,11 @@ def _base_selection_algorithm(
         # Get all rationales for the current choice.
         rationales = all_rationales.filter(first_answer_choice=choice)
         # Select up to four rationales for each choice, if available.
-        rationales = selection_callback(rng, rationales)
-        rationales = [(r.id, r.rationale) for r in rationales]
+        if rationales:
+            rationales = selection_callback(rng, rationales)
+            rationales = [(r.id, r.rationale) for r in rationales]
+        else:
+            rationales = []
         chosen_choices.append((choice, label, rationales))
     # Include the rationale the student entered in the choices.
     chosen_choices[0][2].append((None, ugettext('I stick with my own rationale.')))
