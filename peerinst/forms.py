@@ -36,7 +36,7 @@ class ReviewAnswerForm(forms.Form):
         answer_choices = []
         rationale_choice_fields = []
         for i, (choice, label, rationales) in enumerate(rationale_choices):
-            field_name = '{}_{}'.format(RATIONALE_CHOICE, i)
+            field_name = '{}_{}'.format(self.RATIONALE_CHOICE, i)
             self.fields[field_name] = forms.ChoiceField(
                 label='', required=False, widget=forms.RadioSelect, choices=rationales
             )
@@ -48,7 +48,8 @@ class ReviewAnswerForm(forms.Form):
     def clean(self):
         cleaned_data = forms.Form.clean(self)
         rationale_choices = [
-            value for key, value in cleaned_data.iteritems() if key.startswith(RATIONALE_CHOICE)
+            value for key, value in cleaned_data.iteritems()
+            if key.startswith(self.RATIONALE_CHOICE)
         ]
         if sum(map(bool, rationale_choices)) != 1:
             # This should be prevented by the UI on the client side, so this check is mostly to
