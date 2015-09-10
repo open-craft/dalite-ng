@@ -39,7 +39,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         assignment_id = lti_data['custom_assignment_id']
         question_id = lti_data['custom_question_id']
         return reverse(
-            'question-start', kwargs=dict(assignment_id=assignment_id, question_id=question_id)
+            'question', kwargs=dict(assignment_id=assignment_id, question_id=question_id)
         )
 
     def authentication_hook(self, request, user_id=None, username=None, email=None):
