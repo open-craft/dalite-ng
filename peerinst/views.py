@@ -98,27 +98,32 @@ class QuestionFormView(QuestionMixin, FormView):
         data.update(
             assignment_id=self.assignment.pk,
             assignment_title=self.assignment.title,
+            max_grade=1.0,
+            problem=usage_key,
             question_id=self.question.pk,
             question_text=self.question.text,
         )
 
         # Build event dictionary.
+        META = self.request.META
         event = dict(
-            accept_language=self.request.META.get('HTTP_ACCEPT_LANGUAGE'),
-            agent=self.request.META.get('HTTP_USER_AGENT'),
+            accept_language=META.get('HTTP_ACCEPT_LANGUAGE'),
+            agent=META.get('HTTP_USER_AGENT'),
             context=dict(
                 course_id=course_id,
                 module=dict(
                     usage_key=usage_key,
                 ),
                 org_id=course_key.org,
+                username=self.user_token,
             ),
+            course_id=course_id,
             event=data,
             event_source='server',
             event_type=name,
-            host=self.request.META['SERVER_NAME'],
-            ip=self.request.META['REMOTE_ADDR'],
-            referer=self.request.META.get('HTTP_REFERER'),
+            host=META.get('SERVER_NAME'),
+            ip=META.get('HTTP_X_REAL_IP', META.get('REMOTE_ADDR')),
+            referer=META.get('HTTP_REFERER'),
             time=datetime.datetime.now().isoformat(),
             username=self.user_token,
         )
@@ -171,7 +176,7 @@ class QuestionStartView(QuestionFormView):
 
     def form_valid(self, form):
         first_answer_choice = int(form.cleaned_data['first_answer_choice'])
-        correct = self.question.answerchoice_set.all()[first_answer_choice - 1].correct
+        correct = self.question.is_correct(first_answer_choice)
         rationale = form.cleaned_data['rationale']
         self.stage_data.update(
             first_answer_choice=first_answer_choice,
@@ -181,7 +186,7 @@ class QuestionStartView(QuestionFormView):
         self.emit_event(
             'problem_check',
             first_answer_choice=first_answer_choice,
-            first_answer_correct=correct,
+            success='correct' if correct else 'incorrect',
             rationale=rationale,
         )
         return super(QuestionStartView, self).form_valid(form)
@@ -341,6 +346,7 @@ class QuestionReviewView(QuestionReviewBaseView):
         return super(QuestionReviewView, self).form_valid(form)
 
     def emit_check_events(self):
+        correct = self.question.is_correct(self.second_answer_choice)
         event_data = dict(
             second_answer_choice=self.second_answer_choice,
             switch=self.first_answer_choice != self.second_answer_choice,
@@ -356,6 +362,8 @@ class QuestionReviewView(QuestionReviewBaseView):
                 if id is not None
             ],
             chosen_rationale_id=self.chosen_rationale_id,
+            success='correct' if correct else 'incorrect',
+            grade=float(correct),
         )
         self.emit_event('problem_check', **event_data)
         self.emit_event('save_problem_success', **event_data)
@@ -432,7 +440,7 @@ class QuestionReviewView(QuestionReviewBaseView):
         if not self.lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
             # edX didn't provide a callback URL for grading, so this is an unscored problem.
             return
-        correct = self.question.answerchoice_set.all()[self.second_answer_choice - 1].correct
+        correct = self.question.is_correct(self.second_answer_choice)
         Signals.Grade.updated.send(
             __name__,
             user=self.request.user,
