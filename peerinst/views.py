@@ -9,8 +9,9 @@ import random
 import re
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, render_to_response, redirect
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
@@ -55,7 +56,7 @@ class QuestionListView(LoginRequiredMixin, ListView):
         return context
 
 
-class QuestionMixin(LoginRequiredMixin):
+class QuestionMixin(object):
     def get_context_data(self, **kwargs):
         context = super(QuestionMixin, self).get_context_data(**kwargs)
         context.update(
@@ -465,13 +466,28 @@ class QuestionSummaryView(QuestionMixin, TemplateView):
         return context
 
 
-@login_required
+def redirect_to_login_or_show_cookie_help(request):
+    """Redirect to login page outside of an iframe, show help on enabling cookies inside an iframe.
+
+    We consider the request to come from within an iframe if the HTTP Referer header is set.  This
+    isn't entirely accurate, but should be good enough.
+    """
+    if request.META['HTTP_REFERER']:
+        # We probably got here from within the LMS, and the user has third-party cookies disabled,
+        # so we show help on enabling cookies for this site.
+        return render_to_response('peerinst/cookie_help.html', dict(host=request.get_host()))
+    return redirect_to_login(request.get_full_path())
+
+
 def question(request, assignment_id, question_id):
     """Load common question data and dispatch to the right question stage.
 
     This dispatcher loads the session state and relevant database objects.  Based on the available
     data, it delegates to the correct view class.
     """
+    if not request.user.is_authenticated():
+        return redirect_to_login_or_show_cookie_help(request)
+
     # Collect common objects required for the view
     assignment = get_object_or_404(models.Assignment, pk=assignment_id)
     question = get_object_or_404(models.Question, pk=question_id)

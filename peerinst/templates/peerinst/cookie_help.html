@@ -1,0 +1,19 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ Cookies }}{% endblock %}
+{% block body %}
+<p>
+  {% blocktrans %}
+  This component cannot be shown because your browser does not seem to accept third-party cookies.
+  You should configure your browser to allow all cookies for the site {{ host }} and reload this
+  page.
+  {% endblocktrans %}
+</p>
+<p>
+  {% blocktrans %}
+  In Internet Explorer, this can be done by going to Tools → Internet Options → Privacy → Sites,
+  entering {{ host }} in the address field and clicking "Allow".
+  {% endblocktrans %}
+</p>
+{% endblock %}
