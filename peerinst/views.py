@@ -472,7 +472,7 @@ def redirect_to_login_or_show_cookie_help(request):
     We consider the request to come from within an iframe if the HTTP Referer header is set.  This
     isn't entirely accurate, but should be good enough.
     """
-    if request.META['HTTP_REFERER']:
+    if request.META.get('HTTP_REFERER'):
         # We probably got here from within the LMS, and the user has third-party cookies disabled,
         # so we show help on enabling cookies for this site.
         return render_to_response('peerinst/cookie_help.html', dict(host=request.get_host()))
