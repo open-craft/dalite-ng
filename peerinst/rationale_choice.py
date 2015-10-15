@@ -132,6 +132,8 @@ def prefer_expert_and_highly_voted(rng, first_answer_choice, entered_rationale, 
         if expert_rationales:
             chosen.append(rng.choice(expert_rationales))
             rationales = rationales.exclude(pk=chosen[-1].pk)
+            if not rationales:
+                return chosen
 
         # Add a highly voted rationale if one exists.
         rationales_with_votes = rationales.annotate(votes=Count('answer'))
