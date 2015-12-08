@@ -89,11 +89,12 @@ class QuestionFormView(QuestionMixin, FormView):
                 course_id=re.escape(course_id)
             )
         )
-        usage_key = grade_handler_re.match(
-            self.lti_data.edx_lti_parameters.get('lis_outcome_service_url')
-        )
-        if usage_key:
-            usage_key = usage_key.group('usage_key')
+        usage_key = None
+        outcome_service_url = self.lti_data.edx_lti_parameters.get('lis_outcome_service_url')
+        if outcome_service_url:
+            usage_key = grade_handler_re.match(outcome_service_url)
+            if usage_key:
+                usage_key = usage_key.group('usage_key')
 
         # Add common fields to event data
         data.update(
