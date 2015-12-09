@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import json
 import random
 
@@ -74,7 +77,7 @@ class QuestionViewTestCase(TestCase):
 class QuestionViewTest(QuestionViewTestCase):
 
     def test_standard_review_mode(self):
-        """Test answering questions in default mode."""
+        """Test answering questions in default mode, with scoring enabled."""
 
         # Show the question and the form for the first answer and rationale.
         response = self.question_get()
@@ -120,6 +123,13 @@ class QuestionViewTest(QuestionViewTestCase):
         self.assertEqual(response.context['second_choice_label'], second_choice_label)
         self.assertEqual(response.context['rationale'], rationale)
         self.assertEqual(response.context['chosen_rationale'].id, chosen_rationale)
+
+    def test_standard_review_mode_unscored(self):
+        """Test answering questions in default mode, with scoring disabled."""
+        lti_params = self.LTI_PARAMS.copy()
+        del lti_params['lis_outcome_service_url']
+        self.log_in_with_lti(lti_params=lti_params)
+        self.test_standard_review_mode()
 
     def test_sequential_review_mode(self):
         """Test answering questions in sequential review mode."""
