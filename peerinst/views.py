@@ -66,6 +66,21 @@ class QuestionMixin(object):
         )
         return context
 
+    def send_grade(self, second_answer_choice):
+        if not self.lti_data:
+            # We are running outside of an LTI context, so we don't need to send a grade.
+            return
+        if not self.lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
+            # edX didn't provide a callback URL for grading, so this is an unscored problem.
+            return
+        correct = self.question.is_correct(second_answer_choice)
+        Signals.Grade.updated.send(
+            __name__,
+            user=self.request.user,
+            custom_key=self.custom_key,
+            grade=float(correct),
+        )
+
 
 class QuestionReload(Exception):
     """Raised to cause a reload of the page, usually to start over in case of an error."""
@@ -344,7 +359,7 @@ class QuestionReviewView(QuestionReviewBaseView):
         self.save_answer()
         self.save_votes()
         self.stage_data.clear()
-        self.send_grade()
+        self.send_grade(self.second_answer_choice)
         return super(QuestionReviewView, self).form_valid(form)
 
     def emit_check_events(self):
@@ -435,21 +450,6 @@ class QuestionReviewView(QuestionReviewBaseView):
             vote_type=vote_type,
         ).save()
 
-    def send_grade(self):
-        if not self.lti_data:
-            # We are running outside of an LTI context, so we don't need to send a grade.
-            return
-        if not self.lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
-            # edX didn't provide a callback URL for grading, so this is an unscored problem.
-            return
-        correct = self.question.is_correct(self.second_answer_choice)
-        Signals.Grade.updated.send(
-            __name__,
-            user=self.request.user,
-            custom_key=self.custom_key,
-            grade=float(correct),
-        )
-
 
 class QuestionSummaryView(QuestionMixin, TemplateView):
     """Show a summary of answers to the student and submit the data to the database."""
@@ -464,6 +464,7 @@ class QuestionSummaryView(QuestionMixin, TemplateView):
             rationale=self.answer.rationale,
             chosen_rationale=self.answer.chosen_rationale,
         )
+        self.send_grade(self.answer.second_answer_choice)
         return context
 
 

@@ -76,8 +76,8 @@ class QuestionViewTestCase(TestCase):
 
 class QuestionViewTest(QuestionViewTestCase):
 
-    def test_standard_review_mode(self):
-        """Test answering questions in default mode, with scoring enabled."""
+    def run_standard_review_mode(self):
+        """Test answering questions in default mode."""
 
         # Show the question and the form for the first answer and rationale.
         response = self.question_get()
@@ -124,12 +124,19 @@ class QuestionViewTest(QuestionViewTestCase):
         self.assertEqual(response.context['rationale'], rationale)
         self.assertEqual(response.context['chosen_rationale'].id, chosen_rationale)
 
+    def test_standard_review_mode(self):
+        """Test answering questions in default mode, with scoring enabled."""
+        self.run_standard_review_mode()
+        send = mock.call('peerinst.views', user=self.user, custom_key=self.custom_key, grade=0.0)
+        self.assertEqual(self.mock_send_grade.call_args_list, [send] * 2)
+
     def test_standard_review_mode_unscored(self):
         """Test answering questions in default mode, with scoring disabled."""
         lti_params = self.LTI_PARAMS.copy()
         del lti_params['lis_outcome_service_url']
         self.log_in_with_lti(lti_params=lti_params)
-        self.test_standard_review_mode()
+        self.run_standard_review_mode()
+        self.assertFalse(self.mock_send_grade.called)
 
     def test_sequential_review_mode(self):
         """Test answering questions in sequential review mode."""
