@@ -15,6 +15,11 @@ def no_hyphens(value):
         raise ValidationError(_('Hyphens may not be used in this field.'))
 
 
+class GradingScheme(object):
+    STANDARD = 0
+    ADVANCED = 1
+
+
 class Category(models.Model):
     title = models.CharField(
         _('Category Name'), unique=True, max_length=100,
@@ -107,6 +112,19 @@ class Question(models.Model):
         default='prefer_expert_and_highly_voted', max_length=100, help_text=_(
             'The algorithm to use for choosing the rationales presented to students during '
             'question review.  This option is ignored if you selected sequential review.'
+        )
+    )
+    GRADING_SCHEME_CHOICES = (
+        (GradingScheme.STANDARD, 'standard'),
+        (GradingScheme.ADVANCED, 'advanced'),
+    )
+    grading_scheme = models.IntegerField(
+        _('Grading scheme'), choices=GRADING_SCHEME_CHOICES, default=GradingScheme.STANDARD,
+        help_text=_(
+            'Grading scheme to use. '
+            'The "standard" scheme awards 1 point if the second answer '
+            'provided by the student is correct, and 0 points otherwise. '
+            'The "advanced" scheme awards 0.5 points for each correct answer.'
         )
     )
 
@@ -229,6 +247,21 @@ class Answer(models.Model):
 
     def __unicode__(self):
         return unicode(_('{} for question {}').format(self.id, self.question.title))
+
+    def get_grade(self):
+        """ Compute grade based on grading scheme of question. """
+        if self.question.grading_scheme == GradingScheme.STANDARD:
+            # Standard grading scheme: Full score if second answer is correct
+            correct = self.question.is_correct(self.second_answer_choice)
+            return float(correct)
+        else:
+            # Advanced grading scheme: Partial scores for individual answers
+            grade = 0.
+            if self.question.is_correct(self.first_answer_choice):
+                grade += 0.5
+            if self. question.is_correct(self.second_answer_choice):
+                grade += 0.5
+            return grade
 
 
 class FakeUsername(models.Model):
