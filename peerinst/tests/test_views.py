@@ -61,7 +61,17 @@ class QuestionViewTestCase(TestCase):
         self.custom_key = unicode(self.assignment.pk) + ':' + unicode(question.pk)
         self.log_in_with_lti()
 
-    def disable_scoring(self):
+    def log_in_with_scoring_disabled(self):
+        """
+        Log a user in pretending that scoring is disabled in the LMS.
+
+        This is done by calling `log_in_with_lti` with a modified version of `LTI_PARAMS`
+        that does not include `lis_outcome_service_url`.
+
+        `lis_outcome_service_url` is the URL of the handler to use for sending grades to the LMS.
+        It is only included in the LTI request if grading is enabled on the LMS side
+        (otherwise there is no need to send back a grade).
+        """
         lti_params = self.LTI_PARAMS.copy()
         del lti_params['lis_outcome_service_url']
         self.log_in_with_lti(lti_params=lti_params)
@@ -153,7 +163,7 @@ class QuestionViewTest(QuestionViewTestCase):
 
     def test_standard_review_mode_scoring_disabled(self):
         """Test answering questions in default mode, with scoring disabled."""
-        self.disable_scoring()
+        self.log_in_with_scoring_disabled()
         self.run_standard_review_mode()
         self.assertFalse(self.mock_send_grade_signal.called)
         self.assertTrue(self.mock_get_grade.called)  # "emit_check_events" still uses "get_grade" to obtain grade data
@@ -281,5 +291,5 @@ class EventLogTest(QuestionViewTestCase):
 
     @mock.patch('peerinst.views.LOGGER')
     def test_events_scoring_disabled(self, logger):
-        self.disable_scoring()
+        self.log_in_with_scoring_disabled()
         self._test_events(logger, scoring_disabled=True)

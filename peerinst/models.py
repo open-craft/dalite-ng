@@ -115,16 +115,17 @@ class Question(models.Model):
         )
     )
     GRADING_SCHEME_CHOICES = (
-        (GradingScheme.STANDARD, 'standard'),
-        (GradingScheme.ADVANCED, 'advanced'),
+        (GradingScheme.STANDARD, _('Standard')),
+        (GradingScheme.ADVANCED, _('Advanced')),
     )
     grading_scheme = models.IntegerField(
         _('Grading scheme'), choices=GRADING_SCHEME_CHOICES, default=GradingScheme.STANDARD,
         help_text=_(
             'Grading scheme to use. '
-            'The "standard" scheme awards 1 point if the second answer '
-            'provided by the student is correct, and 0 points otherwise. '
-            'The "advanced" scheme awards 0.5 points for each correct answer.'
+            'The "Standard" scheme awards 1 point if the student\'s final answer is correct, '
+            'and 0 points otherwise. The "Advanced" scheme awards 0.5 points '
+            'if the student\'s initial guess is correct, and 0.5 points '
+            'if they subsequently stick with or change to the correct answer.'
         )
     )
 
@@ -259,7 +260,7 @@ class Answer(models.Model):
             grade = 0.
             if self.question.is_correct(self.first_answer_choice):
                 grade += 0.5
-            if self. question.is_correct(self.second_answer_choice):
+            if self.question.is_correct(self.second_answer_choice):
                 grade += 0.5
             return grade
 

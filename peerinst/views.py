@@ -71,12 +71,11 @@ class QuestionMixin(object):
         if not self.lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
             # edX didn't provide a callback URL for grading, so this is an unscored problem.
             return
-        grade = self.answer.get_grade()
         Signals.Grade.updated.send(
             __name__,
             user=self.request.user,
             custom_key=self.custom_key,
-            grade=grade,
+            grade=self.answer.get_grade(),
         )
 
 

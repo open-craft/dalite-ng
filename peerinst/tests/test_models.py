@@ -41,7 +41,7 @@ class AnswerModelTestCase(TestCase):
 
     def test_get_grade_standard(self):
         """
-        Check if `get_grade` produces correct values when using 'standard' grading scheme.
+        Check if `get_grade` produces correct values when using 'Standard' grading scheme.
 
         | First choice | Second choice | Grade |
         |--------------+---------------+-------|
@@ -54,7 +54,7 @@ class AnswerModelTestCase(TestCase):
 
     def test_get_grade_advanced(self):
         """
-        Check if `get_grade` produces correct values when using 'advanced' grading scheme.
+        Check if `get_grade` produces correct values when using 'Advanced' grading scheme.
 
         | First choice | Second choice | Grade |
         |--------------+---------------+-------|
