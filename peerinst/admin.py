@@ -78,12 +78,13 @@ class QuestionAdmin(admin.ModelAdmin):
         (_('Question image or video'), {'fields': ['image', 'image_alt_text', 'video_url']}),
         (None, {'fields': [
             'answer_style', 'fake_attributions', 'sequential_review',
-            'rationale_selection_algorithm'
+            'rationale_selection_algorithm', 'grading_scheme'
         ]}),
     ]
     radio_fields = {
         'answer_style': admin.HORIZONTAL,
         'rationale_selection_algorithm': admin.HORIZONTAL,
+        'grading_scheme': admin.HORIZONTAL,
     }
     readonly_fields = ['id']
     inlines = [AnswerChoiceInline, AnswerInline]

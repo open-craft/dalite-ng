@@ -5,14 +5,22 @@ import json
 import random
 
 from django.core.urlresolvers import reverse
-from django.test import Client, TestCase
+from django.test import TestCase
 from django_lti_tool_provider.models import LtiUserData
 from django_lti_tool_provider.views import LTIView
+
+import ddt
 import mock
 
 from ..util import SessionStageData
-from .. import views
 from . import factories
+
+
+class Grade(object):
+    CORRECT = 1.0
+    INCORRECT = 0.0
+    PARTIAL = 0.5
+
 
 class QuestionViewTestCase(TestCase):
 
@@ -37,8 +45,11 @@ class QuestionViewTestCase(TestCase):
             choices=5, choices__correct=[2, 4], choices__rationales=4,
         ))
         self.addCleanup(mock.patch.stopall)
-        patcher = mock.patch('django_lti_tool_provider.signals.Signals.Grade.updated.send')
-        self.mock_send_grade = patcher.start()
+        signal_patcher = mock.patch('django_lti_tool_provider.signals.Signals.Grade.updated.send')
+        self.mock_send_grade_signal = signal_patcher.start()
+        grade_patcher = mock.patch('peerinst.models.Answer.get_grade')
+        self.mock_get_grade = grade_patcher.start()
+        self.mock_get_grade.return_value = Grade.CORRECT
 
     def set_question(self, question):
         self.question = question
@@ -49,6 +60,21 @@ class QuestionViewTestCase(TestCase):
         )
         self.custom_key = unicode(self.assignment.pk) + ':' + unicode(question.pk)
         self.log_in_with_lti()
+
+    def log_in_with_scoring_disabled(self):
+        """
+        Log a user in pretending that scoring is disabled in the LMS.
+
+        This is done by calling `log_in_with_lti` with a modified version of `LTI_PARAMS`
+        that does not include `lis_outcome_service_url`.
+
+        `lis_outcome_service_url` is the URL of the handler to use for sending grades to the LMS.
+        It is only included in the LTI request if grading is enabled on the LMS side
+        (otherwise there is no need to send back a grade).
+        """
+        lti_params = self.LTI_PARAMS.copy()
+        del lti_params['lis_outcome_service_url']
+        self.log_in_with_lti(lti_params=lti_params)
 
     def log_in_with_lti(self, user=None, password=None, lti_params=None):
         """Log a user in with fake LTI data."""
@@ -72,9 +98,13 @@ class QuestionViewTestCase(TestCase):
         response = self.client.post(self.question_url, form_data, follow=True)
         self.assertEqual(response.status_code, 200)
         return response
-        
+
 
 class QuestionViewTest(QuestionViewTestCase):
+
+    def assert_grade_signal(self, grade=Grade.INCORRECT):
+        send = mock.call('peerinst.views', user=self.user, custom_key=self.custom_key, grade=grade)
+        self.assertEqual(self.mock_send_grade_signal.call_args_list, [send] * 2)
 
     def run_standard_review_mode(self):
         """Test answering questions in default mode."""
@@ -126,20 +156,22 @@ class QuestionViewTest(QuestionViewTestCase):
 
     def test_standard_review_mode(self):
         """Test answering questions in default mode, with scoring enabled."""
+        self.mock_get_grade.return_value = Grade.INCORRECT
         self.run_standard_review_mode()
-        send = mock.call('peerinst.views', user=self.user, custom_key=self.custom_key, grade=0.0)
-        self.assertEqual(self.mock_send_grade.call_args_list, [send] * 2)
+        self.assert_grade_signal()
+        self.assertTrue(self.mock_get_grade.called)
 
-    def test_standard_review_mode_unscored(self):
+    def test_standard_review_mode_scoring_disabled(self):
         """Test answering questions in default mode, with scoring disabled."""
-        lti_params = self.LTI_PARAMS.copy()
-        del lti_params['lis_outcome_service_url']
-        self.log_in_with_lti(lti_params=lti_params)
+        self.log_in_with_scoring_disabled()
         self.run_standard_review_mode()
-        self.assertFalse(self.mock_send_grade.called)
+        self.assertFalse(self.mock_send_grade_signal.called)
+        self.assertTrue(self.mock_get_grade.called)  # "emit_check_events" still uses "get_grade" to obtain grade data
 
     def test_sequential_review_mode(self):
         """Test answering questions in sequential review mode."""
+
+        self.mock_get_grade.return_value = Grade.INCORRECT
 
         self.set_question(factories.QuestionFactory(
             sequential_review=True,
@@ -203,32 +235,37 @@ class QuestionViewTest(QuestionViewTestCase):
         self.assertEqual(response.context['rationale'], rationale)
         self.assertEqual(response.context['chosen_rationale'].id, chosen_rationale)
 
+        self.assert_grade_signal()
+        self.assertTrue(self.mock_get_grade.called)
 
+
+@ddt.ddt
 class EventLogTest(QuestionViewTestCase):
 
-    def verify_event(self, logger):
+    def verify_event(self, logger, scoring_disabled=False):
         self.assertTrue(logger.info.called)
         event = json.loads(logger.info.call_args[0][0])
         self.assertEqual(event['context']['course_id'], self.COURSE_ID)
-        self.assertEqual(event['context']['module']['usage_key'], self.USAGE_ID)
+        self.assertEqual(event['context']['module']['usage_key'], None if scoring_disabled else self.USAGE_ID)
         self.assertEqual(event['context']['org_id'], self.ORG)
         self.assertEqual(event['event']['assignment_id'], self.assignment.pk)
         self.assertEqual(event['event']['question_id'], self.question.pk)
         self.assertEqual(event['username'], self.user.username)
+        if scoring_disabled:
+            self.assertIsNone(event['event'].get('grade'))
+            self.assertIsNone(event['event'].get('max_grade'))
         return event
 
-    @mock.patch('peerinst.views.LOGGER')
-    def test_events(self, logger):
-
+    def _test_events(self, logger, scoring_disabled=False, grade=Grade.CORRECT):
         # Show the question and verify the logged event.
         response = self.question_get()
-        event = self.verify_event(logger)
+        event = self.verify_event(logger, scoring_disabled=scoring_disabled)
         self.assertEqual(event['event_type'], 'problem_show')
         logger.reset_mock()
 
         # Provide a first answer and a rationale, and verify the logged event.
         response = self.question_post(first_answer_choice=2, rationale='my rationale text')
-        event = self.verify_event(logger)
+        event = self.verify_event(logger, scoring_disabled=scoring_disabled)
         self.assertEqual(event['event_type'], 'problem_check')
         self.assertEqual(event['event']['first_answer_choice'], 2)
         self.assertEqual(event['event']['success'], 'correct')
@@ -237,8 +274,22 @@ class EventLogTest(QuestionViewTestCase):
 
         # Select our own rationale and verify the logged event
         response = self.question_post(second_answer_choice=2, rationale_choice_0=None)
-        event = self.verify_event(logger)
+        event = self.verify_event(logger, scoring_disabled=scoring_disabled)
         self.assertEqual(logger.info.call_count, 2)
         self.assertEqual(event['event_type'], 'save_problem_success')
-        self.assertEqual(event['event']['success'], 'correct')
-        self.assertEqual(event['event']['grade'], 1.0)
+        self.assertEqual(event['event']['success'], 'correct' if grade == Grade.CORRECT else 'incorrect')
+
+        if not scoring_disabled:
+            self.assertEqual(event['event']['grade'], grade)
+            self.assertEqual(event['event']['max_grade'], Grade.CORRECT)
+
+    @ddt.data(Grade.CORRECT, Grade.INCORRECT, Grade.PARTIAL)
+    @mock.patch('peerinst.views.LOGGER')
+    def test_events_scoring_enabled(self, grade, logger):
+        self.mock_get_grade.return_value = grade
+        self._test_events(logger, grade=grade)
+
+    @mock.patch('peerinst.views.LOGGER')
+    def test_events_scoring_disabled(self, logger):
+        self.log_in_with_scoring_disabled()
+        self._test_events(logger, scoring_disabled=True)

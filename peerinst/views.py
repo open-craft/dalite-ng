@@ -4,13 +4,11 @@ from __future__ import unicode_literals
 import datetime
 import json
 import logging
-import math
 import random
 import re
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
-from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response, redirect
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
@@ -66,19 +64,18 @@ class QuestionMixin(object):
         )
         return context
 
-    def send_grade(self, second_answer_choice):
+    def send_grade(self):
         if not self.lti_data:
             # We are running outside of an LTI context, so we don't need to send a grade.
             return
         if not self.lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
             # edX didn't provide a callback URL for grading, so this is an unscored problem.
             return
-        correct = self.question.is_correct(second_answer_choice)
         Signals.Grade.updated.send(
             __name__,
             user=self.request.user,
             custom_key=self.custom_key,
-            grade=float(correct),
+            grade=self.answer.get_grade(),
         )
 
 
@@ -110,12 +107,17 @@ class QuestionFormView(QuestionMixin, FormView):
             usage_key = grade_handler_re.match(outcome_service_url)
             if usage_key:
                 usage_key = usage_key.group('usage_key')
+            # Grading is enabled, so include information about max grade in event data
+            data['max_grade'] = 1.0
+        else:
+            # Grading is not enabled, so remove information about grade from event data
+            if 'grade' in data:
+                del data['grade']
 
         # Add common fields to event data
         data.update(
             assignment_id=self.assignment.pk,
             assignment_title=self.assignment.title,
-            max_grade=1.0,
             problem=usage_key,
             question_id=self.question.pk,
             question_text=self.question.text,
@@ -355,15 +357,15 @@ class QuestionReviewView(QuestionReviewBaseView):
     def form_valid(self, form):
         self.second_answer_choice = int(form.cleaned_data['second_answer_choice'])
         self.chosen_rationale_id = int_or_none(form.cleaned_data['chosen_rationale_id'])
-        self.emit_check_events()
         self.save_answer()
+        self.emit_check_events()
         self.save_votes()
         self.stage_data.clear()
-        self.send_grade(self.second_answer_choice)
+        self.send_grade()
         return super(QuestionReviewView, self).form_valid(form)
 
     def emit_check_events(self):
-        correct = self.question.is_correct(self.second_answer_choice)
+        grade = self.answer.get_grade()
         event_data = dict(
             second_answer_choice=self.second_answer_choice,
             switch=self.first_answer_choice != self.second_answer_choice,
@@ -379,8 +381,8 @@ class QuestionReviewView(QuestionReviewBaseView):
                 if id is not None
             ],
             chosen_rationale_id=self.chosen_rationale_id,
-            success='correct' if correct else 'incorrect',
-            grade=float(correct),
+            success='correct' if grade == 1.0 else 'incorrect',
+            grade=grade,
         )
         self.emit_event('problem_check', **event_data)
         self.emit_event('save_problem_success', **event_data)
@@ -404,7 +406,7 @@ class QuestionReviewView(QuestionReviewBaseView):
         else:
             # We stuck with our own rationale.
             chosen_rationale = None
-        answer = models.Answer(
+        self.answer = models.Answer(
             question=self.question,
             assignment=self.assignment,
             first_answer_choice=self.first_answer_choice,
@@ -413,7 +415,7 @@ class QuestionReviewView(QuestionReviewBaseView):
             chosen_rationale=chosen_rationale,
             user_token=self.user_token,
         )
-        answer.save()
+        self.answer.save()
         if chosen_rationale is not None:
             self.record_fake_attribution_vote(chosen_rationale, models.AnswerVote.FINAL_CHOICE)
 
@@ -464,7 +466,7 @@ class QuestionSummaryView(QuestionMixin, TemplateView):
             rationale=self.answer.rationale,
             chosen_rationale=self.answer.chosen_rationale,
         )
-        self.send_grade(self.answer.second_answer_choice)
+        self.send_grade()
         return context
 
 
