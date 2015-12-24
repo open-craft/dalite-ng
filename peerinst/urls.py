@@ -8,6 +8,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.AssignmentListView.as_view(), name='assignment-list'),
+    url(r'^login/$', 'django.contrib.auth.views.login', { 'template_name': 'peerinst/login.html'}, name='peerinst_login'),
     url(r'^assignment/(?P<assignment_id>[^/]+)/', include([
         url(r'^$', views.QuestionListView.as_view(), name='question-list'),
         url(r'(?P<question_id>\d+)/', include([
