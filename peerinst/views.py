@@ -9,6 +9,7 @@ import re
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
+from django.conf import settings
 from django.shortcuts import get_object_or_404, render_to_response, redirect
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
@@ -40,7 +41,10 @@ class CsrfExemptMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
         view = super(CsrfExemptMixin, cls).as_view(**initkwargs)
-        return csrf_exempt(view)
+        if settings.CSRF_EXEMPT_PEERINST:
+            return csrf_exempt(view)
+        else:
+            return view
 
 
 class AssignmentListView(LoginRequiredMixin, ListView):
@@ -491,7 +495,6 @@ def redirect_to_login_or_show_cookie_help(request):
     return redirect_to_login(request.get_full_path())
 
 
-@csrf_exempt
 def question(request, assignment_id, question_id):
     """Load common question data and dispatch to the right question stage.
 
@@ -544,3 +547,7 @@ def question(request, assignment_id, question_id):
         return redirect(request.path)
     stage_data.store()
     return result
+
+
+if settings.CSRF_EXEMPT_PEERINST:
+    question = csrf_exempt(question)
