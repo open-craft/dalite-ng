@@ -18,7 +18,7 @@ Setting up the development server
    run these commands as the MySQL superuser:
 
         mysql> CREATE DATABASE dalite_ng;
-        mysql> CREATE USER 'dalite' IDENTIFIED BY 'your password here';
+        mysql> CREATE USER 'dalite'@'localhost' IDENTIFIED BY 'your password here';
         mysql> GRANT ALL PRIVILEGES ON dalite_ng.* TO dalite;
 
    The password can be passed in the environment:
