@@ -9,10 +9,12 @@ import re
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
+from django.conf import settings
 from django.shortcuts import get_object_or_404, render_to_response, redirect
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
@@ -33,6 +35,16 @@ class LoginRequiredMixin(object):
     def as_view(cls, **initkwargs):
         view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
         return login_required(view)
+
+
+class CsrfExemptMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(CsrfExemptMixin, cls).as_view(**initkwargs)
+        if settings.CSRF_EXEMPT_PEERINST:
+            return csrf_exempt(view)
+        else:
+            return view
 
 
 class AssignmentListView(LoginRequiredMixin, ListView):
@@ -83,7 +95,7 @@ class QuestionReload(Exception):
     """Raised to cause a reload of the page, usually to start over in case of an error."""
 
 
-class QuestionFormView(QuestionMixin, FormView):
+class QuestionFormView(QuestionMixin, CsrfExemptMixin, FormView):
     """Base class for the form views in the student UI."""
 
     def emit_event(self, name, **data):
@@ -453,7 +465,7 @@ class QuestionReviewView(QuestionReviewBaseView):
         ).save()
 
 
-class QuestionSummaryView(QuestionMixin, TemplateView):
+class QuestionSummaryView(QuestionMixin, CsrfExemptMixin, TemplateView):
     """Show a summary of answers to the student and submit the data to the database."""
 
     template_name = 'peerinst/question_summary.html'
@@ -535,3 +547,7 @@ def question(request, assignment_id, question_id):
         return redirect(request.path)
     stage_data.store()
     return result
+
+
+if settings.CSRF_EXEMPT_PEERINST:
+    question = csrf_exempt(question)

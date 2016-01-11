@@ -151,6 +151,10 @@ LTI_CLIENT_SECRET = os.environ.get('LTI_CLIENT_SECRET', None)
 PASSWORD_GENERATOR_NONCE = os.environ.get('PASSWORD_GENERATOR_NONCE', None)
 # LTI Integration end
 
+# Disables CSRF checks on peerinst views, allowing for multiple dalite LTI consumers to be displayed on the same page
+# and function properly
+CSRF_EXEMPT_PEERINST = False
+
 try:
     from .local_settings import *
 except ImportError:
