@@ -1,15 +1,18 @@
 import base64
 import hashlib
-import random
+import logging
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.dispatch import receiver
+from django.db import IntegrityError
 
 from django_lti_tool_provider import AbstractApplicationHookManager
 from django_lti_tool_provider.views import LTIView
+
+
+logger = logging.getLogger(__name__)
 
 
 class ApplicationHookManager(AbstractApplicationHookManager):
@@ -55,7 +58,12 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         try:
             User.objects.get(username=uname)
         except User.DoesNotExist:
-            User.objects.create_user(username=uname, email=email, password=password)
+            try:
+                User.objects.create_user(username=uname, email=email, password=password)
+            except IntegrityError as e:
+                # A result of race condition of multiple simultaneous LTI requests - should be safe to ignore,
+                # as password and uname are stable (i.e. not change for the same user)
+                logger.info("IntegrityError creating user - assuming result of race condition: %s", e.message)
         authenticated = authenticate(username=uname, password=password)
         login(request, authenticated)
 
