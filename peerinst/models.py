@@ -171,7 +171,7 @@ class Question(models.Model):
         elif self.answer_style == Question.ALPHA:
             return string.ascii_uppercase[index - 1]
         elif self.answer_style == Question.NUMERIC:
-            return index
+            return str(index)
         assert False, 'The field Question.answer_style has an invalid value.'
 
     def get_choices(self):

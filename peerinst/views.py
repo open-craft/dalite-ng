@@ -461,8 +461,8 @@ class QuestionSummaryView(QuestionMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(QuestionSummaryView, self).get_context_data(**kwargs)
         context.update(
-            first_choice_label=self.question.get_choice_label(self.answer.first_answer_choice),
-            second_choice_label=self.question.get_choice_label(self.answer.second_answer_choice),
+            first_choice_label=self.answer.first_answer_choice_label(),
+            second_choice_label=self.answer.second_answer_choice_label(),
             rationale=self.answer.rationale,
             chosen_rationale=self.answer.chosen_rationale,
         )

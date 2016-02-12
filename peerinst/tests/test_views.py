@@ -12,6 +12,7 @@ from django_lti_tool_provider.views import LTIView
 import ddt
 import mock
 
+from ..models import Question
 from ..util import SessionStageData
 from . import factories
 
@@ -160,6 +161,14 @@ class QuestionViewTest(QuestionViewTestCase):
         self.run_standard_review_mode()
         self.assert_grade_signal()
         self.assertTrue(self.mock_get_grade.called)
+
+    def test_numeric_answer_labels(self):
+        """Test answering questions in default mode, using numerical labels."""
+        self.set_question(factories.QuestionFactory(
+            answer_style=Question.NUMERIC,
+            choices=5, choices__correct=[2, 4], choices__rationales=4,
+        ))
+        self.run_standard_review_mode()
 
     def test_standard_review_mode_scoring_disabled(self):
         """Test answering questions in default mode, with scoring disabled."""
