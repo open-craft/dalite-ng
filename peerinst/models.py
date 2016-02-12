@@ -198,6 +198,7 @@ class AnswerChoice(models.Model):
         return self.text
 
     class Meta:
+        ordering = ['id']
         verbose_name = _('answer choice')
         verbose_name_plural = _('answer choices')
 
