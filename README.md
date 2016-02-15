@@ -148,8 +148,12 @@ Running the tests
 The tests can be run with
 
 ```
+dalite$ export PASSWORD_GENERATOR_NONCE=some_random_string
 dalite$ make test
 ```
+
+(If you have set `PASSWORD_GENERATOR_NONCE` in your settings you don't need the
+export statement above.)
 
 After the tests have finished, you can view the coverage report using:
 
