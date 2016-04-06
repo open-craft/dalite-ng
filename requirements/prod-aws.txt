@@ -1,0 +1,3 @@
+-r requirements.txt
+
+django-storages-redux==1.3

@@ -1,0 +1,3 @@
+-r requirements.txt
+
+django-storage-swift==1.2.9

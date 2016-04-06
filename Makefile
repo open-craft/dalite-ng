@@ -8,8 +8,8 @@ test: test-requirements
 coverage-report:
 	coverage report -m
 
-.%-timestamp: %.txt
+.%-timestamp: requirements/%.txt
 	pip install -r "$<"
-	touch "$@"
+	touch requirements/"$@"
 
 .PHONY: requirements test-requirements test coverage-report
