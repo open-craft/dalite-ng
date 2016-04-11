@@ -161,6 +161,79 @@ After the tests have finished, you can view the coverage report using:
 dalite$ make coverage-report
 ```
 
+Deployment notes
+----------------
+
+## Storage backends 
+
+### AWS 
+
+Dalite file upload has been tested with AWS S3  using `django-storages-redux`. 
+ 
+TOOD: Describe how it works 
+
+### Open Stack Swift
+
+Dalite file upload has been tested with OpenStack Swift using `django-storage-swift`, 
+to configure it you'll need to configure dalite, as well as set-up Swift on OpenStack 
+provider. 
+
+#### Swift setup
+
+* Create two publicly readable containers, one can be used for media uploads, second 
+  for staticfiles (this one is optional).
+* Note user credentials required, you might obtain these credentials using the OpenStack Horizon 
+  web-console (look for in the `Compute -> Access and Security` tab for `Download OpenStack RC file` 
+  button. This file, once sourced, will set-up OpenStack enviorment variables, that are
+  read in the settings example below.   
+
+#### Dalite setup 
+
+To set it up you need to:
+
+* Install requirements from ``requirements/prod-openstack.txt``
+* Set up the `settings.py` file (extensive list of setting keys
+  can be found in the [Django storage swift documentation]
+  (https://github.com/blacktorn/django-storage-swift#configuring). 
+
+Example file is here (it works  out of the box when you source the 
+OpenStack rc file)
+
+```
+# Storage to use for user uploads
+DEFAULT_FILE_STORAGE='swift.storage.SwiftStorage'
+# An existing, publicly readable container for media uploads
+SWIFT_CONTAINER_NAME='media'
+
+# Storage to use for static file
+STATICFILES_STORAGE ='swift.storage.StaticSwiftStorage'
+# An existing, publicly readable container for static files
+SWIFT_STATIC_CONTAINER_NAME='static'
+
+# Credentials
+# This is the url to authentication endpoint of your OpenStack installation 
+SWIFT_AUTH_URL=os.environ["OS_AUTH_URL"]
+# Username for Swift authorization
+SWIFT_USERNAME=os.environ["OS_USERNAME"]
+# Password for Swift authorization
+SWIFT_KEY=os.environ["OS_PASSWORD"]
+# This is the auth version to use, on OVH I used version 2
+SWIFT_AUTH_VERSION=2
+# Tenant ID 
+SWIFT_TENANT_ID=os.environ["OS_TENANT_ID"]
+# Region name, this one is optional
+SWIFT_EXTRA_OPTIONS = {
+    'region_name': os.environ['OS_REGION_NAME']
+}
+```
+ 
+#### Testing Dalite with swift locally
+
+If you need to test Dalite with swift locally, [you might use this vagrant instance]
+(https://github.com/swiftstack/vagrant-swift-all-in-one), it will create a working swift VM that is usable 
+with Dalite. 
+
+
 Attributions
 ------------
 
