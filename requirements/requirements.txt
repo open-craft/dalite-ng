@@ -4,5 +4,5 @@ mysql-python
 pillow
 
 -e git+https://github.com/tophatmonocle/ims_lti_py.git@979244d83c2e6420d2c1941f58e52f641c56ad12#egg=ims_lti_py-develop
--e git+https://github.com/open-craft/django-lti-tool-provider@ebf33b7c95282d26bb772db4b0b2b498881621c2#egg=django_lti_tool_provider-master
+-e git+https://github.com/open-craft/django-lti-tool-provider@11d770b53da8b76435885f44475ae4e914587157#egg=django_lti_tool_provider-master
 -e git+https://github.com/edx/opaque-keys@27dc382ea587483b1e3889a3d19cbd90b9023a06#egg=opaque-keys
