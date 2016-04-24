@@ -14,6 +14,7 @@ urlpatterns = [
             url(r'^$', views.question, name='question'),
         ])),
     ])),
+    url(r'^heartbeat/$', views.HeartBeatUrl.as_view()),
     url(r'^admin/$', admin_views.AdminIndexView.as_view(), name='admin-index'),
     url(r'^admin/peerinst/', include([
         url(r'^assignment_results/(?P<assignment_id>[^/]+)/', include([

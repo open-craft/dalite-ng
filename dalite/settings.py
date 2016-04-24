@@ -151,6 +151,9 @@ LTI_CLIENT_SECRET = os.environ.get('LTI_CLIENT_SECRET', None)
 PASSWORD_GENERATOR_NONCE = os.environ.get('PASSWORD_GENERATOR_NONCE', None)
 # LTI Integration end
 
+# Configureation file for the heartbeat view, should contain json file. See this url for file contents.
+HEARTBEAT_REQUIRED_FREE_SPACE_PERCENTAGE = 20
+
 try:
     from .local_settings import *
 except ImportError:
