@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^admin/peerinst/', include([
         url(r'^assignment_results/(?P<assignment_id>[^/]+)/', include([
             url(r'^$', admin_views.AssignmentResultsView.as_view(), name='assignment-results'),
+            url(r'^rationales/(?P<question_id>\d+)$', admin_views.QuestionRationaleView.as_view(), name='question-rationales'),
         ])),
         url(r'^question_preview/(?P<question_id>[^/]+)$',
             admin_views.QuestionPreviewView.as_view(), name='question-preview'),

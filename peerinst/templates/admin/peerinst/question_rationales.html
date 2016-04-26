@@ -1,7 +1,7 @@
 {% extends "admin/base_site.html" %}
 {% load i18n staticfiles grp_tags %}
 
-{% block title %}{% trans 'Assignment results' %}{% endblock %}
+{% block title %}{% trans 'Question rationales' %}{% endblock %}
 
 {% block extrastyle %}
 <link href="{% static 'peerinst/css/admin.css' %}" rel="stylesheet" type="text/css" />
@@ -10,12 +10,13 @@
 {% block breadcrumbs %}
 <ul>
   <li><a href="{% url 'admin-index' %}">{% trans 'Home' %}</a></li>
-  <li>{{ assignment.identifier }} {% trans 'results' %}</li>
+  <li><a href="{% url 'assignment-results' assignment_id=assignment.identifier %}">{% trans 'results' %}</a></li>
+  <li>{{ question.title }} {% trans 'rationales' %}</li>
 </ul>
 {% endblock %}
 
 {% block content_title %}
-<h1>{% trans 'Results for the assignment' %} {{ assignment.identifier }}</h1>
+<h1>{% trans 'Rationales for answers to ' %} {{ question.title }}</h1>
 {% endblock %}
 
 {% block content %}
@@ -23,36 +24,38 @@
   <h2>Summary</h2>
   <table class="results-summary">
     <tbody>
-      {% for label, item in assignment_data %}
+      {% for label, item in summary_data %}
       <tr><th>{{ label }}</th><td>{{ item }}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 <div class="g-d-c-fluid">
-  <h2>Results for individual questions</h2>
-  <table class="results-question-data">
+  {% for data in rationale_data %}
+  <h2>{{ data.heading }}</h2>
+  <table class="results-rationale-data">
     <thead>
       <tr>
-        {% for label in question_data.labels %}
+        {% for label in data.labels %}
         <th>{{ label }}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for question in question_data.rows %}
+      {% for rationale in data.rows %}
       <tr class="grp-row-{% cycle 'odd' 'even' %}">
-        {% for item in question.data %}
+        {% for item in rationale.data %}
         <td>{{ item }}</td>
         {% endfor %}
         <td>
-          <a href="{{ question.link_this }}">[{% trans 'this assignment' %}]</a>
-          <a href="{{ question.link_all }}">[{% trans 'all' %}]</a>
-          <a href="{{ question.link_rationales }}">[{% trans 'rationales' %}]</a>
+        {% if rationale.link_answers %}
+        <a href="{{ rationale.link_answers }}">[{% trans 'answers' %}]</a>
+        {% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  {% endfor %}
 </div>
 {% endblock %}

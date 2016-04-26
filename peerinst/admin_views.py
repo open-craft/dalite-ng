@@ -86,6 +86,162 @@ def get_assignment_aggregates(assignment):
     return sums, question_data
 
 
+def get_question_rationale_aggregates(assignment, question):
+    """Get aggregated top rationales for answers to the given assignment and question, for these groups of rationales:
+
+    * 'upvoted': upvoted rationales
+    * 'chosen': chosen rationales for all answers to the given question
+    * 'right_to_wrong': chosen rationales for answers that switched from right to wrong
+    * 'wrong_to_right': chosen rationales for answers that switched from wrong to right
+
+    This function returns a pair (sums, rationales).
+    'sums' is a collection.Counter object mapping the above rationale group labels to rationale counts.
+
+    'rationales' is a dict keyed by the above rational group labels.  The values are sorted lists of dicts:
+        {
+        'upvoted': [
+            {
+                'rationale': <obj>, # instance of model.Answer
+                'count': <int>,     # number of times 'rationale' was upvoted
+            },
+            ...
+        ],
+        'chosen': [
+            {
+                'rationale': <obj>, # instance of model.Answer or None
+                'count': <int>,     # number of times 'rationale' was chosen
+            },
+            ...
+        ],
+        ...
+        }
+
+    """
+    # Select answers entered by students, not example answers
+    answers = question.answer_set.filter(assignment=assignment).exclude(user_token='')
+
+    # Get indices of the correct answer choice(s)
+    answerchoice_correct = question.answerchoice_set.values_list('correct', flat=True)
+    correct_choices = list(itertools.compress(itertools.count(1), answerchoice_correct))
+
+    # Helper function collects chosen rationales and the number of times used from a list of answers
+    def _top_rationales(answer_list):
+        # Count the chosen rationales for the given answer list
+        counts = collections.Counter(a.chosen_rationale for a in answer_list.select_related('chosen_rationale'))
+
+        # Return a list of dicts, sorted by descending count
+        sorted_list = [dict(rationale=r, count=counts[r]) for r in sorted(counts, key=counts.get, reverse=True)]
+        return sorted_list
+
+    # Collect the upvoted rationales, sorted by descending upvotes
+    output = {'upvoted': []}
+    for rationale in answers.exclude(upvotes=0).order_by('-upvotes'):
+        output['upvoted'].append({'rationale': rationale, 'count': rationale.upvotes})
+
+    # Collect top rationales chosen for all answers
+    output['chosen'] = _top_rationales(answers)
+
+    # Collect top rationales chosen for answers switched from wrong to right
+    wrong_to_right = (answers.exclude(first_answer_choice__in=correct_choices)
+                      .filter(second_answer_choice__in=correct_choices))
+    output['wrong_to_right'] = _top_rationales(wrong_to_right)
+
+    # Collect top rationales chosen for answers switched from right to wrong
+    right_to_wrong = (answers.exclude(second_answer_choice__in=correct_choices)
+                      .filter(first_answer_choice__in=correct_choices))
+    output['right_to_wrong'] = _top_rationales(right_to_wrong)
+
+    # Calculate the sums: total number of rationales for each group
+    sums = collections.Counter({k: len(v) for k, v in output.iteritems()})
+
+    # Return the sums and final sorted lists of rationales
+    return sums, output
+
+
+class QuestionRationaleView(StaffMemberRequiredMixin, TemplateView):
+    template_name = "admin/peerinst/question_rationales.html"
+
+    @staticmethod
+    def prepare_summary_data(sums):
+        return [
+            (_('Total rationales upvoted'), sums['upvoted']),
+            (_('Total rationales chosen'), sums['chosen']),
+            (_('Total rationales chosen for right to wrong answer switches'), sums['right_to_wrong']),
+            (_('Total rationales chosen for wrong to right answer switches'), sums['wrong_to_right']),
+        ]
+
+    @staticmethod
+    def prepare_rationale_labels():
+        return [
+            _('Count'),
+            _('Rationale'),
+            _('Upvotes'),
+            _('Downvotes'),
+            _('Answers with this chosen rationale'),
+        ]
+
+    @staticmethod
+    def prepare_rationale_rows(rationale_data=None):
+        rows = []
+        for item in rationale_data:
+            count = item.get('count', 0)
+            rationale = item.get('rationale', None)
+            if rationale:
+                row = dict(
+                    data=[count, rationale.rationale, rationale.upvotes, rationale.downvotes],
+                    link_answers='?'.join([reverse('admin:peerinst_answer_changelist'),
+                                           urllib.urlencode(dict(chosen_rationale__id__exact=rationale.id))]),
+                )
+            else:
+                row = dict(
+                    data=[count, _('(Student stuck to own rationale)'), '', ''],
+                    link_answers='?'.join([reverse('admin:peerinst_answer_changelist'),
+                                           urllib.urlencode(dict(chosen_rationale__isnull=True))]),
+                )
+            rows.append(row)
+
+        return rows
+
+    def prepare_rationale_data(self, rationale_data):
+        return [
+            {
+                'heading': _('Upvoted rationales'),
+                'labels': self.prepare_rationale_labels(),
+                'rows': self.prepare_rationale_rows(rationale_data['upvoted']),
+            },
+            {
+                'heading': _('Top rationales chosen'),
+                'labels': self.prepare_rationale_labels(),
+                'rows': self.prepare_rationale_rows(rationale_data['chosen']),
+            },
+            {
+                'heading': _('Top rationales chosen for right to wrong answer switches'),
+                'labels': self.prepare_rationale_labels(),
+                'rows': self.prepare_rationale_rows(rationale_data['right_to_wrong']),
+            },
+            {
+                'heading': _('Top rationales chosen for wrong to right answer switches'),
+                'labels': self.prepare_rationale_labels(),
+                'rows': self.prepare_rationale_rows(rationale_data['wrong_to_right']),
+            },
+        ]
+
+    def get_context_data(self, **kwargs):
+        context = TemplateView.get_context_data(self, **kwargs)
+        assignment_id = self.kwargs['assignment_id']
+        assignment = get_object_or_404(models.Assignment, identifier=assignment_id)
+        question_id = self.kwargs['question_id']
+        question = get_object_or_404(models.Question, id=question_id)
+        sums, rationale_data = get_question_rationale_aggregates(assignment, question)
+        context.update(
+            assignment=assignment,
+            question=question,
+            summary_data=self.prepare_summary_data(sums),
+            rationale_data=self.prepare_rationale_data(rationale_data),
+        )
+        return context
+
+
 class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
     template_name = "admin/peerinst/assignment_results.html"
 
@@ -132,6 +288,10 @@ class AssignmentResultsView(StaffMemberRequiredMixin, TemplateView):
                 data=[i, question.title] + self.prepare_stats(sums, switch_columns),
                 link_this='?'.join([reverse('admin:peerinst_answer_changelist'), get_params_this]),
                 link_all='?'.join([reverse('admin:peerinst_answer_changelist'), get_params_all]),
+                link_rationales=reverse('question-rationales', kwargs={
+                    'assignment_id': self.assignment_id,
+                    'question_id': question.id,
+                }),
             ))
         labels = [
             _('No.'), _('Question ID'), _('Total answers'), _('Total students'),

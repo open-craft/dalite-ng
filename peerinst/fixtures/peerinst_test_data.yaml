@@ -32,32 +32,35 @@
     title: Assignment title 1
   model: peerinst.assignment
   pk: Assignment1
-- fields: {assignment: Assignment1, chosen_rationale: null, first_answer_choice: 1,
+- fields: {assignment: Assignment1, chosen_rationale: 861, first_answer_choice: 1,
     question: 29, rationale: Rationale text 1 for choice 1, second_answer_choice: 3,
+    upvotes: 10, downvotes: 1,
     show_to_others: true, user_token: rhtof}
   model: peerinst.answer
   pk: 855
 - fields: {assignment: Assignment1, chosen_rationale: null, first_answer_choice: 1,
     question: 29, rationale: Rationale text 2 for choice 1, second_answer_choice: 2,
+    upvotes: 9, downvotes: 2,
     show_to_others: true, user_token: esbxa}
   model: peerinst.answer
   pk: 856
-- fields: {assignment: Assignment1, chosen_rationale: null, first_answer_choice: 1,
+- fields: {assignment: Assignment1, chosen_rationale: 861, first_answer_choice: 1,
     question: 29, rationale: Rationale text 3 for choice 1, second_answer_choice: 3,
+    upvotes: 8, downvotes: 3,
     show_to_others: true, user_token: upjwt}
   model: peerinst.answer
   pk: 857
-- fields: {assignment: Assignment1, chosen_rationale: null, first_answer_choice: 2,
+- fields: {assignment: Assignment1, chosen_rationale: 864, first_answer_choice: 2,
     question: 29, rationale: Rationale text 1 for choice 2, second_answer_choice: 4,
     show_to_others: true, user_token: rhtof}
   model: peerinst.answer
   pk: 858
-- fields: {assignment: Assignment1, chosen_rationale: null, first_answer_choice: 2,
+- fields: {assignment: Assignment1, chosen_rationale: 865, first_answer_choice: 2,
     question: 29, rationale: Rationale text 2 for choice 2, second_answer_choice: 4,
     show_to_others: true, user_token: nrqek}
   model: peerinst.answer
   pk: 859
-- fields: {assignment: Assignment1, chosen_rationale: null, first_answer_choice: 2,
+- fields: {assignment: Assignment1, chosen_rationale: 861, first_answer_choice: 2,
     question: 29, rationale: Rationale text 3 for choice 2, second_answer_choice: 3,
     show_to_others: true, user_token: bmnwf}
   model: peerinst.answer
@@ -102,7 +105,7 @@
     show_to_others: true, user_token: ''}
   model: peerinst.answer
   pk: 868
-- fields: {assignment: Assignment1, chosen_rationale: null, first_answer_choice: 5,
+- fields: {assignment: Assignment1, chosen_rationale: 856, first_answer_choice: 5,
     question: 29, rationale: Rationale text 3 for choice 5, second_answer_choice: 1,
     show_to_others: true, user_token: eeawg}
   model: peerinst.answer
