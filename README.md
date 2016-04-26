@@ -10,7 +10,7 @@ Setting up the development server
 
 1. Install the requirements (you probably want to set up a virtualenv first).
 
-        $ pip install -r requirements.txt
+        $ pip install -r requirements/requirements.txt
 
 2. Set up the database connection.  The default configuration is to use the
    MySQL database `dalite_ng` and the user `dalite`.  To set up the database,
@@ -18,7 +18,8 @@ Setting up the development server
 
         mysql> CREATE DATABASE dalite_ng;
         mysql> CREATE USER 'dalite'@'localhost' IDENTIFIED BY 'your password here';
-        mysql> GRANT ALL PRIVILEGES ON dalite_ng.* TO dalite;
+        mysql> GRANT ALL PRIVILEGES ON dalite_ng.* TO 'dalite'@'localhost';
+        mysql> GRANT ALL PRIVILEGES ON test_dalite_ng.* TO 'dalite'@'localhost';
 
    The password can be passed in the environment:
 
