@@ -16,6 +16,7 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from .forms import FirstAnswerForm
 from . import models
+from .admin import AnswerAdmin
 from .util import make_percent_function
 
 
@@ -86,18 +87,21 @@ def get_assignment_aggregates(assignment):
     return sums, question_data
 
 
-def get_question_rationale_aggregates(assignment, question):
-    """Get aggregated top rationales for answers to the given assignment and question, for these groups of rationales:
+def get_question_rationale_aggregates(assignment, question, perpage):
+    """Get the top `perpage` rationales for answers to the given assignment and question.
 
+    This function returns a pair (sums, rationales), with entries for these groups of rationales:
     * 'upvoted': upvoted rationales
     * 'chosen': chosen rationales for all answers to the given question
     * 'right_to_wrong': chosen rationales for answers that switched from right to wrong
     * 'wrong_to_right': chosen rationales for answers that switched from wrong to right
 
-    This function returns a pair (sums, rationales).
-    'sums' is a collection.Counter object mapping the above rationale group labels to rationale counts.
+    `perpage` limits the number of rationales returned, but does not affect the counts in the returned `sums`.
+
+    'sums' is a collection.Counter object mapping the above rationale group labels to total rationale counts.
 
     'rationales' is a dict keyed by the above rational group labels.  The values are sorted lists of dicts:
+
         {
         'upvoted': [
             {
@@ -130,29 +134,32 @@ def get_question_rationale_aggregates(assignment, question):
         counts = collections.Counter(a.chosen_rationale for a in answer_list.select_related('chosen_rationale'))
 
         # Return a list of dicts, sorted by descending count
-        sorted_list = [dict(rationale=r, count=counts[r]) for r in sorted(counts, key=counts.get, reverse=True)]
-        return sorted_list
+        sorted_list = [dict(rationale=rationale, count=counts[rationale])
+                       for rationale in sorted(counts, key=counts.get, reverse=True)]
+        return sorted_list[:perpage], len(sorted_list)
 
     # Collect the upvoted rationales, sorted by descending upvotes
     output = {'upvoted': []}
-    for rationale in answers.exclude(upvotes=0).order_by('-upvotes'):
+    upvoted = answers.exclude(upvotes=0).order_by('-upvotes')
+    for rationale in upvoted.all()[:perpage]:
         output['upvoted'].append({'rationale': rationale, 'count': rationale.upvotes})
 
+    # Show totals in the sums counter
+    sums = collections.Counter()
+    sums['upvoted'] = upvoted.count()
+
     # Collect top rationales chosen for all answers
-    output['chosen'] = _top_rationales(answers)
+    output['chosen'], sums['chosen'] = _top_rationales(answers)
 
     # Collect top rationales chosen for answers switched from wrong to right
     wrong_to_right = (answers.exclude(first_answer_choice__in=correct_choices)
                       .filter(second_answer_choice__in=correct_choices))
-    output['wrong_to_right'] = _top_rationales(wrong_to_right)
+    output['wrong_to_right'], sums['wrong_to_right'] = _top_rationales(wrong_to_right)
 
     # Collect top rationales chosen for answers switched from right to wrong
     right_to_wrong = (answers.exclude(second_answer_choice__in=correct_choices)
                       .filter(first_answer_choice__in=correct_choices))
-    output['right_to_wrong'] = _top_rationales(right_to_wrong)
-
-    # Calculate the sums: total number of rationales for each group
-    sums = collections.Counter({k: len(v) for k, v in output.iteritems()})
+    output['right_to_wrong'], sums['right_to_wrong'] = _top_rationales(right_to_wrong)
 
     # Return the sums and final sorted lists of rationales
     return sums, output
@@ -232,12 +239,23 @@ class QuestionRationaleView(StaffMemberRequiredMixin, TemplateView):
         assignment = get_object_or_404(models.Assignment, identifier=assignment_id)
         question_id = self.kwargs['question_id']
         question = get_object_or_404(models.Question, id=question_id)
-        sums, rationale_data = get_question_rationale_aggregates(assignment, question)
+
+        # Limit number of rationales shown to a number between [0, AnswerAdmin.list_per_page]
+        perpage = self.request.GET.get('perpage')
+        try:
+            perpage = int(perpage)
+        except (TypeError, ValueError):
+            perpage = None
+        if (perpage is None) or (perpage <= 0) or (perpage > AnswerAdmin.list_per_page):
+            perpage = AnswerAdmin.list_per_page
+
+        sums, rationale_data = get_question_rationale_aggregates(assignment, question, perpage)
         context.update(
             assignment=assignment,
             question=question,
             summary_data=self.prepare_summary_data(sums),
             rationale_data=self.prepare_rationale_data(rationale_data),
+            perpage=perpage,
         )
         return context
 
