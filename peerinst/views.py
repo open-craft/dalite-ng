@@ -5,19 +5,12 @@ import datetime
 import json
 import logging
 import random
-import urllib2
-import os
-
-import collections
 
 import re
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.db.utils import DatabaseError
 from django.shortcuts import get_object_or_404, render_to_response, redirect
 from django.template.response import TemplateResponse
 from django.utils.html import escape, format_html
@@ -29,11 +22,12 @@ from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
 from opaque_keys.edx.keys import CourseKey
+
+from . import heartbeat_checks
 from . import forms
 from . import models
 from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -480,71 +474,16 @@ class QuestionSummaryView(QuestionMixin, TemplateView):
         return context
 
 
-HeartbeatUrlCheckResult = collections.namedtuple("HeartbeatUrlCheckResult", ["is_ok", "message"])
-
-
 class HeartBeatUrl(View):
-
-    def get_free_percentage_on_mount(self, mount):
-        stats = os.statvfs(mount)
-        return stats.f_bavail / float(stats.f_blocks) * 100
-
-    def test_free_space_on_mount(self, mount, free_percentage_required):
-        free_percentage = self.get_free_percentage_on_mount(mount)
-        if free_percentage_required > free_percentage:
-            message = "Not enough free space on {mount}. Free space available {percentage:.1f}%".format(
-                mount=mount,
-                percentage=free_percentage
-            )
-            return HeartbeatUrlCheckResult(False, message)
-        else:
-            message = "Enough free space on {mount}. Free space available {percentage:.1f}%".format(
-                mount=mount,
-                percentage=free_percentage
-            )
-            return HeartbeatUrlCheckResult(True, message)
-
-    def check_free_space(self, default_free_space_percentage):
-        with open("/proc/mounts") as f:
-            proc_mounts = f.read().strip()
-        for line in proc_mounts.split("\n"):
-            parts = line.split()
-            device = parts[0]
-            mount = parts[1]
-            if device.startswith("/dev"):
-                yield self.test_free_space_on_mount(mount, default_free_space_percentage)
-
-    def check_db_query(self):
-        try:
-            models.Question.objects.count()
-            return HeartbeatUrlCheckResult(True, "Database connection seems to work")
-        except DatabaseError:
-            return HeartbeatUrlCheckResult(False, "Database connection error")
-
-    def check_staticfiles(self):
-        path = None
-
-        canary = 'some contents'
-
-        try:
-            path = default_storage.save('image.gif', ContentFile(canary))
-            response = urllib2.urlopen(default_storage.url(path))
-            response_content = response.read()
-            if response_content != canary:
-                return HeartbeatUrlCheckResult(False, "Cant load uploaded file")
-            return HeartbeatUrlCheckResult(True, "Media upload works")
-        except Exception:
-            return HeartbeatUrlCheckResult(False, "Some error in media upload")
-        finally:
-            default_storage.delete(path)
 
     def get(self, request):
 
         checks = []
 
-        checks.append(self.check_db_query())
-        checks.append(self.check_staticfiles())
-        checks.extend(self.check_free_space(settings.HEARTBEAT_REQUIRED_FREE_SPACE_PERCENTAGE))
+        checks.append(heartbeat_checks.check_db_query())
+        checks.append(heartbeat_checks.check_staticfiles())
+        checks.extend(heartbeat_checks.test_global_free_percentage(
+            settings.HEARTBEAT_REQUIRED_FREE_SPACE_PERCENTAGE))
 
         checks_ok = all((check.is_ok for check in checks))
 
