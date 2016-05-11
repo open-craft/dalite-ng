@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import SimpleTestCase
 
-from dalite import ApplicationHookManager
+from dalite import ApplicationHookManager, LTIRoles
 
 
 @ddt.ddt
@@ -86,3 +86,56 @@ class ApplicationHookManagerTests(SimpleTestCase):
             )
             authenticate_mock.assert_called_once_with(username=expected_uname, password=expected_password)
             login_mock.assert_called_once_with(request, auth_result)
+
+    @ddt.unpack
+    @ddt.data(
+        ([], False),
+        (["Unknown role"], False),
+        ([LTIRoles.LEARNER], False),
+        ([LTIRoles.INSTRUCTOR], True),
+        ([LTIRoles.STAFF], True),
+        ([LTIRoles.LEARNER, LTIRoles.INSTRUCTOR], True),
+        ([LTIRoles.LEARNER, LTIRoles.STAFF], True),
+    )
+    def test_authentication_hook_admin_roles(self, roles, is_admin, user_objects_manager):
+        user = User()
+        user_objects_manager.get.return_value = user
+        request = mock.Mock()
+
+        with mock.patch('dalite.authenticate') as authenticate_mock, mock.patch('dalite.login') as login_mock, \
+                mock.patch.object(user, 'save') as save_mock:
+            authenticate_mock.return_value = True
+            self.manager.authentication_hook(request, 'irrelevant', 'irrelevant', 'irrelevant', roles=roles)
+
+            self.assertEqual(user.is_staff, is_admin)
+            self.assertEqual(save_mock.called, is_admin)
+
+    @ddt.unpack
+    @ddt.data(
+        ('assignment_1', 1),
+        ('assignment_2', 2),
+    )
+    def test_authenticated_redirect_normal(self, assignment_id, question_id, user_objects_manager):
+        request = mock.Mock()
+        lti_data = {
+            'custom_assignment_id': assignment_id,
+            'custom_question_id': question_id
+        }
+        expected_redirect = "/assignment/{assignment_id}/{question_id}/".format(
+            assignment_id=assignment_id, question_id=question_id
+        )
+        actual_redirect = self.manager.authenticated_redirect_to(request, lti_data)
+
+        self.assertEqual(actual_redirect, expected_redirect)
+
+    def test_authenticated_redirect_studio_user(self, user_objects_manager):
+        request = mock.Mock()
+        request.user.username = "student"
+        lti_data = {
+            'custom_assignment_id': 'irrelevant',
+            'custom_question_id': 1
+        }
+        expected_redirect = "/admin/"
+        actual_redirect = self.manager.authenticated_redirect_to(request, lti_data)
+
+        self.assertEqual(actual_redirect, expected_redirect)
