@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, unicode_literals
 import ddt
+import mock
 
+from itertools import repeat
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from . import factories
@@ -10,7 +12,6 @@ from .. import models
 from .. import admin
 
 
-@ddt.ddt
 class AggregatesTestCase(TestCase):
     fixtures = ['peerinst_test_data']
 
@@ -66,300 +67,124 @@ class AggregatesTestCase(TestCase):
         }
         self.assertDictEqual(dict(sums), expected_sums)
 
-    @ddt.unpack
-    @ddt.data(
-        ('Assignment1', 29, 100,
-         {
-             'upvoted': 3,
-             'chosen': 5,
-             'wrong_to_right': 2,
-             'right_to_wrong': 3,
-         }, {
-             'upvoted': [
-                 {'count': 10, 'rationale': 855},
-                 {'count': 9, 'rationale': 856},
-                 {'count': 8, 'rationale': 857},
-             ],
-             'chosen': [
-                 {'count': 8, 'rationale': None},
-                 {'count': 3, 'rationale': 861},
-                 {'count': 1, 'rationale': 864},
-                 {'count': 1, 'rationale': 865},
-                 {'count': 1, 'rationale': 856},
-             ],
-             'right_to_wrong': [
-                 {'count': 3, 'rationale': 861},
-                 {'count': 1, 'rationale': 864},
-                 {'count': 1, 'rationale': 865},
-             ],
-             'wrong_to_right': [
-                 {'count': 1, 'rationale': 856},
-                 {'count': 1, 'rationale': None},
-             ],
-         }),
-        # Empty case - no chosen_rationales set, no upvotes given
-        ('Assignment1', 30, 100,
-         {
-             'upvoted': 0,
-             'chosen': 1,
-             'wrong_to_right': 1,
-             'right_to_wrong': 1,
-         }, {
-             'upvoted': [],
-             'chosen': [
-                 {'count': 6, 'rationale': None},
-             ],
-             'wrong_to_right': [
-                 {'count': 3, 'rationale': None},
-             ],
-             'right_to_wrong': [
-                 {'count': 3, 'rationale': None},
-             ],
-         }),
-        # Set perpage=2
-        ('Assignment1', 29, 2,
-         {
-             'upvoted': 3,
-             'chosen': 5,
-             'wrong_to_right': 2,
-             'right_to_wrong': 3,
-         }, {
-             'upvoted': [
-                 {'count': 10, 'rationale': 855},
-                 {'count': 9, 'rationale': 856},
-             ],
-             'chosen': [
-                 {'count': 8, 'rationale': None},
-                 {'count': 3, 'rationale': 861},
-             ],
-             'right_to_wrong': [
-                 {'count': 3, 'rationale': 861},
-                 {'count': 1, 'rationale': 864},
-             ],
-             'wrong_to_right': [
-                 {'count': 1, 'rationale': 856},
-                 {'count': 1, 'rationale': None},
-             ],
-         }),
-    )
-    def test_get_question_rationale_aggregates(self, assign_id, question_id, perpage,
-                                               expected_sums, expected_rationales):
-        assignment = models.Assignment.objects.get(identifier=assign_id)
-        question = models.Question.objects.get(id=question_id)
-        sums, rationales = admin_views.get_question_rationale_aggregates(assignment, question, perpage)
-        self.assertDictEqual(dict(sums), expected_sums)
 
-        # Fetch the actual objects from the ids in the test data
-        for data in expected_rationales.values():
-            for item in data:
-                rationale_id = item.get('rationale')
-                if rationale_id:
-                    item['rationale'] = models.Answer.objects.get(id=rationale_id)
-        self.assertDictEqual(rationales, expected_rationales)
+class TopRationalesTestData(object):
+
+    @staticmethod
+    def getData(count):
+        assignment = factories.AssignmentFactory()
+        question = factories.QuestionFactory(
+            choices=2, choices__correct=[1],
+        )
+        assignment.questions.add(question)
+
+        # Many chosen rationales, with long text
+        answers = []
+        for idx in range(count):
+            first_answer = (idx % 2) + 1  # 1, 2, 1, 2, ...
+            second_answer = (1 if (idx % 4) < 2 else 2)  # 1, 1, 2, 2, ...
+            upvotes = idx % 10
+            chosen_rationale = (answers[idx - 1] if idx else None)
+            rationale = 'Rationale ' + str(idx)*200
+            answers += [
+                factories.AnswerFactory(
+                    assignment=assignment,
+                    question=question,
+                    first_answer_choice=first_answer,
+                    second_answer_choice=second_answer,
+                    user_token='etfge',
+                    upvotes=upvotes,
+                    chosen_rationale=chosen_rationale,
+                    rationale=rationale,
+                ),
+            ]
+        return (assignment, question)
+
+    @staticmethod
+    def mock_rationale_aggregates(question, assignment, perpage):
+        sums = {'upvoted': 1, 'chosen': 150, 'right_to_wrong': 12, 'wrong_to_right': 50}
+        answer = mock.Mock()
+
+        if (perpage is None) or (perpage <= 0) or (perpage > admin.AnswerAdmin.list_per_page):
+            perpage = admin.AnswerAdmin.list_per_page
+
+        rationales = {
+            'upvoted': list(repeat(answer, min(perpage, 1))),
+            'chosen': list(repeat(answer, min(perpage, 150))),
+            'right_to_wrong': list(repeat(answer, min(perpage, 12))),
+            'wrong_to_right': list(repeat(answer, min(perpage, 50))),
+        }
+        return sums, rationales
 
 
 @ddt.ddt
-class QuestionRationaleViewTestCase(TestCase):
-    fixtures = ['peerinst_test_data']
+class TopRationalesTestCase(TestCase):
+    assignment = None
+    question = None
 
-    def setUp(self):
-        super(QuestionRationaleViewTestCase, self).setUp()
-        self.admin_user = factories.UserFactory()
-        self.admin_user.is_staff = True
-        self.admin_user.save()
+    @classmethod
+    def setUpClass(cls):
+        super(TopRationalesTestCase, cls).setUpClass()
+        (cls.assignment, cls.question) = TopRationalesTestData.getData(5000)
 
-    @ddt.unpack
-    @ddt.data(
-        # Default perpage
-        ('Assignment1', 29, None, [
-            ('Total rationales upvoted', 3),
-            ('Total rationales chosen', 5),
-            ('Total rationales chosen for right to wrong answer switches', 3),
-            ('Total rationales chosen for wrong to right answer switches', 2),
-        ], [
-            {
-                'heading': 'Upvoted rationales',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [
-                    {
-                        'data': [10, 'Rationale text 1 for choice 1', 10, 1],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=855',
-                    },
-                    {
-                        'data': [9, 'Rationale text 2 for choice 1', 9, 2],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=856',
-                    },
-                    {
-                        'data': [8, 'Rationale text 3 for choice 1', 8, 3],
-                        'link_answers': u'/admin/peerinst/answer/?chosen_rationale__id__exact=857',
-                    }
-                ]
-            }, {
-                'heading': 'Top rationales chosen',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [
-                    {
-                        'data': [8, '(Student stuck to own rationale)', u'', u''],
-                        'link_answers': u'/admin/peerinst/answer/?chosen_rationale__isnull=True',
-                    },
-                    {
-                        'data': [3, 'Rationale text 1 for choice 3', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=861',
-                    },
-                    {
-                        'data': [1, 'Rationale text 1 for choice 4', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=864',
-                    },
-                    {
-                        'data': [1, 'Rationale text 2 for choice 4', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=865',
-                    },
-                    {
-                        'data': [1, 'Rationale text 2 for choice 1', 9, 2],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=856',
-                    },
-                ]
-            }, {
-                'heading': 'Top rationales chosen for right to wrong answer switches',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [
-                    {
-                        'data': [3, 'Rationale text 1 for choice 3', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=861',
-                    },
-                    {
-                        'data': [1, 'Rationale text 1 for choice 4', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=864',
-                    },
-                    {
-                        'data': [1, 'Rationale text 2 for choice 4', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=865',
-                    },
-                ]
-            }, {
-                'heading': 'Top rationales chosen for wrong to right answer switches',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [
-                    {
-                        'data': [1, 'Rationale text 2 for choice 1', 9, 2],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=856',
-                    },
-                    {
-                        'data': [1, '(Student stuck to own rationale)', u'', u''],
-                        'link_answers': u'/admin/peerinst/answer/?chosen_rationale__isnull=True',
-                    },
-                ]
-            }
-        ]),
-        # Empty case - no chosen_rationales set, no upvotes given, default perpage
-        ('Assignment1', 30, None, [
-            ('Total rationales upvoted', 0),
-            ('Total rationales chosen', 1),
-            ('Total rationales chosen for right to wrong answer switches', 1),
-            ('Total rationales chosen for wrong to right answer switches', 1),
-        ], [
-            {
-                'heading': 'Upvoted rationales',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': []
-            },
-            {
-                'heading': 'Top rationales chosen',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [{
-                    'data': [6, '(Student stuck to own rationale)', u'', u''],
-                    'link_answers': u'/admin/peerinst/answer/?chosen_rationale__isnull=True',
-                }]
-            },
-            {
-                'heading': 'Top rationales chosen for right to wrong answer switches',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [{
-                    'data': [3, '(Student stuck to own rationale)', u'', u''],
-                    'link_answers': u'/admin/peerinst/answer/?chosen_rationale__isnull=True',
-                }]
-            },
-            {
-                'heading': 'Top rationales chosen for wrong to right answer switches',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [{
-                    'data': [3, '(Student stuck to own rationale)', u'', u''],
-                    'link_answers': u'/admin/peerinst/answer/?chosen_rationale__isnull=True',
-                }]
-            },
-        ]),
-        # perpage=2
-        ('Assignment1', 29, 2, [
-            ('Total rationales upvoted', 3),
-            ('Total rationales chosen', 5),
-            ('Total rationales chosen for right to wrong answer switches', 3),
-            ('Total rationales chosen for wrong to right answer switches', 2),
-        ], [
-            {
-                'heading': 'Upvoted rationales',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [
-                    {
-                        'data': [10, 'Rationale text 1 for choice 1', 10, 1],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=855',
-                    },
-                    {
-                        'data': [9, 'Rationale text 2 for choice 1', 9, 2],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=856',
-                    },
-                ]
-            }, {
-                'heading': 'Top rationales chosen',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [
-                    {
-                        'data': [8, '(Student stuck to own rationale)', u'', u''],
-                        'link_answers': u'/admin/peerinst/answer/?chosen_rationale__isnull=True',
-                    },
-                    {
-                        'data': [3, 'Rationale text 1 for choice 3', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=861',
-                    },
-                ]
-            }, {
-                'heading': 'Top rationales chosen for right to wrong answer switches',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [
-                    {
-                        'data': [3, 'Rationale text 1 for choice 3', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=861',
-                    },
-                    {
-                        'data': [1, 'Rationale text 1 for choice 4', 0, 0],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=864',
-                    },
-                ]
-            }, {
-                'heading': 'Top rationales chosen for wrong to right answer switches',
-                'labels': ['Count', 'Rationale', 'Upvotes', 'Downvotes', 'Answers with this chosen rationale'],
-                'rows': [
-                    {
-                        'data': [1, 'Rationale text 2 for choice 1', 9, 2],
-                        'link_answers': '/admin/peerinst/answer/?chosen_rationale__id__exact=856',
-                    },
-                    {
-                        'data': [1, '(Student stuck to own rationale)', u'', u''],
-                        'link_answers': u'/admin/peerinst/answer/?chosen_rationale__isnull=True',
-                    },
-                ]
-            }
-        ]),
-    )
-    def test_view(self, assign_id, question_id, perpage, expected_summary_data, expected_rationale_data):
-        self.client.login(username=self.admin_user.username, password='test')
-        kwargs = dict(assignment_id=assign_id, question_id=question_id)
+    @ddt.data(0, 100, 2, 1500)
+    def test_large_data(self, perpage):
+        with self.assertNumQueries(6 if perpage else 5):
+            sums, rationales = admin_views.get_question_rationale_aggregates(self.assignment, self.question, perpage)
+        self.assertEquals(sums['upvoted'], 4500)
+        self.assertEquals(len(rationales['upvoted']), perpage if perpage < 4500 else 4500)
+
+        self.assertEquals(sums['chosen'], 5000)
+        self.assertEquals(len(rationales['chosen']), perpage if perpage < 5000 else 5000)
+        
+        self.assertEquals(sums['wrong_to_right'], 1250)
+        self.assertEquals(len(rationales['wrong_to_right']), perpage if perpage < 1250 else 1250)
+        self.assertEquals(sums['right_to_wrong'], 1250)
+        self.assertEquals(len(rationales['right_to_wrong']), perpage if perpage < 1250 else 1250)
+
+    @ddt.data(0, 100, 2)
+    @mock.patch('peerinst.admin_views.get_question_rationale_aggregates',
+                TopRationalesTestData.mock_rationale_aggregates)
+    def test_view(self, perpage):
+
+        admin_user = factories.UserFactory()
+        admin_user.is_staff = True
+        admin_user.save()
+
+        self.client.login(username=admin_user.username, password='test')
+        kwargs = dict(assignment_id=self.assignment.identifier, question_id=self.question.id)
         url = reverse('question-rationales', kwargs=kwargs)
         if perpage:
             url = '?'.join([url, 'perpage={0}'.format(perpage)])
         else:
             perpage = admin.AnswerAdmin.list_per_page
+
         response = self.client.get(url)
+        context = response.context
         self.assertEqual(response.status_code, 200)
-        self.assertListEqual(response.context['summary_data'], expected_summary_data)
-        self.assertListEqual(response.context['rationale_data'], expected_rationale_data)
-        self.assertEqual(response.context['perpage'], perpage)
+        self.assertEqual(context['perpage'], perpage)
+
+        summary_data = context['summary_data']
+        self.assertEquals(len(summary_data), 4)
+        self.assertEquals(summary_data[0], ('Total rationales upvoted', 1))
+        self.assertEquals(summary_data[1], ('Total rationales chosen', 150))
+        self.assertEquals(summary_data[2], ('Total rationales chosen for right to wrong answer switches', 12))
+        self.assertEquals(summary_data[3], ('Total rationales chosen for wrong to right answer switches', 50))
+
+        rationale_data = context['rationale_data']
+        self.assertEquals(len(rationale_data), 4)
+        for data in rationale_data:
+            self.assertListEqual(data['labels'], ['Count', 'Rationale', 'Upvotes', 'Downvotes',
+                                                  'Answers with this chosen rationale'])
+
+        self.assertEquals(rationale_data[0]['heading'], 'Upvoted rationales')
+        self.assertEquals(len(rationale_data[0]['rows']), 1)
+
+        self.assertEquals(rationale_data[1]['heading'], 'Top rationales chosen')
+        self.assertEquals(len(rationale_data[1]['rows']), perpage if perpage < 150 else 150)
+
+        self.assertEquals(rationale_data[2]['heading'], 'Top rationales chosen for right to wrong answer switches')
+        self.assertEquals(len(rationale_data[2]['rows']), perpage if perpage < 12 else 12)
+
+        self.assertEquals(rationale_data[3]['heading'], 'Top rationales chosen for wrong to right answer switches')
+        self.assertEquals(len(rationale_data[3]['rows']), perpage if perpage < 50 else 50)
