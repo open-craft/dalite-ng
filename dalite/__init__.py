@@ -59,7 +59,9 @@ class ApplicationHookManager(AbstractApplicationHookManager):
                 'question', kwargs=dict(assignment_id=assignment_id, question_id=question_id)
             )
 
-    def authentication_hook(self, request, user_id=None, username=None, email=None, **kwargs):
+    def authentication_hook(self, request, user_id=None, username=None, email=None, extra_params=None):
+        extra = extra_params if extra_params else {}
+
         # have no better option than to automatically generate password from user_id
         password = self._generate_password(user_id, settings.PASSWORD_GENERATOR_NONCE)
 
@@ -80,7 +82,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
                 # as password and uname are stable (i.e. not change for the same user)
                 logger.info("IntegrityError creating user - assuming result of race condition: %s", e.message)
         authenticated = authenticate(username=uname, password=password)
-        if user and authenticated and 'roles' in kwargs and (self.ADMIN_ACCESS_ROLES & set(kwargs['roles'])):
+        if user and authenticated and 'roles' in extra and (self.ADMIN_ACCESS_ROLES & set(extra['roles'])):
             user.is_staff = True
             user.save()
         login(request, authenticated)

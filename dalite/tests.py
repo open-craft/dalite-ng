@@ -105,7 +105,9 @@ class ApplicationHookManagerTests(SimpleTestCase):
         with mock.patch('dalite.authenticate') as authenticate_mock, mock.patch('dalite.login') as login_mock, \
                 mock.patch.object(user, 'save') as save_mock:
             authenticate_mock.return_value = True
-            self.manager.authentication_hook(request, 'irrelevant', 'irrelevant', 'irrelevant', roles=roles)
+            self.manager.authentication_hook(
+                request, 'irrelevant', 'irrelevant', 'irrelevant', extra_params={'roles': roles}
+            )
 
             self.assertEqual(user.is_staff, is_admin)
             self.assertEqual(save_mock.called, is_admin)
