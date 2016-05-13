@@ -52,7 +52,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         assignment_id = lti_data['custom_assignment_id']
         question_id = lti_data['custom_question_id']
 
-        if request.user.username == 'student':  # studio uses fixed user_id 'student'
+        if request.user.is_staff:
             return reverse('admin:index')
         else:
             return reverse(
@@ -91,6 +91,18 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         return ":".join(str(lti_data[k]) for k in self.LTI_KEYS)
 
     def optional_lti_parameters(self):
+        """
+        Return a dictionary of LTI parameters supported/required by this AuthenticationHookManager in addition
+        to user_id, username and email. These parameters are passed to authentication_hook method via kwargs.
+
+        This dictionary should have LTI parameter names (as specified by LTI specification) as keys; values are used
+        as parameter names passed to authentication_hook method, i.e. it allows renaming (not always intuitive) LTI spec
+        parameter names.
+
+        Example:
+            # renames lis_person_name_given -> user_first_name, lis_person_name_family -> user_lat_name
+            {'lis_person_name_given': 'user_first_name', 'lis_person_name_family': 'user_lat_name'}
+        """
         return {"roles": "roles"}
 
 
