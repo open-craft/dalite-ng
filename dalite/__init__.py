@@ -53,7 +53,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         question_id = lti_data['custom_question_id']
 
         if request.user.is_staff:
-            return reverse('admin:index')
+            return reverse('admin_index_wrapper')
         else:
             return reverse(
                 'question', kwargs=dict(assignment_id=assignment_id, question_id=question_id)

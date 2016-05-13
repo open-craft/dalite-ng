@@ -3,9 +3,10 @@ import mock
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
 from dalite import ApplicationHookManager, LTIRoles
+from dalite.views import admin_index_wrapper
 
 
 @ddt.ddt
@@ -138,7 +139,26 @@ class ApplicationHookManagerTests(SimpleTestCase):
             'custom_assignment_id': 'irrelevant',
             'custom_question_id': 1
         }
-        expected_redirect = "/admin/"
+        expected_redirect = "/admin_index_wrapper/"
         actual_redirect = self.manager.authenticated_redirect_to(request, lti_data)
 
         self.assertEqual(actual_redirect, expected_redirect)
+
+
+class TestViews(TestCase):
+    def test_admin_index_wrapper_authenticated(self):
+        request = mock.Mock()
+        request.user.is_authenticated.return_value = True
+        response = admin_index_wrapper(request)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response['Location'], "/admin/")
+
+    def test_admin_index_wrapper_not_authenticated(self):
+        request = mock.Mock()
+        request.user.is_authenticated.return_value = False
+        response = admin_index_wrapper(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "This component cannot be shown because your browser does not seem to accept third-party cookies."
+        )
