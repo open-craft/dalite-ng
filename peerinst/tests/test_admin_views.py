@@ -86,7 +86,8 @@ class TopRationalesAggregatesTestCase(TestCase):
         )
         cls.assignment.questions.add(cls.question)
 
-        # No chosen rationales
+        # Answers with no chosen rationale
+        # (students chose to stick with their own rationale)
         cls.answers += [
             factories.AnswerFactory(
                 assignment=cls.assignment,
@@ -126,11 +127,11 @@ class TopRationalesAggregatesTestCase(TestCase):
                 first_answer_choice=1,
                 second_answer_choice=2,
                 user_token='etfge',
-                rationale='Rationale 3A',
+                rationale='Rationale 3B',
             ),
         ]
 
-        # Upvoted rationales
+        # Answers with upvoted rationales
         cls.answers += [
             factories.AnswerFactory(
                 assignment=cls.assignment,
@@ -170,8 +171,9 @@ class TopRationalesAggregatesTestCase(TestCase):
             ),
         ]
 
-        # Chosen rationales
+        # Answers that chose rationales created previously
         cls.answers += [
+            # Answer choice stayed with correct answer
             factories.AnswerFactory(
                 assignment=cls.assignment,
                 question=cls.question,
@@ -181,6 +183,7 @@ class TopRationalesAggregatesTestCase(TestCase):
                 chosen_rationale=cls.answers[0],
                 rationale='Rationale 8A',
             ),
+            # Answer choice stayed with wrong answer
             factories.AnswerFactory(
                 assignment=cls.assignment,
                 question=cls.question,
@@ -190,6 +193,7 @@ class TopRationalesAggregatesTestCase(TestCase):
                 chosen_rationale=cls.answers[1],
                 rationale='Rationale 9A',
             ),
+            # 2 Answer choices changed from right to wrong
             factories.AnswerFactory(
                 assignment=cls.assignment,
                 question=cls.question,
@@ -208,6 +212,7 @@ class TopRationalesAggregatesTestCase(TestCase):
                 chosen_rationale=cls.answers[1],
                 rationale='Rationale 11A',
             ),
+            # 3 Answer choices changed from wrong to right
             factories.AnswerFactory(
                 assignment=cls.assignment,
                 question=cls.question,
@@ -232,13 +237,13 @@ class TopRationalesAggregatesTestCase(TestCase):
                 first_answer_choice=2,
                 second_answer_choice=1,
                 user_token='etfge',
-                chosen_rationale=cls.answers[0],
+                chosen_rationale=cls.answers[4],
                 rationale='Rationale 14A',
             ),
         ]
 
     @ddt.data(0, 100, 2)
-    def test_get_question_rationales_aggregates(self, perpage):
+    def test_upvoted_rationales(self, perpage):
         sums, rationales = admin_views.get_question_rationale_aggregates(self.assignment, self.question, perpage)
         self.assertEquals(sums['upvoted'], 4)
         self.assertEquals(len(rationales['upvoted']), perpage if perpage < 4 else 4)
@@ -255,6 +260,9 @@ class TopRationalesAggregatesTestCase(TestCase):
             self.assertEquals(rationales['upvoted'][3]['count'], 1)
             self.assertEquals(rationales['upvoted'][3]['rationale'].rationale, 'Rationale 6A')
 
+    @ddt.data(0, 100, 2)
+    def test_chosen_rationales(self, perpage):
+        sums, rationales = admin_views.get_question_rationale_aggregates(self.assignment, self.question, perpage)
         self.assertEquals(sums['chosen'], 4)
         self.assertEquals(len(rationales['chosen']), perpage if perpage < 4 else 4)
         if perpage > 0:
@@ -270,6 +278,21 @@ class TopRationalesAggregatesTestCase(TestCase):
             self.assertEquals(rationales['chosen'][3]['count'], 2)
             self.assertEquals(rationales['chosen'][3]['rationale'].rationale, 'Rationale 0A')
 
+    @ddt.data(0, 100, 2)
+    def test_right_to_wrong_rationales(self, perpage):
+        sums, rationales = admin_views.get_question_rationale_aggregates(self.assignment, self.question, perpage)
+        self.assertEquals(sums['right_to_wrong'], 2)
+        self.assertEquals(len(rationales['right_to_wrong']), perpage if perpage < 2 else 2)
+        if perpage > 0:
+            self.assertEquals(rationales['right_to_wrong'][0]['count'], 3)
+            self.assertEquals(rationales['right_to_wrong'][0]['rationale'], None)
+        if perpage > 1:
+            self.assertEquals(rationales['right_to_wrong'][1]['count'], 2)
+            self.assertEquals(rationales['right_to_wrong'][1]['rationale'].rationale, 'Rationale 1A')
+
+    @ddt.data(0, 100, 2)
+    def test_wrong_to_right_rationales(self, perpage):
+        sums, rationales = admin_views.get_question_rationale_aggregates(self.assignment, self.question, perpage)
         self.assertEquals(sums['wrong_to_right'], 3)
         self.assertEquals(len(rationales['wrong_to_right']), perpage if perpage < 3 else 3)
         if perpage > 0:
@@ -281,15 +304,6 @@ class TopRationalesAggregatesTestCase(TestCase):
         if perpage > 2:
             self.assertEquals(rationales['wrong_to_right'][2]['count'], 1)
             self.assertEquals(rationales['wrong_to_right'][2]['rationale'].rationale, 'Rationale 0A')
-
-        self.assertEquals(sums['right_to_wrong'], 2)
-        self.assertEquals(len(rationales['right_to_wrong']), perpage if perpage < 2 else 2)
-        if perpage > 0:
-            self.assertEquals(rationales['right_to_wrong'][0]['count'], 3)
-            self.assertEquals(rationales['right_to_wrong'][0]['rationale'], None)
-        if perpage > 1:
-            self.assertEquals(rationales['right_to_wrong'][1]['count'], 2)
-            self.assertEquals(rationales['right_to_wrong'][1]['rationale'].rationale, 'Rationale 1A')
 
     @ddt.data(0, 100, 2)
     def test_view(self, perpage):
@@ -307,6 +321,7 @@ class TopRationalesAggregatesTestCase(TestCase):
         context = response.context
         self.assertEqual(context['perpage'], perpage)
 
+        # Summary data contains full counts, regardless of perpage value
         summary_data = context['summary_data']
         self.assertEquals(len(summary_data), 4)
         self.assertEquals(summary_data[0], ('Total rationales upvoted', 4))
@@ -320,6 +335,7 @@ class TopRationalesAggregatesTestCase(TestCase):
             self.assertListEqual(data['labels'], ['Count', 'Rationale', 'Upvotes', 'Downvotes',
                                                   'Answers with this chosen rationale'])
 
+        # But rationale data is limited by perpage
         self.assertEquals(rationale_data[0]['heading'], 'Upvoted rationales')
         self.assertEquals(len(rationale_data[0]['rows']), perpage if perpage < 4 else 4)
 
