@@ -71,21 +71,36 @@ class AggregatesTestCase(TestCase):
 class TopRationalesTestData(object):
 
     @staticmethod
-    def getData(count):
+    def getData(count, num_chosen=12):
         assignment = factories.AssignmentFactory()
+        correct_choices = [1]
         question = factories.QuestionFactory(
-            choices=2, choices__correct=[1],
+            choices=2, choices__correct=correct_choices,
         )
         assignment.questions.add(question)
 
-        # Many chosen rationales, with long text
+        # Generate the answers
         answers = []
         for idx in range(count):
-            first_answer = (idx % 2) + 1  # 1, 2, 1, 2, ...
-            second_answer = (1 if (idx % 4) < 2 else 2)  # 1, 1, 2, 2, ...
+            # Ocillate the first and second answer choices to achieve a known spread of answer switches.
+            # We bias the ocillation slightly to generate a slightly higher number of right->wrong vs
+            # wrong->right answer switches, to test the different result counts.
+            # (1 = right, 2 = wrong)
+            # * first_answer:  1, 2, 1, 2, 1, 2, 1, 2, 1, 2...
+            # * second_answer: 1, 2, 2, 1, 2, 2, 1, 2, 2, 1...
+            first_answer = (idx % 2) + 1
+            second_answer = (1 if (idx % 3) < 1 else 2)
+
+            # Upvotes are just 0..9
             upvotes = idx % 10
-            chosen_rationale = (answers[idx - 1] if idx else None)
+
+            # None = "no chosen rationale", or "I'm sticking with my original rationale"
+            # Else, choose one of the first num_chosen-1 rationales
+            chosen_rationale = (answers[(idx % num_chosen) - 1] if (idx % num_chosen) else None)
+
+            # Use long rationale text
             rationale = 'Rationale ' + str(idx)*200
+
             answers += [
                 factories.AnswerFactory(
                     assignment=assignment,
@@ -98,7 +113,7 @@ class TopRationalesTestData(object):
                     rationale=rationale,
                 ),
             ]
-        return (assignment, question)
+        return (assignment, question, correct_choices)
 
     @staticmethod
     def mock_rationale_aggregates(question, assignment, perpage):
@@ -109,10 +124,10 @@ class TopRationalesTestData(object):
             perpage = admin.AnswerAdmin.list_per_page
 
         rationales = {
-            'upvoted': list(repeat(answer, min(perpage, 1))),
-            'chosen': list(repeat(answer, min(perpage, 150))),
-            'right_to_wrong': list(repeat(answer, min(perpage, 12))),
-            'wrong_to_right': list(repeat(answer, min(perpage, 50))),
+            'upvoted': list(repeat(dict(rationale=answer, count=1), min(perpage, 1))),
+            'chosen': list(repeat(dict(rationale=answer, count=15), min(perpage, 150))),
+            'right_to_wrong': list(repeat(dict(rationale=answer, count=10), min(perpage, 12))),
+            'wrong_to_right': list(repeat(dict(rationale=answer, count=5), min(perpage, 50))),
         }
         return sums, rationales
 
@@ -121,26 +136,69 @@ class TopRationalesTestData(object):
 class TopRationalesTestCase(TestCase):
     assignment = None
     question = None
+    correct_choices = None
 
     @classmethod
     def setUpClass(cls):
         super(TopRationalesTestCase, cls).setUpClass()
-        (cls.assignment, cls.question) = TopRationalesTestData.getData(5000)
 
-    @ddt.data(0, 100, 2, 1500)
+        # Generate 5000 answers, with 12 chosen rationales
+        (cls.assignment, cls.question, cls.correct_choices) = TopRationalesTestData.getData(5000, 12)
+
+    def assert_top_rationales(self, rationales, answer_list):
+        # Ensure the top rationales have the correct count of answers that chose them
+        #   and that the counts are descending.
+        prev_count = None
+        for entry in rationales:
+            # Filter answers that chose this rationale
+            rationale = entry['rationale']
+            if rationale:
+                answer_count = answer_list.filter(chosen_rationale_id=rationale.id).count()
+            # Filter answers that chose to stick with their own rationale
+            else:
+                answer_count = answer_list.filter(chosen_rationale_id__isnull=True).count()
+
+            # Ensure more than one answer was counted
+            self.assertGreater(entry['count'], 0)
+
+            # Ensure the correct number of answers were counted
+            self.assertEquals(answer_count, entry['count'])
+
+            # Ensure the rationales are listed in decreasing count order
+            if prev_count:
+                self.assertGreaterEqual(prev_count, entry['count'])
+            prev_count = entry['count']
+
+    @ddt.data(0, 100, 1)
     def test_large_data(self, perpage):
         with self.assertNumQueries(6 if perpage else 5):
             sums, rationales = admin_views.get_question_rationale_aggregates(self.assignment, self.question, perpage)
+
+        # Ensure all upvoted rationales have upvotes > 0
         self.assertEquals(sums['upvoted'], 4500)
         self.assertEquals(len(rationales['upvoted']), perpage if perpage < 4500 else 4500)
+        for entry in rationales['upvoted']:
+            self.assertGreater(entry['rationale'].upvotes, 0)
 
-        self.assertEquals(sums['chosen'], 5000)
-        self.assertEquals(len(rationales['chosen']), perpage if perpage < 5000 else 5000)
-        
-        self.assertEquals(sums['wrong_to_right'], 1250)
-        self.assertEquals(len(rationales['wrong_to_right']), perpage if perpage < 1250 else 1250)
-        self.assertEquals(sums['right_to_wrong'], 1250)
-        self.assertEquals(len(rationales['right_to_wrong']), perpage if perpage < 1250 else 1250)
+        # Ensure that the top chosen rationales are counted correctly, and listed top to bottom
+        self.assertEquals(sums['chosen'], 12)
+        self.assertEquals(len(rationales['chosen']), perpage if perpage < 12 else 12)
+        answers = models.Answer.objects
+        self.assert_top_rationales(rationales['chosen'], answers)
+
+        # Ensure that the rationales chosen for wrong-to-right answer switches are counted correctly
+        self.assertEquals(sums['wrong_to_right'], 2)
+        self.assertEquals(len(rationales['wrong_to_right']), perpage if perpage < 2 else 2)
+        wrong_to_right_answers = (answers.exclude(first_answer_choice__in=self.correct_choices)
+                                  .filter(second_answer_choice__in=self.correct_choices))
+        self.assert_top_rationales(rationales['wrong_to_right'], wrong_to_right_answers)
+
+        # Ensure that the rationales chosen for right-to-wrong answer switches are counted correctly
+        self.assertEquals(sums['right_to_wrong'], 4)
+        self.assertEquals(len(rationales['right_to_wrong']), perpage if perpage < 4 else 4)
+        right_to_wrong_answers = (answers.exclude(second_answer_choice__in=self.correct_choices)
+                                  .filter(first_answer_choice__in=self.correct_choices))
+        self.assert_top_rationales(rationales['right_to_wrong'], right_to_wrong_answers)
 
     @ddt.data(0, 100, 2)
     @mock.patch('peerinst.admin_views.get_question_rationale_aggregates',
