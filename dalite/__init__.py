@@ -3,8 +3,8 @@ import hashlib
 import logging
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, get_permission_codename
+from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 
@@ -22,6 +22,13 @@ class LTIRoles(object):
     LEARNER = "Learner"
     INSTRUCTOR = "Instructor"
     STAFF = "Staff"
+
+
+MODELS_STAFF_USER_CAN_EDIT = (
+    ('peerinst', 'question'),
+    ('peerinst', 'assignment'),
+    ('peerinst', 'category'),
+)
 
 
 class ApplicationHookManager(AbstractApplicationHookManager):
@@ -60,7 +67,8 @@ class ApplicationHookManager(AbstractApplicationHookManager):
             )
 
     def authentication_hook(self, request, user_id=None, username=None, email=None, extra_params=None):
-        extra = extra_params if extra_params else {}
+        if extra_params is None:
+            extra_params = {}
 
         # have no better option than to automatically generate password from user_id
         password = self._generate_password(user_id, settings.PASSWORD_GENERATOR_NONCE)
@@ -71,21 +79,50 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         # so, since we want to track user for both iframe and non-iframe LTI blocks, username is completely ignored
         uname = self._compress_user_name(user_id)
         email = email if email else user_id+'@localhost'
-        user = None
         try:
-            user = User.objects.get(username=uname)
+            User.objects.get(username=uname)
         except User.DoesNotExist:
             try:
-                user = User.objects.create_user(username=uname, email=email, password=password)
+                User.objects.create_user(username=uname, email=email, password=password)
             except IntegrityError as e:
                 # A result of race condition of multiple simultaneous LTI requests - should be safe to ignore,
                 # as password and uname are stable (i.e. not change for the same user)
                 logger.info("IntegrityError creating user - assuming result of race condition: %s", e.message)
-        authenticated = authenticate(username=uname, password=password)
-        if user and authenticated and 'roles' in extra and (self.ADMIN_ACCESS_ROLES & set(extra['roles'])):
-            user.is_staff = True
-            user.save()
-        login(request, authenticated)
+
+        user = authenticate(username=uname, password=password)
+
+        if user and self.is_user_staff(extra_params):
+            self.update_staff_user(user)
+
+        login(request, user)
+
+    def is_user_staff(self, extra_params):
+        """
+        Returns true if given circumstances user is considered as having a staff account.
+        :param dict extra_params: Additional parameters passed by LTI.
+        :return: bool
+        """
+        return bool('roles' in extra_params and (self.ADMIN_ACCESS_ROLES & set(extra_params['roles'])))
+
+    def _get_permissions_for_staff_user(self):
+
+        from django.apps.registry import apps
+
+        for app_label, model_name in MODELS_STAFF_USER_CAN_EDIT:
+            model = apps.get_model(app_label, model_name)
+            for action in ('add', 'change'):
+                codename = get_permission_codename(action, model._meta)
+                yield Permission.objects.get_by_natural_key(codename, app_label, model_name)
+
+    def update_staff_user(self, user):
+        """
+        Updates user to acknowledge he is a staff member
+        :param django.contrib.auth.models.User user:
+        :return: None
+        """
+        user.is_staff = True
+        user.user_permissions.add(*self._get_permissions_for_staff_user())
+        user.save()
 
     def vary_by_key(self, lti_data):
         return ":".join(str(lti_data[k]) for k in self.LTI_KEYS)
