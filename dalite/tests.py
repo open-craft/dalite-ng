@@ -144,6 +144,7 @@ class ApplicationHookManagerTests(SimpleTestCase):
     def test_authenticated_redirect_studio_user(self, user_objects_manager):
         request = mock.Mock()
         request.user.is_staff = True
+        request.user.username = "student"
         lti_data = {
             'custom_assignment_id': 'irrelevant',
             'custom_question_id': 1
