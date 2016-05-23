@@ -88,30 +88,39 @@ class ApplicationHookManagerTests(SimpleTestCase):
             authenticate_mock.assert_called_once_with(username=expected_uname, password=expected_password)
             login_mock.assert_called_once_with(request, auth_result)
 
-    @ddt.unpack
-    @ddt.data(
-        ([], False),
-        (["Unknown role"], False),
-        ([LTIRoles.LEARNER], False),
-        ([LTIRoles.INSTRUCTOR], True),
-        ([LTIRoles.STAFF], True),
-        ([LTIRoles.LEARNER, LTIRoles.INSTRUCTOR], True),
-        ([LTIRoles.LEARNER, LTIRoles.STAFF], True),
-    )
-    def test_authentication_hook_admin_roles(self, roles, is_admin, user_objects_manager):
+    @ddt.data(True, False)
+    def test_authentication_hook_admin_roles(self, is_admin, user_objects_manager):
         user = User()
         user_objects_manager.get.return_value = user
         request = mock.Mock()
 
         with mock.patch('dalite.authenticate') as authenticate_mock, mock.patch('dalite.login') as login_mock, \
-                mock.patch.object(user, 'save') as save_mock:
-            authenticate_mock.return_value = True
+                mock.patch.object(ApplicationHookManager, 'is_user_staff') as is_user_staff, \
+                mock.patch.object(ApplicationHookManager, 'update_staff_user') as update_staff_user:
+
+            authenticate_mock.return_value = user
+            is_user_staff.return_value = is_admin
+
             self.manager.authentication_hook(
-                request, 'irrelevant', 'irrelevant', 'irrelevant', extra_params={'roles': roles}
+                request, 'irrelevant', 'irrelevant', 'irrelevant'
             )
 
-            self.assertEqual(user.is_staff, is_admin)
-            self.assertEqual(save_mock.called, is_admin)
+            self.assertEqual(update_staff_user.called, is_admin)
+
+    @ddt.unpack
+    @ddt.data(
+        ({}, False),
+        ({"roles": []}, False),
+        ({"roles": ["Unknown role"]}, False),
+        ({"roles": [LTIRoles.LEARNER]}, False),
+        ({"roles": [LTIRoles.INSTRUCTOR]}, True),
+        ({"roles": [LTIRoles.STAFF]}, True),
+        ({"roles": [LTIRoles.LEARNER, LTIRoles.INSTRUCTOR]}, True),
+        ({"roles": [LTIRoles.LEARNER, LTIRoles.STAFF]}, True),
+    )
+    def test_is_staff_user(self, extra_args, is_staff_expected, user_objects_manager):
+        is_staff_actual = self.manager.is_user_staff(extra_args)
+        self.assertEqual(is_staff_actual, is_staff_expected)
 
     @ddt.unpack
     @ddt.data(
@@ -135,6 +144,7 @@ class ApplicationHookManagerTests(SimpleTestCase):
     def test_authenticated_redirect_studio_user(self, user_objects_manager):
         request = mock.Mock()
         request.user.is_staff = True
+        request.user.username = "student"
         lti_data = {
             'custom_assignment_id': 'irrelevant',
             'custom_question_id': 1
@@ -143,6 +153,21 @@ class ApplicationHookManagerTests(SimpleTestCase):
         actual_redirect = self.manager.authenticated_redirect_to(request, lti_data)
 
         self.assertEqual(actual_redirect, expected_redirect)
+
+
+class TestUpdateStaffUser(TestCase):
+    def setUp(self):
+        self.manager = ApplicationHookManager()
+
+    def test_update_staff_user(self):
+        expected_perms = {
+            u'add_assignment', u'change_assignment', u'add_question', u'change_question',
+            u'add_category', u'change_category'
+        }
+        user = User.objects.create(username="test")
+        self.manager.update_staff_user(user)
+        actual_perms = set((p.codename for p in user.user_permissions.all()))
+        self.assertEqual(expected_perms, actual_perms)
 
 
 class TestViews(TestCase):

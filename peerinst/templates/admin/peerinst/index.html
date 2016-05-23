@@ -41,11 +41,13 @@
             {% trans 'Question categories' %}
         </a></p>
       </div>
+      {% if "auth.add_user" in perms %}
       <div class="grp-row">
         <p><a href="{% url 'admin:app_list' app_label='auth' %}">
             {% trans 'Users' %}
         </a></p>
       </div>
+      {% endif %}
       <div class="grp-row">
         <p><a href="{% url 'fake-usernames' %}">
             {% trans 'Fake usernames' %}
