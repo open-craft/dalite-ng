@@ -31,6 +31,24 @@ MODELS_STAFF_USER_CAN_EDIT = (
 )
 
 
+def get_permissions_for_staff_user():
+    """
+    Returns all permissions that staff user possess. Staff user can create and edit
+    all models from `MODELS_STAFF_USER_CAN_EDIT` list. By design he has no
+    delete privileges --- as deleting questions could lead to bad user experience
+    for students.
+
+    :return: Iterable[django.contrib.auth.models.Permission]
+    """
+    from django.apps.registry import apps
+
+    for app_label, model_name in MODELS_STAFF_USER_CAN_EDIT:
+        model = apps.get_model(app_label, model_name)
+        for action in ('add', 'change'):
+            codename = get_permission_codename(action, model._meta)
+            yield Permission.objects.get_by_natural_key(codename, app_label, model_name)
+
+
 class ApplicationHookManager(AbstractApplicationHookManager):
     LTI_KEYS = ['custom_assignment_id', 'custom_question_id']
     ADMIN_ACCESS_ROLES = {LTIRoles.INSTRUCTOR, LTIRoles.STAFF}
@@ -108,17 +126,8 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         :param dict extra_params: Additional parameters passed by LTI.
         :return: bool
         """
-        return bool('roles' in extra_params and (self.ADMIN_ACCESS_ROLES & set(extra_params['roles'])))
-
-    def _get_permissions_for_staff_user(self):
-
-        from django.apps.registry import apps
-
-        for app_label, model_name in MODELS_STAFF_USER_CAN_EDIT:
-            model = apps.get_model(app_label, model_name)
-            for action in ('add', 'change'):
-                codename = get_permission_codename(action, model._meta)
-                yield Permission.objects.get_by_natural_key(codename, app_label, model_name)
+        user_roles = set(extra_params.get("roles", set()))
+        return bool(self.ADMIN_ACCESS_ROLES.intersection(user_roles))
 
     def update_staff_user(self, user):
         """
@@ -127,7 +136,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         :return: None
         """
         user.is_staff = True
-        user.user_permissions.add(*self._get_permissions_for_staff_user())
+        user.user_permissions.add(*get_permissions_for_staff_user())
         user.save()
 
     def vary_by_key(self, lti_data):
