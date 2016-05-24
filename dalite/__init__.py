@@ -74,21 +74,20 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         return generator.digest()
 
     def authenticated_redirect_to(self, request, lti_data):
-        assignment_id = lti_data['custom_assignment_id']
-        question_id = lti_data['custom_question_id']
+        action = lti_data.get('custom_action')
+        assignment_id = lti_data.get('custom_assignment_id')
+        question_id = lti_data.get('custom_question_id')
 
-        user = request.user
-
-        # There is no direct way to detect whether request was made from Studio or from LMS. Best way we could thought
-        # of was to check if username equals to "student". Studio seems to fix username to this value for every LTI
-        # call. Additionally we check whether user has appropriate role --- so if by some accident student will get
-        # username "student" (instead of anonymized username) he still will get redirected to question.
-        if user.is_staff and user.username == "student":
-            return reverse('admin_index_wrapper')
-        else:
+        if action == 'launch-admin':
+            return reverse('admin:index')
+        elif action == 'edit-question':
             return reverse(
-                'question', kwargs=dict(assignment_id=assignment_id, question_id=question_id)
+                'admin:peerinst_question_change', args=(question_id,)
             )
+
+        return reverse(
+            'question', kwargs=dict(assignment_id=assignment_id, question_id=question_id)
+        )
 
     def authentication_hook(self, request, user_id=None, username=None, email=None, extra_params=None):
         if extra_params is None:

@@ -7,7 +7,7 @@
 {% for obj in object_list %}
   <li><a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">
     {{ obj.pk }}
-  <a></li>
+  </a></li>
 {% empty %}
   <li>{% trans 'No questions available.' %}</li>
 {% endfor %}

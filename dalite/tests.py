@@ -141,15 +141,28 @@ class ApplicationHookManagerTests(SimpleTestCase):
 
         self.assertEqual(actual_redirect, expected_redirect)
 
-    def test_authenticated_redirect_studio_user(self, user_objects_manager):
+    @ddt.data(
+        ('assignment_1', 1, None, '/assignment/assignment_1/1/'),
+        ('assignment_2', 123, None, '/assignment/assignment_2/123/'),
+        (None, None, 'launch-admin', '/admin/'),
+        ('assignment_2', 123, 'launch-admin', '/admin/'),
+        ('assignment_1', 1, 'edit-question', '/admin/peerinst/question/1/'),
+        ('assignment_2', 123, 'edit-question', '/admin/peerinst/question/123/'),
+    )
+    @ddt.unpack
+    def test_authenticated_redirect_studio_user(
+            self, assignment_id, question_id, action, expected_redirect, user_objects_manager):
         request = mock.Mock()
         request.user.is_staff = True
         request.user.username = "student"
         lti_data = {
-            'custom_assignment_id': 'irrelevant',
-            'custom_question_id': 1
+            'custom_assignment_id': assignment_id,
+            'custom_question_id': question_id
         }
-        expected_redirect = "/admin_index_wrapper/"
+
+        if action:
+            lti_data['custom_action'] = action
+
         actual_redirect = self.manager.authenticated_redirect_to(request, lti_data)
 
         self.assertEqual(actual_redirect, expected_redirect)
