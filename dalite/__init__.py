@@ -118,6 +118,15 @@ class ApplicationHookManager(AbstractApplicationHookManager):
             self.update_staff_user(user)
 
         login(request, user)
+        
+        # LTI sessions are created implicitly, and are not terminated when user logs out of Studio/LMS, which may lead
+        # to granting access to unauthorized users in shared computer setting. Students have no way to terminate dalite
+        # session (other than cleaning cookies). This setting instructs browser to clear session when browser is
+        # closed --- this allows staff user to terminate the session easily. which decreases the chance of
+        # session hijacking in shared computer environment.
+
+        # TL; DR; Sets session expiry on browser close.
+        request.session.set_expiry(0)
 
     def is_user_staff(self, extra_params):
         """
@@ -137,15 +146,6 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         user.is_staff = True
         user.user_permissions.add(*get_permissions_for_staff_user())
         user.save()
-
-        # LTI sessions are created implicitly, and are not terminated when user logs out of Studio/LMS, which may lead
-        # to granting access to unauthorized users in shared computer setting. Students have no way to terminate dalite
-        # session (other than cleaning cookies). This setting instructs browser to clear session when browser is
-        # closed --- this allows staff user to terminate the session easily. which decreases the chance of
-        # session hijacking in shared computer environment.
-
-        # TL; DR; Sets session expiry on browser close.
-        request.session.set_expiry(0)
 
     def vary_by_key(self, lti_data):
         return ":".join(str(lti_data[k]) for k in self.LTI_KEYS)
