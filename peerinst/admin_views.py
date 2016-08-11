@@ -132,15 +132,20 @@ def get_question_rationale_aggregates(assignment, question, perpage):
     def _top_rationales(answer_list):
         # Count the chosen rationales for the given answer list
 
-        counts = answer_list.select_related('chosen_rationale')\
-                            .values('chosen_rationale')\
-                            .annotate(count=Count('chosen_rationale'), rationale=F('chosen_rationale'))\
-                            .order_by('-count')\
-                            .values('count', 'rationale')
-        sorted_list = counts
+        sorted_list = answer_list.select_related('chosen_rationale')\
+                            .annotate(choice_count=Count('chosen_rationale'))\
+                            .order_by('-choice_count')
+        number_of_rationales = sorted_list.count()
+        sorted_list = [
+            {
+                'count': answer.choice_count,
+                'rationale': answer.chosen_rationale
+            }
+            for answer in sorted_list[:perpage]
+        ]
 
         #Return a list of dicts, sorted by descending count
-        return sorted_list[:perpage], sorted_list.count()
+        return sorted_list, number_of_rationales
 
     # Collect the upvoted rationales, sorted by descending upvotes
     output = {'upvoted': []}

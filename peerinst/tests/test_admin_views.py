@@ -129,7 +129,7 @@ class TopRationalesTestCase(TestCase):
 
     @ddt.data(0, 100, 2, 1500)
     def test_large_data(self, perpage):
-        with self.assertNumQueries(6 if perpage else 5):
+        with self.assertNumQueries(9 if perpage else 5):
             sums, rationales = admin_views.get_question_rationale_aggregates(self.assignment, self.question, perpage)
         self.assertEquals(sums['upvoted'], 4500)
         self.assertEquals(len(rationales['upvoted']), perpage if perpage < 4500 else 4500)
