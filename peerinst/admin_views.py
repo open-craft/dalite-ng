@@ -8,7 +8,7 @@ import urllib
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.db.models import F
+from django.db.models import F, Count
 from django import forms
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import ugettext_lazy as _
@@ -131,12 +131,16 @@ def get_question_rationale_aggregates(assignment, question, perpage):
     # Helper function collects chosen rationales and the number of times used from a list of answers
     def _top_rationales(answer_list):
         # Count the chosen rationales for the given answer list
-        counts = collections.Counter(a.chosen_rationale for a in answer_list.select_related('chosen_rationale'))
 
-        # Return a list of dicts, sorted by descending count
-        sorted_list = [dict(rationale=rationale, count=counts[rationale])
-                       for rationale in sorted(counts, key=counts.get, reverse=True)]
-        return sorted_list[:perpage], len(sorted_list)
+        counts = answer_list.select_related('chosen_rationale')\
+                            .values('chosen_rationale')\
+                            .annotate(count=Count('chosen_rationale'), rationale=F('chosen_rationale'))\
+                            .order_by('-count')\
+                            .values('count', 'rationale')
+        sorted_list = counts
+
+        #Return a list of dicts, sorted by descending count
+        return sorted_list[:perpage], sorted_list.count()
 
     # Collect the upvoted rationales, sorted by descending upvotes
     output = {'upvoted': []}
