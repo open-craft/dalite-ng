@@ -21,6 +21,7 @@ from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
+from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 
 from . import heartbeat_checks
@@ -75,6 +76,7 @@ class QuestionMixin(object):
         if not self.lti_data.edx_lti_parameters.get('lis_outcome_service_url'):
             # edX didn't provide a callback URL for grading, so this is an unscored problem.
             return
+
         Signals.Grade.updated.send(
             __name__,
             user=self.request.user,
@@ -99,7 +101,13 @@ class QuestionFormView(QuestionMixin, FormView):
 
         # Extract information from LTI parameters.
         course_id = self.lti_data.edx_lti_parameters.get('context_id')
-        course_key = CourseKey.from_string(course_id)
+
+        try:
+            edx_org = CourseKey.from_string(course_id).org
+        except InvalidKeyError:
+            # The course_id is not from edX. Don't place the org in the logs.
+            edx_org = None
+
         grade_handler_re = re.compile(
             'https?://[^/]+/courses/{course_id}/xblock/(?P<usage_key>[^/]+)/'.format(
                 course_id=re.escape(course_id)
@@ -137,7 +145,6 @@ class QuestionFormView(QuestionMixin, FormView):
                 module=dict(
                     usage_key=usage_key,
                 ),
-                org_id=course_key.org,
                 username=self.user_token,
             ),
             course_id=course_id,
@@ -150,6 +157,9 @@ class QuestionFormView(QuestionMixin, FormView):
             time=datetime.datetime.now().isoformat(),
             username=self.user_token,
         )
+
+        if edx_org is not None:
+            event['context']['org_id'] = edx_org
 
         # Write JSON to log file
         LOGGER.info(json.dumps(event))
