@@ -143,6 +143,47 @@ Click "Save". At this point, the Dalite question should be visible in Studio.
 
 **Note:** it is important that the Studio and Dalite URL domains are different; here they are deliberately chosen to be "192.168.33.10" and "localhost".  This difference is necessary to prevent cookies clashing.
 
+Usage Example: Configuring Dalite in Moodle
+-------------------------------------------
+
+_**Note**: For the purposes of these example setup instructions, it is assumed that you already have a working local Moodle and a locally running Dalite LTI server._
+
+* Go to Dalite at [http://192.168.33.10:8321/admin/](http://192.168.33.10:8321/admin/) and login with the superuser login you created (see above steps). Note that we use the IP address 192.168.33.10 which is automatically setup for devstacks, so we don't have to fiddle around with port forwarding settings.
+
+* Click "Questions" and create a couple of questions.
+
+* Click "Assignments" and create a new assignment with identifier "assign1". Add the questions previously created to "Chosen questions" for the assignment.
+
+* Navigate to a Moodle course as a course Instructor.
+
+* Click the "Turn editing on" button in the top right corner: ![](http://i.imgur.com/yiOlqse.png)
+
+* Click "Add an activity or resource" on a topic, and then select "External Tool" ![](http://i.imgur.com/TnVuoLu.png)
+
+* Click the "+" (![](http://i.imgur.com/dI6aKpQ.png)) next to the "External tool type" field and configure a new External Tool type (this will be the configuration for the Dalite LTI server):
+  - Fill out a "Tool name" of your choosing.
+  - Set the tool base URL to `http://192.168.33.10:8321/lti/`.
+  - Set the "Consumer key" to `alpha`.
+  - Set the "Shared secret" to `beta`.
+  - Leave the "Custom parameters" field blank.
+  - Set "Default launch container" to "Embed, without blocks".
+  - Click "Save changes".
+
+    ![](http://i.imgur.com/QRVEcRy.png)
+* Return to the "Adding a new External tool" configuration, and create a new activity:
+  - Fill out an "Activity name" of your choosing.
+  - Set the "External tool type" to be the name of the tool type you just created.
+  - Click "Show more...": ![](http://i.imgur.com/XRBSqag.png)
+  - Set the "Custom parameters" to the following, noting that each parameter is on a separate line (change this field when creating each new activity with problems from the same Dalite LTI server):
+
+    ```
+assignment_id=assign1
+question_id=1
+```
+    ![](http://i.imgur.com/sCnMy5B.png)
+  - Click "Save and Display" (![](http://i.imgur.com/XgGTSbE.png)) to see if your new problem works!
+    ![](http://i.imgur.com/epLoE1X.png)
+
 Running the tests
 -----------------
 
