@@ -87,7 +87,7 @@ def get_assignment_aggregates(assignment):
     return sums, question_data
 
 
-def get_question_rationale_aggregates(assignment, question, perpage):
+def get_question_rationale_aggregates(assignment, question, perpage, choice_id=None, include_own_rationales=False):
     """Get the top `perpage` rationales for answers to the given assignment and question.
 
     This function returns a pair (sums, rationales), with entries for these groups of rationales:
@@ -124,14 +124,29 @@ def get_question_rationale_aggregates(assignment, question, perpage):
     # Select answers entered by students, not example answers
     answers = question.answer_set.filter(assignment=assignment).exclude(user_token='')
 
+    if choice_id is not None:
+        # Filter the answers we look at to just those who eventually chose
+        # the option we're interested in - we want to know which rationales
+        # were convincing for this answer.
+        answers = answers.filter(second_answer_choice=choice_id)
+
     # Get indices of the correct answer choice(s)
     answerchoice_correct = question.answerchoice_set.values_list('correct', flat=True)
     correct_choices = list(itertools.compress(itertools.count(1), answerchoice_correct))
 
     # Helper function collects chosen rationales and the number of times used from a list of answers
     def _top_rationales(answer_list):
-        # Count the chosen rationales for the given answer list
-        counts = collections.Counter(a.chosen_rationale for a in answer_list.select_related('chosen_rationale'))
+        # Count the chosen rationales for the given answer list, counting the answer's original
+        # rationale if there's no related chosen rationale (the student stuck with their original rationale)
+        # and the function was called with include_own_rationales=True
+        counts = collections.Counter(
+            a.chosen_rationale or (
+                # If a.chosen_rationale isn't truthy (in other words, if it is None),
+                # count a itself if include_own_rationales is True; otherwise, count None
+                a if include_own_rationales else None
+            ) 
+            for a in answer_list.select_related('chosen_rationale')
+        )
 
         # Return a list of dicts, sorted by descending count
         sorted_list = [dict(rationale=rationale, count=counts[rationale])

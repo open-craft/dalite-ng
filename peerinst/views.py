@@ -29,6 +29,7 @@ from . import forms
 from . import models
 from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
+from .admin_views import get_question_rationale_aggregates
 
 LOGGER = logging.getLogger(__name__)
 
@@ -504,6 +505,114 @@ class HeartBeatUrl(View):
             status=status)
 
 
+class AnswerSummaryChartView(View):
+    """
+    This view draws a chart showing analytics about the answers
+    that students chose for a question, and the rationales
+    that they selected to back up those answers.
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Save the initialization arguments for later use
+        """
+        self.kwargs = kwargs
+        super(AnswerSummaryChartView, self).__init__(*args, **kwargs)
+
+    def get(self, request):
+        """
+        This method handles creation of a piece of context that can
+        be used to draw the chart mentioned in the class docstring.
+        """
+        # Get the relevant assignment/question pairing
+        question = self.kwargs.get('question')
+        assignment = self.kwargs.get('assignment')
+        # There are three columns that every chart will have - prefill them here
+        static_columns = [
+            ("label", "Choice",),
+            ("before", "Before",),
+            ("after", "After",),
+        ]
+        # Other columns will be dynamically present, depending on which choices
+        # were available on a given question.
+        to_columns = [
+            (
+                "to_{}".format(question.get_choice_label(i)),
+                "To {}".format(question.get_choice_label(i)),
+            ) for i in range(1, question.answerchoice_set.count()+1)
+        ]
+        # Initialize a list of answers that we can add details to
+        answers = []
+        for i, answer in enumerate(question.answerchoice_set.all(), start=1):
+            # Get the label for the row, and the counts for how many students chose
+            # this answer the first time, and the second time.
+            answer_row = {
+                "label": "Answer {}: {}".format(question.get_choice_label(i), answer.text),
+                "before": models.Answer.objects.filter(
+                    question=question,
+                    first_answer_choice=i,
+                    assignment=assignment,
+                ).count(),
+                "after": models.Answer.objects.filter(
+                    question=question,
+                    second_answer_choice=i,
+                    assignment=assignment,
+                ).count(),
+            }
+            for j, column in enumerate(to_columns, start=1):
+                # For every other answer, determine the count of students who chose
+                # this answer the first time, but the other answer the second time.
+                answer_row[column[0]] = models.Answer.objects.filter(
+                    question=question,
+                    first_answer_choice=i,
+                    second_answer_choice=j,
+                    assignment=assignment,
+                ).count()
+            # Get the top five rationales for this answer to display underneath the chart
+            _, rationales = get_question_rationale_aggregates(
+                assignment,
+                question,
+                5,
+                choice_id=i,
+                include_own_rationales=True,
+            )
+            answer_row['rationales'] = rationales['chosen']
+            # Save everything about this answer into the list of table rows
+            answers.append(answer_row)
+        # Build a list of all the columns that will be used in this chart 
+        columns = [
+            {
+                "name": name,
+                "label": label,
+            } for name, label in static_columns + to_columns
+        ]
+        # Build a two-dimensional list with a value for each cell in the chart
+        answer_rows = [[row[column['name']] for column in columns] for row in answers]
+        # Transform the rationales we got from the other function into a format we can easily
+        # draw in the page using a template
+        answer_rationales = [
+            {
+                'label': each['label'],
+                'rationales': [
+                    {
+                        "text": rationale['rationale'].rationale,
+                        "count": rationale['count'],
+                    } for rationale in each['rationales'] if rationale['rationale'] is not None
+                ]
+            } for each in answers
+        ]
+        # Render the template using the relevant variables and return it as an HTTP response.
+        return TemplateResponse(
+            request,
+            'peerinst/question_answers_summary.html',
+            context={
+                'question': question,
+                'columns': columns,
+                'answer_rows': answer_rows,
+                'answer_rationales': answer_rationales
+            }
+        )
+
+
 def redirect_to_login_or_show_cookie_help(request):
     """Redirect to login page outside of an iframe, show help on enabling cookies inside an iframe.
 
@@ -547,7 +656,10 @@ def question(request, assignment_id, question_id):
     )
 
     # Determine stage and view class
-    if view_data['answer'] is not None:
+
+    if request.GET.get('show_results_view') == 'true':
+        stage_class = AnswerSummaryChartView
+    elif view_data['answer'] is not None:
         stage_class = QuestionSummaryView
     elif stage_data.get('completed_stage') == 'start':
         if question.sequential_review:

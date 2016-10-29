@@ -77,6 +77,7 @@ class ApplicationHookManager(AbstractApplicationHookManager):
         action = lti_data.get('custom_action')
         assignment_id = lti_data.get('custom_assignment_id')
         question_id = lti_data.get('custom_question_id')
+        show_results_view = lti_data.get('custom_show_results_view', 'false')
 
         if action == 'launch-admin':
             return reverse('admin:index')
@@ -85,9 +86,10 @@ class ApplicationHookManager(AbstractApplicationHookManager):
                 'admin:peerinst_question_change', args=(question_id,)
             )
 
-        return reverse(
-            'question', kwargs=dict(assignment_id=assignment_id, question_id=question_id)
-        )
+        redirect_url =  reverse('question', kwargs=dict(assignment_id=assignment_id, question_id=question_id))
+        if show_results_view == 'true':
+            redirect_url += '?show_results_view=true'
+        return redirect_url
 
     def authentication_hook(self, request, user_id=None, username=None, email=None, extra_params=None):
         if extra_params is None:
