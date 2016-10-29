@@ -37,6 +37,16 @@ class QuestionViewTestCase(TestCase):
         'resource_link_id': 'resource_link_id',
         'user_id': '1234567890',
     }
+    EXPECTED_RESULT_COLUMNS = [
+        {u'name': u'label', u'label': u'Choice'},
+        {u'name': u'before', u'label': u'Before'},
+        {u'name': u'after', u'label': u'After'},
+        {u'name': u'to_A', u'label': u'To A'},
+        {u'name': u'to_B', u'label': u'To B'},
+        {u'name': u'to_C', u'label': u'To C'},
+        {u'name': u'to_D', u'label': u'To D'},
+        {u'name': u'to_E', u'label': u'To E'},
+    ]
 
     def setUp(self):
         super(QuestionViewTestCase, self).setUp()
@@ -76,6 +86,11 @@ class QuestionViewTestCase(TestCase):
         lti_params = self.LTI_PARAMS.copy()
         del lti_params['lis_outcome_service_url']
         self.log_in_with_lti(lti_params=lti_params)
+
+    def get_results_view(self):
+        response = self.client.get(self.question_url + '?show_results_view=true')
+        self.assertEqual(response.status_code, 200)
+        return response
 
     def log_in_with_lti(self, user=None, password=None, lti_params=None):
         """Log a user in with fake LTI data."""
@@ -137,9 +152,7 @@ class QuestionViewTest(QuestionViewTestCase):
         self.assertIn(first_answer_choice, second_answer_choices)
 
         # Select a different answer during review.
-        second_answer_choice = next(
-            choice for choice in second_answer_choices if choice != first_answer_choice
-        )
+        second_answer_choice = next(choice for choice in second_answer_choices if choice != first_answer_choice)
         second_choice_label = self.question.get_choice_label(second_answer_choice)
         chosen_rationale = int(rationale_choices[1][2][0][0])
         response = self.question_post(
@@ -155,6 +168,16 @@ class QuestionViewTest(QuestionViewTestCase):
         self.assertEqual(response.context['rationale'], rationale)
         self.assertEqual(response.context['chosen_rationale'].id, chosen_rationale)
 
+        response = self.get_results_view()
+        self.assertTemplateUsed(response, 'peerinst/question_answers_summary.html')
+        self.assertEqual(response.context['question'], self.question)
+        first_choice_row = next(row for row in response.context['answer_rows'] if first_choice_label in row[0])
+        second_choice_row = next(row for row in response.context['answer_rows'] if second_choice_label in row[0])
+        self.assertEqual(first_choice_row[1], 1)
+        self.assertEqual(first_choice_row[2], 0)
+        self.assertEqual(second_choice_row[2], 1)
+        self.assertEqual(second_choice_row[1], 0)
+
     def test_standard_review_mode(self):
         """Test answering questions in default mode, with scoring enabled."""
         self.mock_get_grade.return_value = Grade.INCORRECT
@@ -168,6 +191,16 @@ class QuestionViewTest(QuestionViewTestCase):
             answer_style=Question.NUMERIC,
             choices=5, choices__correct=[2, 4], choices__rationales=4,
         ))
+        self.EXPECTED_RESULT_COLUMNS = [
+            {u'name': u'label', u'label': u'Choice'},
+            {u'name': u'before', u'label': u'Before'},
+            {u'name': u'after', u'label': u'After'},
+            {u'name': u'to_1', u'label': u'To 1'},
+            {u'name': u'to_2', u'label': u'To 2'},
+            {u'name': u'to_3', u'label': u'To 3'},
+            {u'name': u'to_4', u'label': u'To 4'},
+            {u'name': u'to_5', u'label': u'To 5'},
+        ]
         self.run_standard_review_mode()
 
     def test_standard_review_mode_scoring_disabled(self):

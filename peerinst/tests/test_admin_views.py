@@ -101,7 +101,7 @@ class TopRationalesTestData(object):
         return (assignment, question)
 
     @staticmethod
-    def mock_rationale_aggregates(question, assignment, perpage):
+    def mock_rationale_aggregates(question, assignment, perpage, *args, **kwargs):
         sums = {'upvoted': 1, 'chosen': 150, 'right_to_wrong': 12, 'wrong_to_right': 50}
         answer = mock.Mock()
 
