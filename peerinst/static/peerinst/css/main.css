@@ -155,3 +155,10 @@ input[type="submit"].thumbs-down {
 .votable-rationale q {
     font-style: italic;
 }
+.share-question-answers-summary label {
+    font-weight: bold;
+}
+.share-question-answers-summary textarea {
+    width: 50%;
+    height: 100px;
+}

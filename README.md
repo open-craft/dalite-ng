@@ -73,7 +73,7 @@ dalite$ cd dalite-ng
 
 * Install the requirements
 ```shell
-dalite$ pip install -r requirements.txt
+dalite$ pip install -r requirements/requirements.txt
 ```
 
 * Generate a secret key using `tools/gen_secret_key.py`, and put it in `dalite/local_settings.py`.
