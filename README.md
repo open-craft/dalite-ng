@@ -25,6 +25,10 @@ Setting up the development server
 
         $ export DALITE_DB_PASSWORD='your password here'
 
+   Or to use sqlite3, set in local_setting.py a line containing
+
+   DATABASES = { 'default' : { 'ENGINE' :  'django.db.backends.sqlite3', 'NAME': 'dalite_ng.sqlite3' } }
+
 3. Generate a secret key, e.g. using `tools/gen_secret_key.py`, an put it in
    `dalite/local_settings.py`.
 
