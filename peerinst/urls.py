@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.conf.urls import include, url
+from django.contrib.auth.views import login
 
 from . import admin_views
 from . import views
@@ -28,4 +29,6 @@ urlpatterns = [
         url(r'^attribution_analysis/$', admin_views.AttributionAnalysis.as_view(),
             name='attribution-analysis'),
     ])),
+    url(r'^login/$', login, name='login'),
+    url(r'^logout/$', views.logout_view, name='logout'),
 ]

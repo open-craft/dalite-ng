@@ -100,7 +100,9 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_URL = 'admin:login'
+LOGIN_URL = 'login'
+
+LOGIN_REDIRECT_URL = 'assignment-list'
 
 GRAPPELLI_ADMIN_TITLE = 'Dalite NG administration'
 

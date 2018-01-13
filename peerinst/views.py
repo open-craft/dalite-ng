@@ -35,6 +35,14 @@ from .admin_views import get_question_rationale_aggregates
 LOGGER = logging.getLogger(__name__)
 
 
+def logout_view(request):
+    from django.contrib.auth import logout
+    from django.http import HttpResponseRedirect
+    from django.core.urlresolvers import reverse
+    logout(request)
+    return HttpResponseRedirect(reverse('login'))
+
+
 class LoginRequiredMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
