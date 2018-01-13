@@ -1,6 +1,7 @@
 body {
     color: #3C3C3C;
     font: 1em/1.6em "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
+    margin: 0pt;
 }
 p {
     margin: 0.25em 0;
@@ -161,6 +162,17 @@ input[type="submit"].thumbs-down {
 .share-question-answers-summary textarea {
     width: 50%;
     height: 100px;
+}
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+}
+header {
+  background-color: black;
+  color: white;
+  padding:4pt;
+  font-size: 18pt;
 }
 .site-content {
   margin: 20pt;

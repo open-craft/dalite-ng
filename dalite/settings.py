@@ -47,10 +47,12 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'dalite.urls'
 
+CUSTOM_SETTINGS = os.environ.get('CUSTOM_SETTINGS', 'default')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'custom-settings/'+CUSTOM_SETTINGS+'/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -99,6 +101,10 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'custom-settings/'+CUSTOM_SETTINGS+'/static'),
+)
 
 LOGIN_URL = 'login'
 

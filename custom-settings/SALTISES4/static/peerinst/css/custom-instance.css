@@ -1,0 +1,16 @@
+body {
+    background-color: #f4f4f4;
+    color: black;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-size: 12pt;
+}
+header {
+  background-color: #54c0db;
+}
+h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 24pt;
+  text-transform: uppercase;
+}
