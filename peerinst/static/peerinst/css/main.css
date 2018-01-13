@@ -162,3 +162,14 @@ input[type="submit"].thumbs-down {
     width: 50%;
     height: 100px;
 }
+.site-content {
+  margin: 20pt;
+}
+#logo {
+  width: 40px;
+  vertical-align: middle;
+  padding-right: 4pt;
+}
+a {
+  color: grey;
+}

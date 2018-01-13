@@ -21,6 +21,7 @@ from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
+from django.utils import timezone
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 
@@ -44,6 +45,11 @@ class LoginRequiredMixin(object):
 class AssignmentListView(LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
+
+    def get_context_data(self, **kwargs):
+        context = super(AssignmentListView, self).get_context_data(**kwargs)
+        context['now'] = timezone.now()
+        return context
 
 
 class QuestionListView(LoginRequiredMixin, ListView):
@@ -578,7 +584,7 @@ class AnswerSummaryChartView(View):
             answer_row['rationales'] = rationales['chosen']
             # Save everything about this answer into the list of table rows
             answers.append(answer_row)
-        # Build a list of all the columns that will be used in this chart 
+        # Build a list of all the columns that will be used in this chart
         columns = [
             {
                 "name": name,

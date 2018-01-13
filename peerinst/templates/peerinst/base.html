@@ -1,5 +1,7 @@
 {% load staticfiles %}
 
+{% load admin_urls %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,14 +10,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Dalite NG">
-    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" href="{% static 'peerinst/img/logo.png' %}">
     <link rel="stylesheet" href="{% static 'peerinst/css/main.css' %}">
+
+    <!-- Custom settings for local instance of dalite-ng -->
+    <link href="https://fonts.googleapis.com/css?family=Cardo:400,400i|Montserrat:300,700" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'peerinst/css/custom-instance.css' %}">
 
     {% block stylesheets %}{% endblock %}
   </head>
 
   <body>
-    {% block body %}{% endblock %}
+
+    <!-- Custom header for local instance of dalite-ng -->
+    <header>
+      <div class="wrapper">
+      <div><a href="https://www.saltise.ca/projects/mydalite/"><img src="{% static 'peerinst/img/logo.png' %}" alt="SALTISE.S4-logo" id="logo"></a> <a href="{% url 'assignment-list' %}" style="text-decoration:none;color:white;"><span style="font-family: 'Cardo', serif; font-style:italic;">my</span><span style="font-family: 'Montserrat', sans serif;text-transform:uppercase;">Dalite</span></a></div>
+      <div style="text-align:center;font-size:10pt;"></div>
+      <div style="text-align:right;font-size:10pt;line-height:1.2;">
+        User: {{ request.user.username }}<br>
+        <a href="{% url 'admin:logout' %}" style="color:white;font-weight:bold;text-decoration:none;">Logout</a>
+      </div>
+      </div>
+    </header>
+
+    <div class="site-content">
+      {% block body %}{% endblock %}
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script>
         // Fix potential CSRF token conflicts when loading multiple iframes in parallel,

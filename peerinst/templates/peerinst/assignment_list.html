@@ -3,11 +3,14 @@
 
 {% block body %}
 <h1>{% trans 'Assignments' %}</h1>
+{% if user.is_staff %}
+  <div style="margin-top:-16pt;margin-bottom:12pt;font-size:9pt;opacity:0.6;"><a href="{% url 'admin_index_wrapper' %}" style="text-decoration:none;">Click here to add or edit content</a></div>
+{% endif %}
 <ul>
 {% for obj in object_list %}
-  <li><a href="{% url 'question-list' assignment_id=obj.pk %}">
-    {{ obj.pk }}
-  <a></li>
+  <li>{{ forloop.counter }}. <a href="{% url 'question-list' assignment_id=obj.pk %}">
+    {{ obj.title }}
+  </a></li>
 {% empty %}
   <li>{% trans 'No assignments available.' %}</li>
 {% endfor %}

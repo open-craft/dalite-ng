@@ -1,0 +1,25 @@
+body {
+    background-color: #f4f4f4;
+    color: black;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-size: 12pt;
+    margin: 0pt;
+}
+header {
+  background-color: #54c0db;
+  color: white;
+  padding:4pt;
+  font-size: 18pt;
+}
+h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 24pt;
+  text-transform: uppercase;
+}
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+}
