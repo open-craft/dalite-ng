@@ -14,7 +14,7 @@
     {% block pretext %}{% endblock %}
     <h1>{{ question.title }}</h1>
     {% if user.is_staff %}
-      <div style="margin-top:-16pt;margin-bottom:12pt;font-size:9pt;opacity:0.6;"><a href="{% url 'admin:peerinst_question_change' question.id %}" style="text-decoration:none;">Edit question</a></div>
+      <div class="admin-link"><a href="{% url 'admin:peerinst_question_change' question.id %}">Edit question</a></div>
     {% endif %}
     <div id="question-text">
       {{ question.text|safe }}

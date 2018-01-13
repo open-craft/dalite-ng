@@ -14,8 +14,7 @@
     <link rel="stylesheet" href="{% static 'peerinst/css/main.css' %}">
 
     <!-- Custom settings for local instance of dalite-ng -->
-    <link href="https://fonts.googleapis.com/css?family=Cardo:400,400i|Montserrat:300,700" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'peerinst/css/custom-instance.css' %}">
+    {% include 'peerinst/custom-instance-head.html' %}
 
     {% block stylesheets %}{% endblock %}
   </head>
@@ -24,16 +23,7 @@
 
     <!-- Custom header for local instance of dalite-ng -->
     <header>
-      <div class="wrapper">
-      <div><a href="https://www.saltise.ca/projects/mydalite/"><img src="{% static 'peerinst/img/logo.png' %}" alt="SALTISE.S4-logo" id="logo"></a> <a href="{% url 'assignment-list' %}" style="text-decoration:none;color:white;"><span style="font-family: 'Cardo', serif; font-style:italic;">my</span><span style="font-family: 'Montserrat', sans serif;text-transform:uppercase;">Dalite</span></a></div>
-      <div style="text-align:center;font-size:10pt;"></div>
-      <div style="text-align:right;font-size:10pt;line-height:1.2;">
-        {% if user.is_authenticated %}
-        User: {{ request.user.username }}<br>
-        <a href="{% url 'logout' %}" style="color:white;font-weight:bold;text-decoration:none;">Logout</a>
-        {% endif %}
-      </div>
-      </div>
+      {% include 'peerinst/custom-instance-header.html' %}
     </header>
 
     <div class="site-content">

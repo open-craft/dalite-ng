@@ -165,6 +165,12 @@ input[type="submit"].thumbs-down {
 .site-content {
   margin: 20pt;
 }
+.admin-link {
+  margin-top:-16pt;
+  margin-bottom:12pt;
+  font-size:9pt;
+  opacity:0.8;
+}
 #logo {
   width: 40px;
   vertical-align: middle;
@@ -172,4 +178,5 @@ input[type="submit"].thumbs-down {
 }
 a {
   color: grey;
+  text-decoration: none;
 }
