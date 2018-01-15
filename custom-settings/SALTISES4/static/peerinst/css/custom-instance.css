@@ -13,3 +13,6 @@ h1 {
   font-size: 24pt;
   text-transform: uppercase;
 }
+#search-bar {
+  font-family: 'Montserrat', sans-serif;
+}

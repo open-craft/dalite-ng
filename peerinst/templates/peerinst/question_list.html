@@ -8,9 +8,11 @@
 {% endif %}
 <ul>
 {% for obj in object_list %}
-  <li>{{ forloop.counter }}. <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">
-    {{ obj.title }}
-  </a></li>
+  <li>{{ forloop.counter }}. <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">{{ obj.title }}</a>
+    <div class="question-text">
+      {{ obj.text|safe|striptags }}
+    </div>
+  </li>
 {% empty %}
   <li>{% trans 'No questions available.' %}</li>
 {% endfor %}

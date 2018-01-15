@@ -192,3 +192,18 @@ a {
   color: grey;
   text-decoration: none;
 }
+.question-text {
+    margin-left: 20pt;
+    font-size: 10pt;
+    line-height:1.3;
+}
+.search {
+  display:inline;
+  vertical-align: middle;
+  padding-top:4pt;
+}
+#search-bar {
+  padding:0pt;
+  padding-left:4pt;
+  margin-left:6pt;
+}
