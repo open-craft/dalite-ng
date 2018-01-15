@@ -16,7 +16,9 @@
     {% if user.is_staff %}
       <div class="admin-link">
         <a href="{% url 'admin:peerinst_question_change' question.id %}">Edit question</a>
-        <span style="padding-left:0.5em;padding-right:0.5em;">|</span><a href="{% url 'reset-question' assignment_id=assignment.pk question_id=question.id %}">Reset answers</a>
+        {% if assignment %}
+          <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'reset-question' assignment_id=assignment.pk question_id=question.id %}">Reset answers</a>
+        {% endif %}
       </div>
     {% endif %}
     <div id="question-text">
