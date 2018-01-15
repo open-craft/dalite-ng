@@ -21,6 +21,8 @@ from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
@@ -37,8 +39,6 @@ LOGGER = logging.getLogger(__name__)
 
 def logout_view(request):
     from django.contrib.auth import logout
-    from django.http import HttpResponseRedirect
-    from django.core.urlresolvers import reverse
     logout(request)
     return HttpResponseRedirect(reverse('login'))
 
@@ -695,3 +695,17 @@ def question(request, assignment_id, question_id):
         return redirect(request.path)
     stage_data.store()
     return result
+
+
+def reset_question(request, assignment_id, question_id):
+    """ Clear all answers from user (for testing) """
+
+    assignment = get_object_or_404(models.Assignment, pk=assignment_id)
+    question = get_object_or_404(models.Question, pk=question_id)
+    user_token = request.user.username
+    answer=get_object_or_none(
+        models.Answer, assignment=assignment, question=question, user_token=user_token
+    )
+    answer.delete()
+
+    return HttpResponseRedirect(reverse('question', kwargs={'assignment_id' : assignment.pk, 'question_id' : question.pk}))

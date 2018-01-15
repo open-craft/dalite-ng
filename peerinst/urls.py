@@ -13,6 +13,7 @@ urlpatterns = [
         url(r'^$', views.QuestionListView.as_view(), name='question-list'),
         url(r'(?P<question_id>\d+)/', include([
             url(r'^$', views.question, name='question'),
+            url(r'^reset/$', views.reset_question, name='reset-question'),
         ])),
     ])),
     url(r'^heartbeat/$', views.HeartBeatUrl.as_view(), name='heartbeat'),
