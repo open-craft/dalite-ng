@@ -7,7 +7,7 @@
   <div class="admin-link"><a href="{% url 'admin_index_wrapper' %}">Click here to add or edit content</a></div>
 {% endif %}
 <div class="search">
-  Search: <input type="text" onchange="search()" id="search-bar"></input>
+  Search: <input type="search" onchange="search()" id="search-bar"></input>
 </div>
 <ul>
 {% for obj in object_list %}
