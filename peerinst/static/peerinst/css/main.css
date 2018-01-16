@@ -193,7 +193,10 @@ a {
   text-decoration: none;
 }
 .question-text {
-    margin-left: 20pt;
+    margin-left: 30pt;
+    margin-right: 20pt;
+    margin-top: 2pt;
+    margin-bottom: 10pt;
     font-size: 10pt;
     line-height:1.3;
 }
