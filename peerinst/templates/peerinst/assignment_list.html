@@ -7,7 +7,7 @@
   <div class="admin-link"><a href="{% url 'admin_index_wrapper' %}">Click here to add or edit content</a></div>
 {% endif %}
 <div class="search">
-  Search: <input type="search" onchange="search()" id="search-bar"></input>
+  Search: <input type="search" id="search-bar" oninput="search()"></input>
 </div>
 <ul>
 {% for obj in object_list %}
@@ -20,19 +20,19 @@
 </ul>
 
 <script>
-  function search(){
-    var search_string = document.getElementById('search-bar').value;
-    var items = document.getElementsByName('item');
-    for (var i=0; i<items.length; i++) {
-      if (items[i].id.toLowerCase().indexOf(search_string.toLowerCase()) < 0) {
-        items[i].style.display = "none";
-      }
-      else {
-        items[i].style.display = "block";
-      }
+var search_string = document.getElementById('search-bar');
+search_string.focus();
+function search(){
+  var items = document.getElementsByName('item');
+  for (var i=0; i<items.length; i++) {
+    if (items[i].id.toLowerCase().indexOf(search_string.value.toLowerCase()) < 0) {
+      items[i].style.display = "none";
+    } else {
+      items[i].style.display = "block";
     }
-    return;
   }
+  return;
+}
 </script>
 
 {% endblock %}
