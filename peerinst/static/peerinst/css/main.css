@@ -211,3 +211,16 @@ a {
   margin-left:6pt;
   font-size: 12pt;
 }
+.stats {
+  font-size: 8pt;
+}
+.items-for-question {
+  display: none;
+  font-size: 10pt;
+  margin-left: 30pt;
+  margin-right: 20pt;
+  margin-top: 4pt;
+  margin-bottom:6pt;
+  line-height: 1.2;
+  list-style: circle outside;
+}

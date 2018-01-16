@@ -9,12 +9,58 @@
 <ul>
 {% for obj in object_list %}
   <li>{{ forloop.counter }}. <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">{{ obj.title }}</a>
+    <span class="stats">
+      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(3px);opacity:0.6;" onclick="showAssignments({{ obj.id }})">description</i>{{ obj.assignment_set.all.count }}
+      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(6px);opacity:0.6;" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
+    </span>
     <div class="question-text">
       {{ obj.text|safe|striptags }}
+    </div>
+    <div>
+      <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>
+      <ul>
+        {% for assignment in obj.assignment_set.all %}
+          <li id="{{ obj.id }}" name="assignment" class="items-for-question"><a href="{% url 'question-list' assignment_id=assignment.pk %}">{{ assignment.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <span id="{{ obj.id }}" name="rationale" class="items-for-question"><b>Rationales:</b></span>
+      <ul>
+        {% for answer in obj.answer_set.all %}
+          <li id="{{ obj.id }}" name="rationale" class="items-for-question">{{ answer.rationale|safe|striptags  }}</li>
+        {% endfor %}
+      </ul>
     </div>
   </li>
 {% empty %}
   <li>{% trans 'No questions available.' %}</li>
 {% endfor %}
 </ul>
+
+<script>
+function showItems(items,id){
+  for (var i=0; i<items.length; i++){
+    if (items[i].id == id){
+      if (items[i].style.display != "block"){
+        items[i].style.display = "block";
+      } else {
+        items[i].style.display = "none";
+      }
+    }
+  }
+  return;
+}
+function showAssignments(id){
+  var items = document.getElementsByName('assignment');
+  showItems(items,id);
+  return;
+}
+function showRationales(id){
+  var items = document.getElementsByName('rationale');
+  showItems(items,id);
+  return;
+}
+</script>
+
 {% endblock %}
