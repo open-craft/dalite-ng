@@ -17,7 +17,9 @@
       <div class="admin-link">
         <a href="{% url 'admin:peerinst_question_change' question.id %}">Edit question</a>
         {% if assignment %}
+        {% if first_choice_label and second_choice_label %}
           <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'reset-question' assignment_id=assignment.pk question_id=question.id %}">Reset answers</a>
+        {% endif %}
         {% endif %}
       </div>
     {% endif %}
