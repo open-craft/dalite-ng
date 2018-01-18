@@ -81,6 +81,8 @@ class QuestionMixin(object):
             assignment=self.assignment,
             question=self.question,
             answer_choices=self.answer_choices,
+            correct=self.question.answerchoice_set.filter(correct=True),
+            experts=self.question.answer_set.filter(expert=True),
         )
         return context
 

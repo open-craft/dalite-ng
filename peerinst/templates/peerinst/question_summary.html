@@ -23,4 +23,23 @@
     <blockquote id="chosen-rationale">{{ chosen_rationale.rationale }}</blockquote>
   {% endif %}
 </p>
+
+<p>
+  Correct answer(s):
+    {% for answer in correct %}
+        <blockquote>{{ answer.text|safe }}</blockquote>
+    {% endfor %}
+</p>
+
+<p>
+  Expert rationales:
+    {% for expert in experts %}
+      {% for option in question.answerchoice_set.all %}
+        {% if option.correct and expert.first_answer_choice == forloop.counter %}
+          <blockquote>{{ expert.rationale }}</blockquote>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+</p>
+
 {% endblock %}
