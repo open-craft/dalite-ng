@@ -16,6 +16,13 @@
     <div class="question-text">
       {{ obj.text|safe|striptags }}
     </div>
+    {% if obj.image %}
+    <div class="question-text" id="question-image">
+      <img src="{{ obj.image.url }}"
+           width=200 alt="obj.image_alt_text">
+    </div>
+    {% endif %}
+    <div style="clear:both;"></div>
     <div>
       <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>
       <ul>
