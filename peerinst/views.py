@@ -75,6 +75,7 @@ class QuestionListView(LoginRequiredMixin, ListView):
 
 
 class QuestionMixin(object):
+
     def get_context_data(self, **kwargs):
         context = super(QuestionMixin, self).get_context_data(**kwargs)
         context.update(

@@ -10,8 +10,9 @@
 {% for obj in object_list %}
   <li>{{ forloop.counter }}. <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">{{ obj.title }}</a>
     <span class="stats">
+      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:20px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showAnalytics({{ obj.id }})">assessment</i>
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(3px);opacity:0.6;" onclick="showAssignments({{ obj.id }})">description</i>{{ obj.assignment_set.all.count }}
-      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(6px);opacity:0.6;" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
+      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
     </span>
     <div class="question-text">
       {{ obj.text|safe|striptags }}
@@ -23,6 +24,14 @@
     </div>
     {% endif %}
     <div style="clear:both;"></div>
+    <div>
+      <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
+      <ul>
+        {% for metric in obj.get_matrix.items %}
+          <li id="{{ obj.id }}" name="analytics" class="items-for-question">{{metric}} {{metric.value}}</li>
+        {% endfor %}
+      </ul>
+    </div>
     <div>
       <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>
       <ul>
@@ -56,6 +65,11 @@ function showItems(items,id){
       }
     }
   }
+  return;
+}
+function showAnalytics(id){
+  var items = document.getElementsByName('analytics');
+  showItems(items,id);
   return;
 }
 function showAssignments(id){
