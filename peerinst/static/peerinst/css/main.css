@@ -77,10 +77,6 @@ ul#id_first_answer_choice {
     margin-bottom: 2em;
 }
 
-ul#answer-choices{
-    list-style: disc;
-}
-
 input[type='text'] {
     height: 35px;
 }
@@ -92,6 +88,8 @@ input[type='text']:focus, .form-field:focus {
 .rationales {
     display: table;
     border-collapse: collapse;
+    margin-left:40px;
+    margin-right:40px;
 }
 .rationale {
     display: table-row;
@@ -106,6 +104,10 @@ input[type='text']:focus, .form-field:focus {
 }
 .rationale-choice input {
     display: none;
+}
+
+form ul {
+  padding-left:10px;
 }
 
 .errorlist, ul li.error {
