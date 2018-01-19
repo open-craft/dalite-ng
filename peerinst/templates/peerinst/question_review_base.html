@@ -7,9 +7,13 @@
   <li class="{% if label == first_choice_label %}first-choice{% endif %}{% if label == second_choice_label %} second-choice{% endif %}">{{ label }}. {{ choice|safe }}
     {% if first_choice_label and second_choice_label %}
       {% if label == second_choice_label %}
-        {% for c in correct %}
+        {% for c in question.answerchoice_set.all %}
           {% if choice == c.text %}
-            <i id="check" class="material-icons" style="-webkit-transform: translateY(5px);font-size:16pt;">check</i>
+            {% if c.correct %}
+              <i id="check" class="material-icons" style="-webkit-transform: translateY(5px);font-size:16pt;">check</i>
+            {% else %}
+              <i id="check" class="material-icons" style="-webkit-transform: translateY(5px);font-size:16pt;">close</i>
+            {% endif %}
           {% endif %}
         {% endfor %}
       {% endif %}
