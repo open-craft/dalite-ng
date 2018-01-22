@@ -206,6 +206,16 @@ class Question(models.Model):
 
         return matrix
 
+    def get_frequency(self):
+        frequency = {}
+        student_answers = self.answer_set.filter(expert=False).filter(second_answer_choice__gt=0)
+        c=1
+        for answerChoice in self.answerchoice_set.all():
+            frequency[c-1] = student_answers.filter(second_answer_choice=c).count()
+            c=c+1
+
+        return frequency
+
     class Meta:
         verbose_name = _('question')
         verbose_name_plural = _('questions')

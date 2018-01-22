@@ -31,21 +31,36 @@ function plot(data,id){
 
   var svg = d3.select("#svg-"+id);
 
-  console.info(svg)
+  var size = svg.attr("width");
 
   var g = svg.append("g");
 
-  g.append("rect")
+  var easy = g.append("rect")
   .attr("x", 0)
   .attr("y", 0)
-  .attr("width", 25)
-  .attr("height", 25)
+  .attr("width", size/2)
+  .attr("height", size/2)
   .attr("fill",colour['easy'])
-  .style("opacity",0.8);
+  .style("opacity",0)
+  .transition()
+  .duration(500)
+  .style("opacity",0.5+0.5*data['easy']);
+
+  /**easy.on("mouseover",function(d){
+    tooltip.html("Correct to correct");
+
+    tooltip.transition()
+    .duration(100)
+    .style("opacity",1);
+  });
+
+  easy.on("mouseout",function(d){
+    tooltip.style("opacity",0);
+  })**/
 
   g.append("text")
-  .attr("x", 12.5)
-  .attr("y", 12.5)
+  .attr("x", size/4)
+  .attr("y", size/4)
   .attr("dy",4)
   .style("font-size","8pt")
   .style("fill","white")
@@ -53,16 +68,16 @@ function plot(data,id){
   .text(parseInt(100*data['easy'])+"%");
 
   g.append("rect")
-  .attr("x", 25)
-  .attr("y", 25)
-  .attr("width", 25)
-  .attr("height", 25)
+  .attr("x", size/2)
+  .attr("y", size/2)
+  .attr("width", size/2)
+  .attr("height", size/2)
   .attr("fill",colour['hard'])
-  .style("opacity",0.8);
+  .style("opacity",0.5+0.5*data['hard']);
 
   g.append("text")
-  .attr("x", 37.5)
-  .attr("y", 37.5)
+  .attr("x", 3*size/4)
+  .attr("y", 3*size/4)
   .attr("dy",4)
   .style("font-size","8pt")
   .style("fill","white")
@@ -71,15 +86,15 @@ function plot(data,id){
 
   g.append("rect")
   .attr("x", 0)
-  .attr("y", 25)
-  .attr("width", 25)
-  .attr("height", 25)
+  .attr("y", size/2)
+  .attr("width", size/2)
+  .attr("height", size/2)
   .attr("fill",colour['peer'])
-  .style("opacity",0.8);
+  .style("opacity",0.5+0.5*data['peer']);
 
   g.append("text")
-  .attr("x", 12.5)
-  .attr("y", 37.5)
+  .attr("x", size/4)
+  .attr("y", 3*size/4)
   .attr("dy",4)
   .style("font-size","8pt")
   .style("fill","white")
@@ -87,21 +102,39 @@ function plot(data,id){
   .text(parseInt(100*data['peer'])+"%");
 
   g.append("rect")
-  .attr("x", 25)
+  .attr("x", size/2)
   .attr("y", 0)
-  .attr("width", 25)
-  .attr("height", 25)
+  .attr("width", size/2)
+  .attr("height", size/2)
   .attr("fill",colour['tricky'])
-  .style("opacity",0.8);
+  .style("opacity",0.5+0.5*data['tricky']);
 
   g.append("text")
-  .attr("x", 37.5)
-  .attr("y", 12.5)
+  .attr("x", 3*size/4)
+  .attr("y", size/4)
   .attr("dy",4)
   .style("font-size","8pt")
   .style("fill","white")
   .style("text-anchor","middle")
   .text(parseInt(100*data['tricky'])+"%");
+
+  g.append("text")
+  .attr("x", size/4)
+  .attr("y", 5*size/4)
+  .attr("dy",4)
+  .style("font-size","8pt")
+  .style("fill","black")
+  .style("text-anchor","middle")
+  .text(parseInt(100*(data['easy']+data['peer']))+"%");
+
+  g.append("text")
+  .attr("x", 3*size/4)
+  .attr("y", 5*size/4)
+  .attr("dy",4)
+  .style("font-size","8pt")
+  .style("fill","black")
+  .style("text-anchor","middle")
+  .text(parseInt(100*(data['hard']+data['tricky']))+"%");
 
   return;
 }
@@ -128,7 +161,8 @@ function plot(data,id){
     <div>
       <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
       <div id="{{ obj.id }}" name="analytics" class="items-for-question">
-        <svg id="svg-{{ obj.id }}" width="50" height="50" style="margin-left:40px;"></svg>
+        <svg id="svg-{{ obj.id }}" width="60" height="80" style="margin-left:40px;margin-right:10px;"></svg>
+        <svg width="200" height="80"></svg>
       </div>
       <script>plot({{ obj.get_matrix|safe }},{{ obj.id }})</script>
     </div>
@@ -155,6 +189,13 @@ function plot(data,id){
 </ul>
 
 <script>
+
+/*var tooltip = d3.select("body").append("div")
+.attr("class", "tooltip")
+.style("width","50px")
+.style("height","50px")
+.style("opacity", 0);*/
+
 function showItems(items,id){
   for (var i=0; i<items.length; i++){
     if (items[i].id == id){
@@ -167,21 +208,25 @@ function showItems(items,id){
   }
   return;
 }
+
 function showAnalytics(id){
   var items = document.getElementsByName('analytics');
   showItems(items,id);
   return;
 }
+
 function showAssignments(id){
   var items = document.getElementsByName('assignment');
   showItems(items,id);
   return;
 }
+
 function showRationales(id){
   var items = document.getElementsByName('rationale');
   showItems(items,id);
   return;
 }
+
 </script>
 
 {% endblock %}
