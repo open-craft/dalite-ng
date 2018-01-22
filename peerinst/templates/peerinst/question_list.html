@@ -6,11 +6,40 @@
 {% if user.is_staff %}
   <div class="admin-link"><a href="{% url 'admin_index_wrapper' %}">Click here to add or edit content</a></div>
 {% endif %}
+
+<script>
+function plot(data,id){
+  var colour = {
+    'easy' : 'rgb(30, 142, 62)',
+    'hard' : 'rgb(237, 69, 40)',
+    'tricky' : 'rgb(84, 192, 219)',
+    'peer' : 'rgb(25, 118, 188)'
+  }
+  var max = -0;
+  for (entry in d3.entries(data)){
+    var item = d3.entries(data)[entry];
+    if (item.value > max) {
+      max = item.value;
+      label = item.key;
+    }
+  }
+  var rating = document.getElementById("rating-"+id);
+  rating.innerHTML = label.substring(0,1).toUpperCase()+label.substring(1,);
+
+  var stats = document.getElementById("stats-"+id);
+  stats.style.color = colour[label];
+
+  var svg = document.getElementById("svg-"+id);
+
+  return;
+}
+</script>
+
 <ul>
 {% for obj in object_list %}
   <li>{{ forloop.counter }}. <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">{{ obj.title }}</a>
-    <span class="stats">
-      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:20px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showAnalytics({{ obj.id }})">assessment</i>
+    <span id="stats-{{obj.id}}" class="stats">
+      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:20px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showAnalytics({{ obj.id }})">assessment</i><span id="rating-{{obj.id}}"></span>
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(3px);opacity:0.6;" onclick="showAssignments({{ obj.id }})">description</i>{{ obj.assignment_set.all.count }}
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
     </span>
@@ -26,11 +55,10 @@
     <div style="clear:both;"></div>
     <div>
       <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
-      <ul>
-        {% for metric in obj.get_matrix.items %}
-          <li id="{{ obj.id }}" name="analytics" class="items-for-question">{{metric}} {{metric.value}}</li>
-        {% endfor %}
-      </ul>
+      <div id="{{ obj.id }}" name="analytics" class="items-for-question">
+        <svg id="svg-{{ obj.id }}" width="100" height="100"></svg>
+      </div>
+      <script>plot({{ obj.get_matrix|safe }},{{ obj.id }})</script>
     </div>
     <div>
       <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>

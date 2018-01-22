@@ -186,23 +186,23 @@ class Question(models.Model):
 
     def get_matrix(self):
         matrix = {}
-        matrix['easy'] = 0
-        matrix['hard'] = 0
-        matrix['tricky'] = 0
-        matrix['peer'] = 0
+        matrix[b'easy'] = 0
+        matrix[b'hard'] = 0
+        matrix[b'tricky'] = 0
+        matrix[b'peer'] = 0
         student_answers = self.answer_set.filter(expert=False).filter(second_answer_choice__gt=0)
         N = len(student_answers)
         for answer in student_answers:
             if self.is_correct(answer.first_answer_choice) :
                 if self.is_correct(answer.second_answer_choice) :
-                    matrix['easy'] += 1.0/N
+                    matrix[b'easy'] += 1.0/N
                 else:
-                    matrix['tricky'] += 1.0/N
+                    matrix[b'tricky'] += 1.0/N
             else:
                 if self.is_correct(answer.second_answer_choice) :
-                    matrix['peer'] += 1.0/N
+                    matrix[b'peer'] += 1.0/N
                 else:
-                    matrix['hard'] += 1.0/N
+                    matrix[b'hard'] += 1.0/N
 
         return matrix
 
