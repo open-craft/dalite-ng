@@ -192,18 +192,19 @@ class Question(models.Model):
         matrix[b'peer'] = 0
         student_answers = self.answer_set.filter(expert=False).filter(second_answer_choice__gt=0)
         N = len(student_answers)
-        for answer in student_answers:
-            if self.is_correct(answer.first_answer_choice) :
-                if self.is_correct(answer.second_answer_choice) :
-                    matrix[b'easy'] += 1.0/N
+        if N > 0:
+            for answer in student_answers:
+                if self.is_correct(answer.first_answer_choice) :
+                    if self.is_correct(answer.second_answer_choice) :
+                        matrix[b'easy'] += 1.0/N
+                    else:
+                        matrix[b'tricky'] += 1.0/N
                 else:
-                    matrix[b'tricky'] += 1.0/N
-            else:
-                if self.is_correct(answer.second_answer_choice) :
-                    matrix[b'peer'] += 1.0/N
-                else:
-                    matrix[b'hard'] += 1.0/N
-
+                    if self.is_correct(answer.second_answer_choice) :
+                        matrix[b'peer'] += 1.0/N
+                    else:
+                        matrix[b'hard'] += 1.0/N
+    
         return matrix
 
     def get_frequency(self):

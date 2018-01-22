@@ -23,11 +23,13 @@ function plot(data,id){
       label = item.key;
     }
   }
-  var rating = document.getElementById("rating-"+id);
-  rating.innerHTML = label.substring(0,1).toUpperCase()+label.substring(1,);
+  if (max > 0){
+    var rating = document.getElementById("rating-"+id);
+    rating.innerHTML = label.substring(0,1).toUpperCase()+label.substring(1,);
 
-  var stats = document.getElementById("stats-"+id);
-  stats.style.color = colour[label];
+    var stats = document.getElementById("stats-"+id);
+    stats.style.color = colour[label];
+  }
 
   var svg = d3.select("#svg-"+id);
 
