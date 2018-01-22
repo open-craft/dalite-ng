@@ -12,7 +12,7 @@ function plot(data,id){
   var colour = {
     'easy' : 'rgb(30, 142, 62)',
     'hard' : 'rgb(237, 69, 40)',
-    'tricky' : 'rgb(84, 192, 219)',
+    'tricky' : 'rgb(237, 170, 30)',
     'peer' : 'rgb(25, 118, 188)'
   }
   var max = -0;
@@ -29,7 +29,79 @@ function plot(data,id){
   var stats = document.getElementById("stats-"+id);
   stats.style.color = colour[label];
 
-  var svg = document.getElementById("svg-"+id);
+  var svg = d3.select("#svg-"+id);
+
+  console.info(svg)
+
+  var g = svg.append("g");
+
+  g.append("rect")
+  .attr("x", 0)
+  .attr("y", 0)
+  .attr("width", 25)
+  .attr("height", 25)
+  .attr("fill",colour['easy'])
+  .style("opacity",0.8);
+
+  g.append("text")
+  .attr("x", 12.5)
+  .attr("y", 12.5)
+  .attr("dy",4)
+  .style("font-size","8pt")
+  .style("fill","white")
+  .style("text-anchor","middle")
+  .text(parseInt(100*data['easy'])+"%");
+
+  g.append("rect")
+  .attr("x", 25)
+  .attr("y", 25)
+  .attr("width", 25)
+  .attr("height", 25)
+  .attr("fill",colour['hard'])
+  .style("opacity",0.8);
+
+  g.append("text")
+  .attr("x", 37.5)
+  .attr("y", 37.5)
+  .attr("dy",4)
+  .style("font-size","8pt")
+  .style("fill","white")
+  .style("text-anchor","middle")
+  .text(parseInt(100*data['hard'])+"%");
+
+  g.append("rect")
+  .attr("x", 0)
+  .attr("y", 25)
+  .attr("width", 25)
+  .attr("height", 25)
+  .attr("fill",colour['peer'])
+  .style("opacity",0.8);
+
+  g.append("text")
+  .attr("x", 12.5)
+  .attr("y", 37.5)
+  .attr("dy",4)
+  .style("font-size","8pt")
+  .style("fill","white")
+  .style("text-anchor","middle")
+  .text(parseInt(100*data['peer'])+"%");
+
+  g.append("rect")
+  .attr("x", 25)
+  .attr("y", 0)
+  .attr("width", 25)
+  .attr("height", 25)
+  .attr("fill",colour['tricky'])
+  .style("opacity",0.8);
+
+  g.append("text")
+  .attr("x", 37.5)
+  .attr("y", 12.5)
+  .attr("dy",4)
+  .style("font-size","8pt")
+  .style("fill","white")
+  .style("text-anchor","middle")
+  .text(parseInt(100*data['tricky'])+"%");
 
   return;
 }
@@ -56,7 +128,7 @@ function plot(data,id){
     <div>
       <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
       <div id="{{ obj.id }}" name="analytics" class="items-for-question">
-        <svg id="svg-{{ obj.id }}" width="100" height="100"></svg>
+        <svg id="svg-{{ obj.id }}" width="50" height="50"></svg>
       </div>
       <script>plot({{ obj.get_matrix|safe }},{{ obj.id }})</script>
     </div>
