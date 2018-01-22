@@ -128,7 +128,7 @@ function plot(data,id){
     <div>
       <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
       <div id="{{ obj.id }}" name="analytics" class="items-for-question">
-        <svg id="svg-{{ obj.id }}" width="50" height="50"></svg>
+        <svg id="svg-{{ obj.id }}" width="50" height="50" style="margin-left:40px;"></svg>
       </div>
       <script>plot({{ obj.get_matrix|safe }},{{ obj.id }})</script>
     </div>
