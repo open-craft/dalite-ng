@@ -138,8 +138,9 @@ function plot(matrix,freq,id){
   .text(parseInt(100*(matrix['hard']+matrix['tricky']))+"%");
   */
 
-  var freq_svg = d3.select("#frequency-"+id),
-  margin = {left:60};
+  var first_freq_svg = d3.select("#first-frequency-"+id),
+  second_freq_svg = d3.select("#second-frequency-"+id),
+  margin = {left:30,right:30};
 
   var sum = 0;
   for (entry in freq['first_choice']){
@@ -150,15 +151,15 @@ function plot(matrix,freq,id){
     freq['second_choice'][entry] /= sum;
   }
 
-  var size = (freq_svg.attr("width")-margin.left)/2;
+  var size = (second_freq_svg.attr("width")-margin.left);
 
   var x = d3.scaleLinear().domain([0,1]).rangeRound([0,size]);
-  var y = d3.scaleBand().domain(d3.keys(freq['first_choice']).sort()).rangeRound([0,freq_svg.attr("height")]);
+  var y = d3.scaleBand().domain(d3.keys(freq['first_choice']).sort()).rangeRound([0,first_freq_svg.attr("height")]);
 
-  var gg = freq_svg.append("g")
-  .attr("transform","translate("+(size+margin.left)+",0)");
+  var gg = second_freq_svg.append("g")
+  .attr("transform","translate("+margin.left+",0)");
 
-  var ggg = freq_svg.append("g");
+  var ggg = first_freq_svg.append("g");
 
   gg.append("g")
   .attr("class", "axis axis--x")
@@ -182,7 +183,7 @@ function plot(matrix,freq,id){
   .attr("x",x(0))
   .attr("y",function(d){return y(d.key);})
   .attr("width",function(d){return x(d.value);})
-  .attr("height",freq_svg.attr("height")/d3.values(freq['second_choice']).length)
+  .attr("height",first_freq_svg.attr("height")/d3.values(freq['second_choice']).length)
   .attr("fill","gray")
   .style("stroke","white")
   .style("opacity",0.2);
@@ -194,7 +195,7 @@ function plot(matrix,freq,id){
   .attr("x",function(d){return x(1-d.value);})
   .attr("y",function(d){return y(d.key);})
   .attr("width",function(d){return x(d.value);})
-  .attr("height",freq_svg.attr("height")/d3.values(freq['first_choice']).length)
+  .attr("height",first_freq_svg.attr("height")/d3.values(freq['first_choice']).length)
   .attr("fill","gray")
   .style("stroke","white")
   .style("opacity",0.2);
@@ -259,8 +260,9 @@ function plot(matrix,freq,id){
     <div>
       <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
       <div id="{{ obj.id }}" name="analytics" class="items-for-question">
-        <svg id="matrix-{{ obj.id }}" width="60" height="80" style="margin-left:40px;margin-right:10px;"></svg>
-        <svg id="frequency-{{ obj.id }}" width="600" height="80" style="vertical-align:top;"></svg>
+        <svg id="first-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
+        <svg id="matrix-{{ obj.id }}" width="60" height="60" style="vertical-align:middle"></svg>
+        <svg id="second-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
       </div>
       <script>
         plot({{ obj.get_matrix|safe }},{{ obj.get_frequency|safe|striptags }},{{ obj.id }})
