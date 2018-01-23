@@ -41,9 +41,6 @@ function plot(matrix,freq,id){
   .attr("width", size/2)
   .attr("height", size/2)
   .attr("fill",colour['easy'])
-  .style("opacity",0)
-  .transition()
-  .duration(500)
   .style("opacity",0.5+0.5*matrix['easy']);
 
   /**easy.on("mouseover",function(d){
@@ -180,9 +177,11 @@ function plot(matrix,freq,id){
   .selectAll("rect")
   .data(d3.entries(freq['second_choice']))
   .enter().append("rect")
+  .attr("id","second_choice-"+id)
+  .attr("finalwidth",function(d){return x(d.value);})
   .attr("x",x(0))
   .attr("y",function(d){return y(d.key);})
-  .attr("width",function(d){return x(d.value);})
+  .attr("width",0)
   .attr("height",first_freq_svg.attr("height")/d3.values(freq['second_choice']).length)
   .attr("fill","gray")
   .style("stroke","white")
@@ -192,9 +191,12 @@ function plot(matrix,freq,id){
   .selectAll("rect")
   .data(d3.entries(freq['first_choice']))
   .enter().append("rect")
-  .attr("x",function(d){return x(1-d.value);})
+  .attr("id","first_choice-"+id)
+  .attr("finalwidth",function(d){return x(d.value);})
+  .attr("finalx",function(d){return x(1-d.value);})
+  .attr("x",x(1))
   .attr("y",function(d){return y(d.key);})
-  .attr("width",function(d){return x(d.value);})
+  .attr("width",0)
   .attr("height",first_freq_svg.attr("height")/d3.values(freq['first_choice']).length)
   .attr("fill","gray")
   .style("stroke","white")
@@ -314,6 +316,8 @@ function showItems(items,id){
 function showAnalytics(id){
   var items = document.getElementsByName('analytics');
   showItems(items,id);
+  d3.selectAll("#first_choice-"+id).transition().duration(1000).attr("x",function(d){return d3.select(this).attr("finalx");}).attr("width",function(d){return d3.select(this).attr("finalwidth");});
+  d3.selectAll("#second_choice-"+id).transition().delay(1000).duration(1000).attr("width",function(d){return d3.select(this).attr("finalwidth");});
   return;
 }
 
