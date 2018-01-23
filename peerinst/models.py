@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_bytes
 from . import rationale_choice
 
 
@@ -186,25 +187,25 @@ class Question(models.Model):
 
     def get_matrix(self):
         matrix = {}
-        matrix[b'easy'] = 0
-        matrix[b'hard'] = 0
-        matrix[b'tricky'] = 0
-        matrix[b'peer'] = 0
+        matrix[str('easy')] = 0
+        matrix[str('hard')] = 0
+        matrix[str('tricky')] = 0
+        matrix[str('peer')] = 0
         student_answers = self.answer_set.filter(expert=False).filter(second_answer_choice__gt=0)
         N = len(student_answers)
         if N > 0:
             for answer in student_answers:
                 if self.is_correct(answer.first_answer_choice) :
                     if self.is_correct(answer.second_answer_choice) :
-                        matrix[b'easy'] += 1.0/N
+                        matrix[str('easy')] += 1.0/N
                     else:
-                        matrix[b'tricky'] += 1.0/N
+                        matrix[str('tricky')] += 1.0/N
                 else:
                     if self.is_correct(answer.second_answer_choice) :
-                        matrix[b'peer'] += 1.0/N
+                        matrix[str('peer')] += 1.0/N
                     else:
-                        matrix[b'hard'] += 1.0/N
-    
+                        matrix[str('hard')] += 1.0/N
+
         return matrix
 
     def get_frequency(self):
@@ -212,7 +213,10 @@ class Question(models.Model):
         student_answers = self.answer_set.filter(expert=False).filter(second_answer_choice__gt=0)
         c=1
         for answerChoice in self.answerchoice_set.all():
-            frequency[c-1] = student_answers.filter(second_answer_choice=c).count()
+            label = self.get_choice_label(c)+". "+answerChoice.text
+            if len(label)>75:
+                label = label[0:75]+'...'
+            frequency[smart_bytes(label)] = student_answers.filter(second_answer_choice=c).count()
             c=c+1
 
         return frequency

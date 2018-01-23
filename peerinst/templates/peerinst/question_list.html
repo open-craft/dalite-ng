@@ -8,7 +8,7 @@
 {% endif %}
 
 <script>
-function plot(data,id){
+function plot(matrix,freq,id){
   var colour = {
     'easy' : 'rgb(30, 142, 62)',
     'hard' : 'rgb(237, 69, 40)',
@@ -16,8 +16,8 @@ function plot(data,id){
     'peer' : 'rgb(25, 118, 188)'
   }
   var max = -0;
-  for (entry in d3.entries(data)){
-    var item = d3.entries(data)[entry];
+  for (entry in d3.entries(matrix)){
+    var item = d3.entries(matrix)[entry];
     if (item.value > max) {
       max = item.value;
       label = item.key;
@@ -31,11 +31,9 @@ function plot(data,id){
     stats.style.color = colour[label];
   }
 
-  var svg = d3.select("#svg-"+id);
-
-  var size = svg.attr("width");
-
-  var g = svg.append("g");
+  var matrix_svg = d3.select("#matrix-"+id);
+  var size = matrix_svg.attr("width");
+  var g = matrix_svg.append("g");
 
   var easy = g.append("rect")
   .attr("x", 0)
@@ -46,7 +44,7 @@ function plot(data,id){
   .style("opacity",0)
   .transition()
   .duration(500)
-  .style("opacity",0.5+0.5*data['easy']);
+  .style("opacity",0.5+0.5*matrix['easy']);
 
   /**easy.on("mouseover",function(d){
     tooltip.html("Correct to correct");
@@ -67,7 +65,7 @@ function plot(data,id){
   .style("font-size","8pt")
   .style("fill","white")
   .style("text-anchor","middle")
-  .text(parseInt(100*data['easy'])+"%");
+  .text(parseInt(100*matrix['easy'])+"%");
 
   g.append("rect")
   .attr("x", size/2)
@@ -75,7 +73,7 @@ function plot(data,id){
   .attr("width", size/2)
   .attr("height", size/2)
   .attr("fill",colour['hard'])
-  .style("opacity",0.5+0.5*data['hard']);
+  .style("opacity",0.5+0.5*matrix['hard']);
 
   g.append("text")
   .attr("x", 3*size/4)
@@ -84,7 +82,7 @@ function plot(data,id){
   .style("font-size","8pt")
   .style("fill","white")
   .style("text-anchor","middle")
-  .text(parseInt(100*data['hard'])+"%");
+  .text(parseInt(100*matrix['hard'])+"%");
 
   g.append("rect")
   .attr("x", 0)
@@ -92,7 +90,7 @@ function plot(data,id){
   .attr("width", size/2)
   .attr("height", size/2)
   .attr("fill",colour['peer'])
-  .style("opacity",0.5+0.5*data['peer']);
+  .style("opacity",0.5+0.5*matrix['peer']);
 
   g.append("text")
   .attr("x", size/4)
@@ -101,7 +99,7 @@ function plot(data,id){
   .style("font-size","8pt")
   .style("fill","white")
   .style("text-anchor","middle")
-  .text(parseInt(100*data['peer'])+"%");
+  .text(parseInt(100*matrix['peer'])+"%");
 
   g.append("rect")
   .attr("x", size/2)
@@ -109,7 +107,7 @@ function plot(data,id){
   .attr("width", size/2)
   .attr("height", size/2)
   .attr("fill",colour['tricky'])
-  .style("opacity",0.5+0.5*data['tricky']);
+  .style("opacity",0.5+0.5*matrix['tricky']);
 
   g.append("text")
   .attr("x", 3*size/4)
@@ -118,8 +116,9 @@ function plot(data,id){
   .style("font-size","8pt")
   .style("fill","white")
   .style("text-anchor","middle")
-  .text(parseInt(100*data['tricky'])+"%");
+  .text(parseInt(100*matrix['tricky'])+"%");
 
+  /*
   g.append("text")
   .attr("x", size/4)
   .attr("y", 5*size/4)
@@ -127,7 +126,7 @@ function plot(data,id){
   .style("font-size","8pt")
   .style("fill","black")
   .style("text-anchor","middle")
-  .text(parseInt(100*(data['easy']+data['peer']))+"%");
+  .text(parseInt(100*(matrix['easy']+matrix['peer']))+"%");
 
   g.append("text")
   .attr("x", 3*size/4)
@@ -136,7 +135,70 @@ function plot(data,id){
   .style("font-size","8pt")
   .style("fill","black")
   .style("text-anchor","middle")
-  .text(parseInt(100*(data['hard']+data['tricky']))+"%");
+  .text(parseInt(100*(matrix['hard']+matrix['tricky']))+"%");
+  */
+
+  var freq_svg = d3.select("#frequency-"+id),
+  margin = {left:30};
+
+  var sum = 0;
+  for (entry in freq){
+    sum += freq[entry];
+  }
+  for (entry in freq){
+    freq[entry] /= sum;
+  }
+
+  var x = d3.scaleLinear().domain([1,0]).rangeRound([freq_svg.attr("width"),0]);
+  var y = d3.scaleBand().domain(d3.keys(freq).sort()).rangeRound([0,freq_svg.attr("height")]);
+
+  var gg = freq_svg.append("g")
+  .attr("transform","translate("+margin.left+",0)");
+
+  gg.append("g")
+  .attr("class", "axis axis--x")
+  .style("opacity",0)
+  .call(d3.axisBottom(x));
+
+  gg.append("g")
+  .attr("class", "axis axis--y")
+  .style("opacity",0)
+  .call(d3.axisLeft(y).ticks);
+
+  gg.append("g")
+  .selectAll("rect")
+  .data(d3.entries(freq))
+  .enter().append("rect")
+  .attr("x",x(0))
+  .attr("y",function(d){return y(d.key);})
+  .attr("width",function(d){return x(d.value);})
+  .attr("height",freq_svg.attr("height")/d3.values(freq).length)
+  .attr("fill","gray")
+  .style("stroke","white")
+  .style("opacity",0.4);
+
+  gg.append("g")
+  .selectAll("text")
+  .data(d3.entries(freq))
+  .enter().append("text")
+  .attr("x",x(0))
+  .attr("dx",-2)
+  .attr("y",function(d){return y(d.key);})
+  .attr("dy",y.bandwidth()/2+4)
+  .style("font-size","8pt")
+  .style("text-anchor","end")
+  .text(function(d){return parseInt(100*d.value)+"%";});
+
+  gg.append("g")
+  .selectAll("text")
+  .data(d3.entries(freq))
+  .enter().append("text")
+  .attr("x",x(0))
+  .attr("dx",2)
+  .attr("y",function(d){return y(d.key);})
+  .attr("dy",y.bandwidth()/2+4)
+  .style("font-size","8pt")
+  .text(function(d){return d.key;});
 
   return;
 }
@@ -163,10 +225,12 @@ function plot(data,id){
     <div>
       <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
       <div id="{{ obj.id }}" name="analytics" class="items-for-question">
-        <svg id="svg-{{ obj.id }}" width="60" height="80" style="margin-left:40px;margin-right:10px;"></svg>
-        <svg width="200" height="80"></svg>
+        <svg id="matrix-{{ obj.id }}" width="60" height="80" style="margin-left:40px;margin-right:10px;"></svg>
+        <svg id="frequency-{{ obj.id }}" width="400" height="80" style="vertical-align:top;"></svg>
       </div>
-      <script>plot({{ obj.get_matrix|safe }},{{ obj.id }})</script>
+      <script>
+        plot({{ obj.get_matrix|safe }},{{ obj.get_frequency|safe|striptags }},{{ obj.id }})
+      </script>
     </div>
     <div>
       <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>
