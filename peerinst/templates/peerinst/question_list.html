@@ -139,23 +139,33 @@ function plot(matrix,freq,id){
   */
 
   var freq_svg = d3.select("#frequency-"+id),
-  margin = {left:30};
+  margin = {left:60};
 
   var sum = 0;
-  for (entry in freq){
-    sum += freq[entry];
+  for (entry in freq['first_choice']){
+    sum += freq['first_choice'][entry];
   }
-  for (entry in freq){
-    freq[entry] /= sum;
+  for (entry in freq['first_choice']){
+    freq['first_choice'][entry] /= sum;
+    freq['second_choice'][entry] /= sum;
   }
 
-  var x = d3.scaleLinear().domain([1,0]).rangeRound([freq_svg.attr("width"),0]);
-  var y = d3.scaleBand().domain(d3.keys(freq).sort()).rangeRound([0,freq_svg.attr("height")]);
+  var size = (freq_svg.attr("width")-margin.left)/2;
+
+  var x = d3.scaleLinear().domain([0,1]).rangeRound([0,size]);
+  var y = d3.scaleBand().domain(d3.keys(freq['first_choice']).sort()).rangeRound([0,freq_svg.attr("height")]);
 
   var gg = freq_svg.append("g")
-  .attr("transform","translate("+margin.left+",0)");
+  .attr("transform","translate("+(size+margin.left)+",0)");
+
+  var ggg = freq_svg.append("g");
 
   gg.append("g")
+  .attr("class", "axis axis--x")
+  .style("opacity",0)
+  .call(d3.axisBottom(x));
+
+  ggg.append("g")
   .attr("class", "axis axis--x")
   .style("opacity",0)
   .call(d3.axisBottom(x));
@@ -167,19 +177,31 @@ function plot(matrix,freq,id){
 
   gg.append("g")
   .selectAll("rect")
-  .data(d3.entries(freq))
+  .data(d3.entries(freq['second_choice']))
   .enter().append("rect")
   .attr("x",x(0))
   .attr("y",function(d){return y(d.key);})
   .attr("width",function(d){return x(d.value);})
-  .attr("height",freq_svg.attr("height")/d3.values(freq).length)
+  .attr("height",freq_svg.attr("height")/d3.values(freq['second_choice']).length)
   .attr("fill","gray")
   .style("stroke","white")
-  .style("opacity",0.4);
+  .style("opacity",0.2);
+
+  ggg.append("g")
+  .selectAll("rect")
+  .data(d3.entries(freq['first_choice']))
+  .enter().append("rect")
+  .attr("x",function(d){return x(1-d.value);})
+  .attr("y",function(d){return y(d.key);})
+  .attr("width",function(d){return x(d.value);})
+  .attr("height",freq_svg.attr("height")/d3.values(freq['first_choice']).length)
+  .attr("fill","gray")
+  .style("stroke","white")
+  .style("opacity",0.2);
 
   gg.append("g")
   .selectAll("text")
-  .data(d3.entries(freq))
+  .data(d3.entries(freq['second_choice']))
   .enter().append("text")
   .attr("x",x(0))
   .attr("dx",-2)
@@ -189,9 +211,21 @@ function plot(matrix,freq,id){
   .style("text-anchor","end")
   .text(function(d){return parseInt(100*d.value)+"%";});
 
+  ggg.append("g")
+  .selectAll("text")
+  .data(d3.entries(freq['first_choice']))
+  .enter().append("text")
+  .attr("x",x(1))
+  .attr("dx",2)
+  .attr("y",function(d){return y(d.key);})
+  .attr("dy",y.bandwidth()/2+4)
+  .style("font-size","8pt")
+  .style("text-anchor","start")
+  .text(function(d){return parseInt(100*d.value)+"%";});
+
   gg.append("g")
   .selectAll("text")
-  .data(d3.entries(freq))
+  .data(d3.entries(freq['second_choice']))
   .enter().append("text")
   .attr("x",x(0))
   .attr("dx",2)
@@ -226,7 +260,7 @@ function plot(matrix,freq,id){
       <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
       <div id="{{ obj.id }}" name="analytics" class="items-for-question">
         <svg id="matrix-{{ obj.id }}" width="60" height="80" style="margin-left:40px;margin-right:10px;"></svg>
-        <svg id="frequency-{{ obj.id }}" width="400" height="80" style="vertical-align:top;"></svg>
+        <svg id="frequency-{{ obj.id }}" width="600" height="80" style="vertical-align:top;"></svg>
       </div>
       <script>
         plot({{ obj.get_matrix|safe }},{{ obj.get_frequency|safe|striptags }},{{ obj.id }})

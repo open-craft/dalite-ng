@@ -209,15 +209,21 @@ class Question(models.Model):
         return matrix
 
     def get_frequency(self):
+        choice1 = {}
+        choice2 = {}
         frequency = {}
-        student_answers = self.answer_set.filter(expert=False).filter(second_answer_choice__gt=0)
+        student_answers = self.answer_set.filter(expert=False).filter(first_answer_choice__gt=0).filter(second_answer_choice__gt=0)
         c=1
         for answerChoice in self.answerchoice_set.all():
             label = self.get_choice_label(c)+". "+answerChoice.text
-            if len(label)>75:
-                label = label[0:75]+'...'
-            frequency[smart_bytes(label)] = student_answers.filter(second_answer_choice=c).count()
+            if len(label)>50:
+                label = label[0:50]+'...'
+            choice1[smart_bytes(label)] = student_answers.filter(first_answer_choice=c).count()
+            choice2[smart_bytes(label)] = student_answers.filter(second_answer_choice=c).count()
             c=c+1
+
+        frequency[str('first_choice')] = choice1
+        frequency[str('second_choice')] = choice2
 
         return frequency
 
