@@ -360,7 +360,7 @@ class AnswerVote(models.Model):
     vote_type = models.PositiveSmallIntegerField(_('Vote type'), choices=VOTE_TYPE_CHOICES)
 
 
-class Group(models.Model):
+class StudentGroup(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
     def __unicode__(self):
@@ -377,7 +377,7 @@ class Student(models.Model):
         on_delete=models.CASCADE,
     )
     groups = models.ManyToManyField(
-        Group,
+        StudentGroup,
         blank=True,
     )
     class Meta:
@@ -406,7 +406,7 @@ class Teacher(models.Model):
     institutions = models.ManyToManyField(Institution, blank=True)
     disciplines = models.ManyToManyField(Discipline, blank=True)
     assignments = models.ManyToManyField(Assignment, blank=True)
-    groups = models.ManyToManyField(Group, blank=True)
+    groups = models.ManyToManyField(StudentGroup, blank=True)
 
     def __unicode__(self):
         return self.user.username

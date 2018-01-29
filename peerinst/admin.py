@@ -5,7 +5,7 @@ from django.core import exceptions
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from .models import Answer, AnswerChoice, Assignment, Question, Category, Discipline, Institution, Group, Teacher
+from .models import Answer, AnswerChoice, Assignment, Question, Category, Discipline, Institution, Teacher
 
 
 class AnswerChoiceInlineForm(forms.ModelForm):
