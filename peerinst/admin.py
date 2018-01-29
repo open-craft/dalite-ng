@@ -88,7 +88,9 @@ class QuestionAdmin(admin.ModelAdmin):
     }
     readonly_fields = ['id']
     inlines = [AnswerChoiceInline, AnswerInline]
-    list_display = ['title', 'category']
+    list_display = ['title', 'discipline']
+    ordering = ['discipline']
+    search_fields = ['title','text','category']
 
 
 @admin.register(Category)

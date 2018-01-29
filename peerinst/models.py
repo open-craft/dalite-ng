@@ -9,6 +9,7 @@ from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_bytes
 from . import rationale_choice
+from django.contrib.auth.models import User
 
 
 def no_hyphens(value):
@@ -36,6 +37,23 @@ class Category(models.Model):
     class Meta:
         verbose_name = _('category')
         verbose_name_plural = _('categories')
+
+
+class Discipline(models.Model):
+    title = models.CharField(
+        _('Discipline Name'), unique=True, max_length=100,
+        help_text=_(
+            'Name of a discipline.'
+        ),
+        validators=[no_hyphens]
+    )
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _('discipline')
+        verbose_name_plural = _('disciplines')
 
 
 class QuestionManager(models.Manager):
@@ -95,7 +113,8 @@ class Question(models.Model):
             'Whether the answers are annotated with letters (A, B, C…) or numbers (1, 2, 3…).'
         )
     )
-    category = models.ForeignKey(Category, blank=True, null=True)
+    category = models.ManyToManyField(Category, blank=True)
+    discipline = models.ForeignKey(Discipline, blank=True, null=True)
     fake_attributions = models.BooleanField(
         _('Add fake attributions'), default=False, help_text=_(
             'Add random fake attributions consisting of username and country to rationales.  You '
@@ -339,3 +358,49 @@ class AnswerVote(models.Model):
         (FINAL_CHOICE, 'final_choice'),
     )
     vote_type = models.PositiveSmallIntegerField(_('Vote type'), choices=VOTE_TYPE_CHOICES)
+
+
+class Group(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name = _('group')
+        verbose_name_plural = _('groups')
+
+
+class Student(models.Model):
+    student = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+    )
+    groups = models.ManyToManyField(
+        Group,
+        blank=True,
+    )
+    class Meta:
+        verbose_name = _('student')
+        verbose_name_plural = _('students')
+
+
+class Institution(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name = _('institution')
+        verbose_name_plural = _('institutions')
+
+
+class Teacher(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        )
+    institutions = models.ManyToManyField(Institution, blank=True)
+    disciplines = models.ManyToManyField(Discipline, blank=True)
+    assignments = models.ManyToManyField(Assignment, blank=True)
+    groups = models.ManyToManyField(Group, blank=True)
+    class Meta:
+        verbose_name = _('teacher')
+        verbose_name_plural = _('teachers')
+
+    #Reporting structure
+    #Front-end assignment making
+    #Sorting by label "easy, tricky, peer, hard"
