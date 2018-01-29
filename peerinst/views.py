@@ -183,10 +183,11 @@ class QuestionFormView(QuestionMixin, FormView):
         LOGGER.info(json.dumps(event))
 
         # Automatically keep track of student, student groups and their relationships based on lti data
-        student, created_student = Student.objects.get_or_create(student=self.user_token)
+        user = User.objects.get(username=self.user_token)
+        student, created_student = Student.objects.get_or_create(student=user)
         group, created_group = StudentGroup.objects.get_or_create(name=course_id)
         student.groups.add(group)
-        
+
     def submission_error(self):
         messages.error(self.request, format_html(
             '<h3 class="messages-title">{}</h3>{}',
