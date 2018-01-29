@@ -5,7 +5,7 @@ from django.core import exceptions
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from .models import Answer, AnswerChoice, Assignment, Question, Category
+from .models import Answer, AnswerChoice, Assignment, Question, Category, Discipline
 
 
 class AnswerChoiceInlineForm(forms.ModelForm):
@@ -74,7 +74,7 @@ class AnswerInline(admin.StackedInline):
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['title', 'text', 'category', 'id']}),
+        (None, {'fields': ['title', 'text', 'discipline', 'category', 'id']}),
         (_('Question image or video'), {'fields': ['image', 'image_alt_text', 'video_url']}),
         (None, {'fields': [
             'answer_style', 'fake_attributions', 'sequential_review',
@@ -95,6 +95,11 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Discipline)
+class DisciplineAdmin(admin.ModelAdmin):
     pass
 
 
