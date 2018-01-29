@@ -121,11 +121,12 @@ publish_answers.short_description = _('Show selected answers to students')
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ['question', 'user_token', 'first_answer_choice_label', 'second_answer_choice_label',
-                    'rationale', 'show_to_others', 'expert', 'chosen_rationale', 'upvotes', 'downvotes']
+                    'rationale', 'show_to_others', 'expert', 'show_chosen_rationale', 'upvotes', 'downvotes']
     list_display_links = None
     list_editable = ['show_to_others', 'expert']
-    list_filter=['chosen_rationale']
+    list_filter=['question']
     actions = [publish_answers]
+    search_fields = ['question__title','rationale']
 
 
 @admin.register(Teacher)

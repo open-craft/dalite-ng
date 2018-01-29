@@ -150,8 +150,8 @@ class Question(models.Model):
     )
 
     def __unicode__(self):
-        if self.category:
-            return u'{} - {}'.format(self.category, self.title)
+        if self.discipline:
+            return u'{} - {}'.format(self.discipline, self.title)
         return self.title
 
     def clean(self):
@@ -326,6 +326,13 @@ class Answer(models.Model):
             if self.question.is_correct(self.second_answer_choice):
                 grade += 0.5
             return grade
+
+    def show_chosen_rationale(self):
+        if (self.chosen_rationale):
+            return self.chosen_rationale.rationale
+        else:
+            pass
+    show_chosen_rationale.short_description = 'Display chosen rationale'
 
 
 class FakeUsername(models.Model):
