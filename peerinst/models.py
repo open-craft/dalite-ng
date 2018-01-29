@@ -362,6 +362,10 @@ class AnswerVote(models.Model):
 
 class Group(models.Model):
     name = models.CharField(max_length=100, unique=True)
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         verbose_name = _('group')
         verbose_name_plural = _('groups')
@@ -382,7 +386,13 @@ class Student(models.Model):
 
 
 class Institution(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, help_text=_(
+        'Name of school.'
+    ))
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         verbose_name = _('institution')
         verbose_name_plural = _('institutions')
@@ -397,6 +407,10 @@ class Teacher(models.Model):
     disciplines = models.ManyToManyField(Discipline, blank=True)
     assignments = models.ManyToManyField(Assignment, blank=True)
     groups = models.ManyToManyField(Group, blank=True)
+
+    def __unicode__(self):
+        return self.user.username
+
     class Meta:
         verbose_name = _('teacher')
         verbose_name_plural = _('teachers')

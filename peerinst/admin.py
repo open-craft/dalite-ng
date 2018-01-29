@@ -5,7 +5,7 @@ from django.core import exceptions
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from .models import Answer, AnswerChoice, Assignment, Question, Category, Discipline
+from .models import Answer, AnswerChoice, Assignment, Question, Category, Discipline, Institution, Group, Teacher
 
 
 class AnswerChoiceInlineForm(forms.ModelForm):
@@ -103,6 +103,11 @@ class DisciplineAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Institution)
+class InstitutionAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
     filter_horizontal = ['questions']
@@ -121,3 +126,8 @@ class AnswerAdmin(admin.ModelAdmin):
     list_editable = ['show_to_others', 'expert']
     list_filter=['chosen_rationale']
     actions = [publish_answers]
+
+
+@admin.register(Teacher)
+class TeacherAdmin(admin.ModelAdmin):
+    pass
