@@ -34,6 +34,10 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
+from .models import Student, StudentGroup
+from django.contrib.auth.models import User
+
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -186,7 +190,10 @@ class QuestionFormView(QuestionMixin, FormView):
         user = User.objects.get(username=self.user_token)
         student, created_student = Student.objects.get_or_create(student=user)
         group, created_group = StudentGroup.objects.get_or_create(name=course_id)
+        if created_group:
+            group.save()
         student.groups.add(group)
+        student.save()
 
     def submission_error(self):
         messages.error(self.request, format_html(

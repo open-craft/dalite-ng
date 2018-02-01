@@ -387,6 +387,10 @@ class Student(models.Model):
         StudentGroup,
         blank=True,
     )
+
+    def __unicode__(self):
+        return self.student.username
+
     class Meta:
         verbose_name = _('student')
         verbose_name_plural = _('students')
