@@ -16,13 +16,17 @@ from django.template.response import TemplateResponse
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic import DetailView
 from django.views.generic.base import TemplateView, View
-from django.views.generic.edit import FormView
+from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import FormView, UpdateView
 from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.forms import formset_factory, modelformset_factory
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
@@ -34,7 +38,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup
+from .models import Student, StudentGroup, Teacher
 from django.contrib.auth.models import User
 
 
@@ -45,6 +49,14 @@ def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
     return HttpResponseRedirect(reverse('login'))
+
+
+def welcome(request):
+    try:
+        teacher = Teacher.objects.get(user=request.user)
+        return HttpResponseRedirect(reverse('teacher', kwargs={ 'pk' : teacher.pk }))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('assignment-list'))
 
 
 class LoginRequiredMixin(object):
@@ -725,3 +737,57 @@ def reset_question(request, assignment_id, question_id):
     answer.delete()
 
     return HttpResponseRedirect(reverse('question', kwargs={'assignment_id' : assignment.pk, 'question_id' : question.pk}))
+
+
+class TeacherDetailView(LoginRequiredMixin,DetailView):
+
+    model = Teacher
+
+
+class TeacherUpdate(LoginRequiredMixin,UpdateView):
+
+    model = Teacher
+    fields = ['institutions','disciplines']
+
+
+class TeacherAssignments(LoginRequiredMixin,View):
+
+    pass
+
+
+
+
+class TeacherGroups(LoginRequiredMixin,ListView):
+
+    model = Teacher
+    template_name = 'peerinst/teacher_groups.html'
+
+    def get_queryset(self):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        return StudentGroup.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherGroups, self).get_context_data(**kwargs)
+        context['teacher'] = self.teacher
+        context['form'] = forms.TeacherGroupsForm()
+
+        return context
+
+
+def modify_group(request,pk):
+
+    if request.method=="POST" and request.user.is_authenticated:
+        form = forms.TeacherGroupsForm(request.POST)
+        try:
+            teacher = Teacher.objects.get(user=request.user)
+            if form.is_valid():
+                group = form.cleaned_data['group']
+                if group in teacher.groups.all():
+                    teacher.groups.remove(group)
+                else:
+                    teacher.groups.add(group)
+                teacher.save()
+        except:
+            pass
+
+    return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : pk }))

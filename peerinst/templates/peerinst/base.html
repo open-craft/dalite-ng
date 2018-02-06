@@ -29,7 +29,12 @@
         <div style="text-align:center;font-size:10pt;"></div>
         <div style="text-align:right;font-size:10pt;line-height:1.2;">
           {% if user.is_authenticated %}
-          User: {{ request.user.username }}<br>
+            {% if user.teacher %}
+            Teacher: <a href="{% url 'teacher' pk=user.teacher.pk %}" style="color:white;font-weight:bold;">{{ request.user.username }}</a>
+            {% else %}
+            User: {{ request.user.username }}
+            {% endif %}
+          <br>
           <a href="{% url 'logout' %}" style="color:white;font-weight:bold;">Logout</a>
           {% endif %}
         </div>

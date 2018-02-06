@@ -1,0 +1,14 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block body %}
+
+<h1>My account</h1>
+<h2>{{request.user}}</h2>
+<form action="{% url 'teacher-update' object.id %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit" />
+</form>
+
+{% endblock %}

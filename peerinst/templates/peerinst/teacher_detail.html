@@ -1,0 +1,49 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block body %}
+
+<h1>My account</h1>
+<div>
+  <h2>Identity</h2>
+  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-update' teacher.id %}">Edit identity</a></div>
+  <div style="margin-left:20pt;">
+    <span style="float:left; margin-right:6pt;">Username: </span><div>{{ object.user.username }}</div>
+    <span style="float:left; margin-right:6pt;">Discipline(s): </span>
+    <div>
+      {% for d in object.disciplines.all %}
+        {{ d.title }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </div>
+    <span style="float:left; margin-right:6pt;">Institution(s): </span>
+    <div>
+      {% for i in object.institutions.all %}
+        {{ i.name }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <div style="clear:both;"></div>
+</div>
+
+<div>
+  <h2>Groups</h2>
+  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-groups' teacher.id %}">Add/remove groups</a></div>
+  <ol>
+  {% for g in object.groups.all %}
+    <li>{{ g.name }}</li>
+  {% endfor %}
+  </ol>
+</div>
+
+<div>
+  <h2>Assignments</h2>
+  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-assignments' teacher.id %}">Create a new assignment</a></div>
+  <ol>
+  {% for a in object.assignments.all %}
+    <li>{{ a.identifier }}</li>
+  {% endfor %}
+  </ol>
+</div>
+
+
+{% endblock %}

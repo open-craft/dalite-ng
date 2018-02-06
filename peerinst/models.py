@@ -6,6 +6,7 @@ import string
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.core import exceptions
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_bytes
 from . import rationale_choice
@@ -369,11 +370,16 @@ class AnswerVote(models.Model):
 
 class StudentGroup(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    creation_date = models.DateField(
+        blank=True,
+        null=True,
+    )
 
     def __unicode__(self):
         return self.name
 
     class Meta:
+        ordering = ['-creation_date']
         verbose_name = _('group')
         verbose_name_plural = _('groups')
 
@@ -418,6 +424,9 @@ class Teacher(models.Model):
     disciplines = models.ManyToManyField(Discipline, blank=True)
     assignments = models.ManyToManyField(Assignment, blank=True)
     groups = models.ManyToManyField(StudentGroup, blank=True)
+
+    def get_absolute_url(self):
+        return reverse('teacher', kwargs={'pk': self.pk})
 
     def __unicode__(self):
         return self.user.username

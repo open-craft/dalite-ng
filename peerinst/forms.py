@@ -5,6 +5,8 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
+from .models import StudentGroup
+
 
 class FirstAnswerForm(forms.Form):
     """Form to select one of the answer choices and enter a rationale."""
@@ -71,3 +73,8 @@ class SequentialReviewForm(forms.Form):
         else:
             raise forms.ValidationError(_('Please vote up or down.'))
         return cleaned_data
+
+
+class TeacherGroupsForm(forms.Form):
+    """Simple form to help update teacher groups"""
+    group = forms.ModelChoiceField(queryset=StudentGroup.objects.all())

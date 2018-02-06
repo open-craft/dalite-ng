@@ -108,7 +108,7 @@ STATICFILES_DIRS = (
 
 LOGIN_URL = 'login'
 
-LOGIN_REDIRECT_URL = 'assignment-list'
+LOGIN_REDIRECT_URL = 'welcome'
 
 GRAPPELLI_ADMIN_TITLE = 'Dalite NG administration'
 
