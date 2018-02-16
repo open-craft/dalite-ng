@@ -3,15 +3,29 @@
 
 {% block body %}
 
+<style>
+  input[type="submit"] {
+    font-family: 'Material Icons';
+    font-size: 10pt;
+    padding:1pt;
+    margin-left:3pt;
+
+  }
+</style>
+
 <h1>My groups</h1>
+<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher' teacher.id %}">Back to My Account</a></div>
 <h2>Current</h2>
+{% if not teacher.groups.all %}
+You are not currently following any student groups.  You can select groups to follow from the lists below using the <input type="submit" value="add" />.
+{% endif %}
 <ol>
 {% for g in teacher.groups.all %}
   <li>
     <form action="{% url 'modify-teacher-groups' teacher.id %}" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
-        {{g}} <input type="submit" value="Remove" />
+        {{g}}  <input type="submit" value="clear" />
     </form>
   </li>
 {% endfor %}
@@ -30,7 +44,7 @@
     <form action="{% url 'modify-teacher-groups' teacher.id %}" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
-        {{g}} <input type="submit" value="Add" />
+        {{g}}  <input type="submit" value="add" />
     </form>
   </li>
   {% endif %}

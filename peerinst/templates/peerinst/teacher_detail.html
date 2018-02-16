@@ -37,13 +37,15 @@
 
 <div>
   <h2>Assignments</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-assignments' teacher.id %}">Create a new assignment</a></div>
+  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-assignments' teacher.id %}">Select/create a new assignment</a></div>
+  {% if not object.assignments.all %}
+  You do not have any assignments.
+  {% endif %}
   <ol>
   {% for a in object.assignments.all %}
     <li>{{ a.identifier }}</li>
   {% endfor %}
   </ol>
 </div>
-
 
 {% endblock %}

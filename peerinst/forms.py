@@ -5,7 +5,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from .models import StudentGroup
+from .models import StudentGroup, Assignment
 
 
 class FirstAnswerForm(forms.Form):
@@ -78,3 +78,8 @@ class SequentialReviewForm(forms.Form):
 class TeacherGroupsForm(forms.Form):
     """Simple form to help update teacher groups"""
     group = forms.ModelChoiceField(queryset=StudentGroup.objects.all())
+
+
+class TeacherAssignmentsForm(forms.Form):
+    """Simple form to help update teacher assignments"""
+    assignment = forms.ModelChoiceField(queryset=Assignment.objects.all())

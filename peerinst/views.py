@@ -18,14 +18,12 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView
 from django.views.generic.base import TemplateView, View
-from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormView, UpdateView
 from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.forms import formset_factory, modelformset_factory
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from opaque_keys import InvalidKeyError
@@ -38,7 +36,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup, Teacher
+from .models import Student, StudentGroup, Teacher, Assignment
 from django.contrib.auth.models import User
 
 
@@ -750,11 +748,40 @@ class TeacherUpdate(LoginRequiredMixin,UpdateView):
     fields = ['institutions','disciplines']
 
 
-class TeacherAssignments(LoginRequiredMixin,View):
+class TeacherAssignments(LoginRequiredMixin,ListView):
 
-    pass
+    model = Teacher
+    template_name = 'peerinst/teacher_assignments.html'
+
+    def get_queryset(self):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        return Assignment.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherAssignments, self).get_context_data(**kwargs)
+        context['teacher'] = self.teacher
+        #context['form'] = forms.TeacherGroupsForm()
+
+        return context
 
 
+def modify_assignment(request,pk):
+
+    if request.method=="POST" and request.user.is_authenticated:
+        form = forms.TeacherAssignmentsForm(request.POST)
+        try:
+            teacher = Teacher.objects.get(user=request.user)
+            if form.is_valid():
+                assignment = form.cleaned_data['assignment']
+                if assignment in teacher.assignments.all():
+                    teacher.assignments.remove(assignment)
+                else:
+                    teacher.assignments.add(assignment)
+                teacher.save()
+        except:
+            pass
+
+    return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : pk }))
 
 
 class TeacherGroups(LoginRequiredMixin,ListView):

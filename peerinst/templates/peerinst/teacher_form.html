@@ -3,12 +3,45 @@
 
 {% block body %}
 
+<style>
+
+form {
+  padding: 10px;
+}
+form option {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10pt;
+}
+form label {
+  vertical-align: top;
+}
+.form_field_wrapper {
+  padding-bottom: 10px;
+}
+
+
+</style>
+
 <h1>My account</h1>
 <h2>{{request.user}}</h2>
+
 <form action="{% url 'teacher-update' object.id %}" method="post">
     {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit" />
+    {{ form.non_field_errors }}
+
+    <div class="form_field_wrapper">
+      {{ form.institutions.errors }}
+      {{ form.institutions.label_tag }}
+      {{ form.institutions }}
+    </div>
+
+    <div class="form_field_wrapper">
+      {{ form.disciplines.errors }}
+      {{ form.disciplines.label_tag }}
+      {{ form.disciplines }}
+    </div>
+
+    <input type="submit" value="Update" />
 </form>
 
 {% endblock %}
