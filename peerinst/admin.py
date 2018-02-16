@@ -5,7 +5,7 @@ from django.core import exceptions
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from .models import Answer, AnswerChoice, Assignment, Question, Category, Discipline, Institution, Teacher, Student, StudentGroup
+from .models import Answer, AnswerChoice, Assignment, Question, Category, Discipline, Institution, Teacher, Student, StudentGroup, BlinkQuestion, BlinkAnswer
 
 
 class AnswerChoiceInlineForm(forms.ModelForm):
@@ -134,10 +134,16 @@ class TeacherAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(BlinkQuestion)
+class BlinkQuestionAdmin(admin.ModelAdmin):
+    pass
 # For testing only.  To be removed.
 #admin.register(Student)
 #class StudentAdmin(admin.ModelAdmin):
 #    pass
 @admin.register(StudentGroup)
 class StudentGroupAdmin(admin.ModelAdmin):
+    pass
+@admin.register(BlinkAnswer)
+class BlinkAnswerAdmin(admin.ModelAdmin):
     pass

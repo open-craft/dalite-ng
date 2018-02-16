@@ -83,3 +83,18 @@ class TeacherGroupsForm(forms.Form):
 class TeacherAssignmentsForm(forms.Form):
     """Simple form to help update teacher assignments"""
     assignment = forms.ModelChoiceField(queryset=Assignment.objects.all())
+
+
+class BlinkAnswerForm(forms.Form):
+    """Form to select one of the answer choices."""
+    
+    error_css_class = 'validation-error'
+
+    first_answer_choice = forms.ChoiceField(
+        label=_('Choose one of these answers:'), widget=forms.RadioSelect
+    )
+
+    def __init__(self, answer_choices, *args, **kwargs):
+        choice_texts = [mark_safe(". ".join(pair)) for pair in answer_choices]
+        self.base_fields['first_answer_choice'].choices = enumerate(choice_texts, 1)
+        forms.Form.__init__(self, *args, **kwargs)

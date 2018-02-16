@@ -441,7 +441,7 @@ class Teacher(models.Model):
 
 
 class BlinkQuestion(models.Model):
-    question = ForeignKey(Question)
+    question = models.ForeignKey(Question)
     key = models.CharField(
         unique=True,
         max_length=8,
@@ -451,3 +451,4 @@ class BlinkQuestion(models.Model):
 class BlinkAnswer(models.Model):
     question = models.ForeignKey(BlinkQuestion)
     answer_choice = models.PositiveSmallIntegerField(_('Answer choice'))
+    # track IP???

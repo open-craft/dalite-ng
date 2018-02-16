@@ -36,7 +36,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup, Teacher, Assignment
+from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer
 from django.contrib.auth.models import User
 
 
@@ -822,15 +822,36 @@ def modify_group(request,pk):
 
 
 
-#rationale_selection_algorithm
-def blink_poll(request,pk):
+#testing
+class BlinkQuestionFormView(FormView):
 
-    context = {}
-    context['question'] = Questions.objects.get(pk=pk)
-    context['responses'] =
+    form_class = forms.BlinkAnswerForm
+    template_name = 'peerinst/blink.html'
+    success_url = '/'
 
-    return render_to_response('peerinst/blink.html',context)
+    def form_valid(self,form):
+        print(form)
+        blinkquestion = BlinkQuestion.objects.get(pk=1)
+        models.BlinkAnswer(
+            question=blinkquestion,
+            answer_choice=form.cleaned_data['first_answer_choice']
+        ).save()
 
-def blink_user(request):
+        return super(BlinkQuestionFormView,self).form_valid(form)
 
-    return render_to_response('peerinst/blink_data.html')
+    def get_form_kwargs(self,):
+        kwargs = super(BlinkQuestionFormView, self).get_form_kwargs()
+        print(kwargs)
+        blinkquestion = BlinkQuestion.objects.get(pk=1)
+        kwargs.update(
+            answer_choices=blinkquestion.question.get_choices(),
+        )
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        print('getting context')
+        context = super(BlinkQuestionFormView, self).get_context_data(**kwargs)
+        blinkquestion = BlinkQuestion.objects.get(pk=1)
+        context['object'] = blinkquestion
+        
+        return context

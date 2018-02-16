@@ -5,13 +5,17 @@
 
 <h1>Blink question</h1>
 
-<h2>{{question.title}}</h2>
-<p>{{question.content}}</p>
-<ol>
-  {% for answer in question.content.answers.all %}
-  </li>{{answer.}}
-  {% endfor %}
-</ol>
-{{responses.count}}
+<h2>{{object.question.title}}</h2>
+<p>{{object.question.text|safe}}</p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.errors }}
+  {{ form }}
+  <div>
+    <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
+  </div>
+</form>
+
+{{object.blinkanswer_set.count}}
 
 {% endblock %}
