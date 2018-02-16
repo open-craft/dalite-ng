@@ -39,4 +39,7 @@ urlpatterns = [
     url(r'^login/$', login, name='login'),
     url(r'^welcome/$', views.welcome, name='welcome'),
     url(r'^logout/$', views.logout_view, name='logout'),
+    # testing
+    url(r'^blink/(?P<pk>[0-9]+)$', views.blink_poll, name='blink_poll'),
+    url(r'^blink/(?P<pk>[0-9]+)/user$', views.blink_user, name='blink_user'),    
 ]

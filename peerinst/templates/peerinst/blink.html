@@ -1,0 +1,17 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block body %}
+
+<h1>Blink question</h1>
+
+<h2>{{question.title}}</h2>
+<p>{{question.content}}</p>
+<ol>
+  {% for answer in question.content.answers.all %}
+  </li>{{answer.}}
+  {% endfor %}
+</ol>
+{{responses.count}}
+
+{% endblock %}

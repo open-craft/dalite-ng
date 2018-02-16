@@ -818,3 +818,19 @@ def modify_group(request,pk):
             pass
 
     return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : pk }))
+
+
+
+
+#rationale_selection_algorithm
+def blink_poll(request,pk):
+
+    context = {}
+    context['question'] = Questions.objects.get(pk=pk)
+    context['responses'] =
+
+    return render_to_response('peerinst/blink.html',context)
+
+def blink_user(request):
+
+    return render_to_response('peerinst/blink_data.html')

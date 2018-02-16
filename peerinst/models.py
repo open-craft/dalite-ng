@@ -438,3 +438,16 @@ class Teacher(models.Model):
     #Reporting structure
     #Front-end assignment making
     #Sorting by label "easy, tricky, peer, hard"
+
+
+class BlinkQuestion(models.Model):
+    question = ForeignKey(Question)
+    key = models.CharField(
+        unique=True,
+        max_length=8,
+    )
+
+
+class BlinkAnswer(models.Model):
+    question = models.ForeignKey(BlinkQuestion)
+    answer_choice = models.PositiveSmallIntegerField(_('Answer choice'))
