@@ -43,6 +43,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.utils import timezone
+from django.views.generic.detail import SingleObjectMixin
 
 LOGGER = logging.getLogger(__name__)
 
@@ -822,42 +823,44 @@ def modify_group(request,pk):
 
 
 #testing
-class BlinkQuestionFormView(FormView):
+class BlinkQuestionFormView(SingleObjectMixin,FormView):
 
     form_class = forms.BlinkAnswerForm
     template_name = 'peerinst/blink.html'
-    success_url = reverse_lazy('blink-summary',  kwargs={ 'pk' : 12345678 })
+    model = BlinkQuestion
 
     def form_valid(self,form):
-        blinkquestion = BlinkQuestion.objects.get(pk=12345678)
-        if self.request.session.get('BQid_'+blinkquestion.key, False):
-            return HttpResponseRedirect(reverse('blink-summary',  kwargs={ 'pk' : 12345678 }))
+        self.object = self.get_object()
+        if self.request.session.get('BQid_'+self.object.key, False):
+            return HttpResponseRedirect(reverse('blink-summary',  kwargs={ 'pk' : self.object.pk }))
         else:
-            if blinkquestion.active:
+            if self.object.active:
                 models.BlinkAnswer(
-                    question=blinkquestion,
+                    question=self.object,
                     answer_choice=form.cleaned_data['first_answer_choice'],
                 ).save()
-                self.request.session['BQid_'+blinkquestion.key] = True
+                self.request.session['BQid_'+self.object.key] = True
             else:
                 return HttpResponse("Voting is closed.")
 
         return super(BlinkQuestionFormView,self).form_valid(form)
 
     def get_form_kwargs(self):
+        self.object = self.get_object()
         kwargs = super(BlinkQuestionFormView, self).get_form_kwargs()
-        blinkquestion = BlinkQuestion.objects.get(pk=12345678)
         kwargs.update(
-            answer_choices=blinkquestion.question.get_choices(),
+            answer_choices=self.object.question.get_choices(),
         )
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(BlinkQuestionFormView, self).get_context_data(**kwargs)
-        blinkquestion = BlinkQuestion.objects.get(pk=12345678)
-        context['object'] = blinkquestion
+        context['object'] = self.object
 
         return context
+
+    def get_success_url(self):
+        return reverse('blink-summary', kwargs={'pk': self.object.pk})
 
 
 class BlinkQuestionDetailView(DetailView):
@@ -871,10 +874,10 @@ class BlinkQuestionDetailView(DetailView):
             self.object.active = True
             self.object.activate_time = datetime.datetime.now()
             self.object.save()
-            time_limit = 15
+            time_limit = 30
 
             # clear responses for testing
-            self.object.blinkanswer_set.all().delete()
+            #self.object.blinkanswer_set.all().delete()
 
         else:
             time_limit = max((timezone.now()-self.object.activate_time).seconds,0)
