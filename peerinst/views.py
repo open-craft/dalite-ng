@@ -42,6 +42,7 @@ from django.contrib.auth.models import User
 #testing
 from django.http import JsonResponse
 from django.http import HttpResponse
+from django.utils import timezone
 
 LOGGER = logging.getLogger(__name__)
 
@@ -876,7 +877,7 @@ class BlinkQuestionDetailView(DetailView):
             self.object.blinkanswer_set.all().delete()
 
         else:
-            time_limit = max(datetime.datetime.now()-self.object.activate_time,0)
+            time_limit = max((timezone.now()-self.object.activate_time).seconds,0)
 
         context['time_limit'] = time_limit
 
