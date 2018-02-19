@@ -880,7 +880,7 @@ class BlinkQuestionDetailView(DetailView):
             #self.object.blinkanswer_set.all().delete()
 
         else:
-            time_limit = max((timezone.now()-self.object.activate_time).seconds,0)
+            time_limit = max(30-(timezone.now()-self.object.activate_time).seconds,0)
 
         context['time_limit'] = time_limit
 
