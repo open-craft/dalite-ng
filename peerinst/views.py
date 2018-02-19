@@ -23,9 +23,8 @@ from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 
@@ -39,6 +38,10 @@ from .admin_views import get_question_rationale_aggregates
 from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer
 from django.contrib.auth.models import User
 
+
+#testing
+from django.http import JsonResponse
+from django.http import HttpResponse
 
 LOGGER = logging.getLogger(__name__)
 
@@ -67,11 +70,6 @@ class LoginRequiredMixin(object):
 class AssignmentListView(LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
-
-    def get_context_data(self, **kwargs):
-        context = super(AssignmentListView, self).get_context_data(**kwargs)
-        context['now'] = timezone.now()
-        return context
 
 
 class QuestionListView(LoginRequiredMixin, ListView):
@@ -767,7 +765,7 @@ class TeacherAssignments(LoginRequiredMixin,ListView):
 
 def modify_assignment(request,pk):
 
-    if request.method=="POST" and request.user.is_authenticated:
+    if request.method=="POST" and request.user.is_authenticated():
         form = forms.TeacherAssignmentsForm(request.POST)
         try:
             teacher = Teacher.objects.get(user=request.user)
@@ -803,7 +801,7 @@ class TeacherGroups(LoginRequiredMixin,ListView):
 
 def modify_group(request,pk):
 
-    if request.method=="POST" and request.user.is_authenticated:
+    if request.method=="POST" and request.user.is_authenticated():
         form = forms.TeacherGroupsForm(request.POST)
         try:
             teacher = Teacher.objects.get(user=request.user)
@@ -827,31 +825,95 @@ class BlinkQuestionFormView(FormView):
 
     form_class = forms.BlinkAnswerForm
     template_name = 'peerinst/blink.html'
-    success_url = '/'
+    success_url = reverse_lazy('blink-summary',  kwargs={ 'pk' : 12345678 })
 
     def form_valid(self,form):
-        print(form)
-        blinkquestion = BlinkQuestion.objects.get(pk=1)
-        models.BlinkAnswer(
-            question=blinkquestion,
-            answer_choice=form.cleaned_data['first_answer_choice']
-        ).save()
+        blinkquestion = BlinkQuestion.objects.get(pk=12345678)
+        if self.request.session.get('BQid_'+blinkquestion.key, False):
+            return HttpResponseRedirect(reverse('blink-summary',  kwargs={ 'pk' : 12345678 }))
+        else:
+            if blinkquestion.active:
+                models.BlinkAnswer(
+                    question=blinkquestion,
+                    answer_choice=form.cleaned_data['first_answer_choice'],
+                ).save()
+                self.request.session['BQid_'+blinkquestion.key] = True
+            else:
+                return HttpResponse("Voting is closed.")
 
         return super(BlinkQuestionFormView,self).form_valid(form)
 
-    def get_form_kwargs(self,):
+    def get_form_kwargs(self):
         kwargs = super(BlinkQuestionFormView, self).get_form_kwargs()
-        print(kwargs)
-        blinkquestion = BlinkQuestion.objects.get(pk=1)
+        blinkquestion = BlinkQuestion.objects.get(pk=12345678)
         kwargs.update(
             answer_choices=blinkquestion.question.get_choices(),
         )
         return kwargs
 
     def get_context_data(self, **kwargs):
-        print('getting context')
         context = super(BlinkQuestionFormView, self).get_context_data(**kwargs)
-        blinkquestion = BlinkQuestion.objects.get(pk=1)
+        blinkquestion = BlinkQuestion.objects.get(pk=12345678)
         context['object'] = blinkquestion
-        
+
         return context
+
+
+class BlinkQuestionDetailView(DetailView):
+
+    model = BlinkQuestion
+
+    def get_context_data(self, **kwargs):
+        context = super(BlinkQuestionDetailView, self).get_context_data(**kwargs)
+        # Set question to active in order to accept responses
+        if self.request.user.is_authenticated():
+            self.object.active = True
+            self.object.activate_time = datetime.datetime.now()
+            self.object.save()
+            time_limit = 15
+
+            # clear responses for testing
+            self.object.blinkanswer_set.all().delete()
+
+        else:
+            time_limit = max(datetime.datetime.now()-self.object.activate_time,0)
+
+        context['time_limit'] = time_limit
+
+        return context
+
+
+
+def blink_count(request,pk):
+
+    blinkquestion = BlinkQuestion.objects.get(pk=pk)
+
+    context = {}
+    context['count'] = blinkquestion.blinkanswer_set.count()
+
+    return JsonResponse(context)
+
+
+def blink_results(request,pk):
+
+    pass
+
+
+def blink_state(request,pk):
+
+    context = {}
+
+    if request.method=="POST" and request.user.is_authenticated():
+        form = forms.BlinkQuestionStateForm(request.POST)
+        try:
+            blinkquestion = BlinkQuestion.objects.get(pk=pk)
+            if form.is_valid():
+                blinkquestion.active = form.cleaned_data['active']
+                blinkquestion.save()
+                context['state'] = 'success'
+            else:
+                context['state'] = 'failure'
+        except:
+            context['state'] = 'failure'
+
+    return JsonResponse(context)

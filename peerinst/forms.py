@@ -8,6 +8,10 @@ from django.utils.translation import ugettext_lazy as _
 from .models import StudentGroup, Assignment
 
 
+#testing
+from django.forms import ModelForm
+from .models import BlinkQuestion
+
 class FirstAnswerForm(forms.Form):
     """Form to select one of the answer choices and enter a rationale."""
 
@@ -87,7 +91,7 @@ class TeacherAssignmentsForm(forms.Form):
 
 class BlinkAnswerForm(forms.Form):
     """Form to select one of the answer choices."""
-    
+
     error_css_class = 'validation-error'
 
     first_answer_choice = forms.ChoiceField(
@@ -98,3 +102,10 @@ class BlinkAnswerForm(forms.Form):
         choice_texts = [mark_safe(". ".join(pair)) for pair in answer_choices]
         self.base_fields['first_answer_choice'].choices = enumerate(choice_texts, 1)
         forms.Form.__init__(self, *args, **kwargs)
+
+
+class BlinkQuestionStateForm(ModelForm):
+    """Form to set active state of a BlinkQuestion."""
+    class Meta:
+        model = BlinkQuestion
+        fields = ['active']

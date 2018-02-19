@@ -1,0 +1,132 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block body %}
+
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js">
+// Help with cookie handling as per django docs
+// https://docs.djangoproject.com/en/1.8/ref/csrf/
+// MIT licensed
+</script>
+
+<h1>Blink question</h1>
+
+<h2>{{object.question.title}}</h2>
+<p>{{object.question.text|safe}}</p>
+{% for label, choice in object.question.get_choices %}
+<ul>
+  <li>{{label}}. {{choice|safe}}</li>
+</ul>
+{% endfor %}
+
+Number of respondents: <span id="counter">{{object.blinkanswer_set.count}}</span>
+
+<div>
+  <svg id="timer" width=100 height=100 style="display: block;margin: auto;"></svg>
+</div>
+
+<script>
+var csrftoken = Cookies.get('csrftoken');
+
+// AJAX
+function update_count(url,callback) {
+  var request = new XMLHttpRequest();
+  request.open("GET",url);
+  request.onreadystatechange = function() {
+    if (request.readyState === 4 && request.status === 200) {
+      var type = request.getResponseHeader("Content-Type");
+      if (type === 'application/json') {
+        callback(JSON.parse(request.responseText));
+      }
+      else {
+        callback(request.responseText);
+      }
+    }
+  }
+  request.send(null);
+  return;
+}
+
+function set_counter(json) {
+  document.getElementById("counter").innerHTML = json['count'];
+}
+
+// Schedule AJAX event
+var counterID = window.setInterval(update_count,1000,"{% url 'blink-count' pk=object.pk %}",set_counter);
+
+// Countdown
+var startTime = parseInt({{ time_limit }});
+
+var svg = d3.select("#timer"),
+width = +svg.attr("width"),
+height = +svg.attr("height");
+
+var r = Math.min(width/2,height/2);
+
+var g = svg.append("g")
+.attr("transform","translate("+width/2+","+height/2+")");
+
+g.append("circle")
+.attr("id","timer-bg")
+.attr("x",0)
+.attr("y",0)
+.attr("r",r)
+.style("fill","blue");
+
+var time = g.append("text")
+.attr("x",0)
+.attr("y",0)
+.attr("dy",0.35*r)
+.attr("text-anchor","middle")
+.attr("font-size",r)
+.style("fill","white")
+.text(startTime);
+
+var timerID = window.setInterval(update_time,1000);
+
+function changeQuestionState(url,state,callback) {
+  var request = new XMLHttpRequest();
+  request.open("POST",url);
+  request.onreadystatechange = function() {
+    if (request.readyState === 4 && callback) {
+      callback(request);
+    }
+  };
+  // Need to implement this: https://docs.djangoproject.com/en/1.8/ref/csrf/
+  request.setRequestHeader("X-CSRFToken", csrftoken);
+  request.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+  if (state == false){
+    request.send("");
+  }
+  else {
+    request.send("active=on");
+  }
+
+}
+
+function getResponse(response) {
+  console.info(response);
+  return;
+}
+
+function update_time(){
+  time.text(function(){
+    startTime=startTime-1;
+    if (startTime>0) {
+      return startTime;
+    }
+    else {
+      clearInterval(counterID);
+      clearInterval(timerID);
+      d3.select("#timer-bg").style('fill','red');
+      // Close the question
+      changeQuestionState("{% url 'blink-state' pk=object.pk %}",false,getResponse);
+      return 0;
+    }
+  });
+}
+
+
+</script>
+
+{% endblock %}

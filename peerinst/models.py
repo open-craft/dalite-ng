@@ -12,6 +12,9 @@ from django.utils.encoding import smart_bytes
 from . import rationale_choice
 from django.contrib.auth.models import User
 
+#testing
+import uuid
+
 
 def no_hyphens(value):
     if '-' in value:
@@ -442,13 +445,15 @@ class Teacher(models.Model):
 
 class BlinkQuestion(models.Model):
     question = models.ForeignKey(Question)
+    active = models.BooleanField(default=False)
+    activate_time = models.DateTimeField()
     key = models.CharField(
         unique=True,
         max_length=8,
+        primary_key=True,
     )
 
 
 class BlinkAnswer(models.Model):
     question = models.ForeignKey(BlinkQuestion)
     answer_choice = models.PositiveSmallIntegerField(_('Answer choice'))
-    # track IP???

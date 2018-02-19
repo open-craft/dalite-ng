@@ -12,10 +12,8 @@
   {{ form.errors }}
   {{ form }}
   <div>
-    <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
+    <input type="submit" value="{% block submit_button %}{% trans 'Submit' %}{% endblock %}" />
   </div>
 </form>
-
-{{object.blinkanswer_set.count}}
 
 {% endblock %}
