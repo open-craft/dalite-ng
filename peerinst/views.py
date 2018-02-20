@@ -936,7 +936,4 @@ def blink_reset(request,pk):
 
     blinkquestion = BlinkQuestion.objects.get(pk=pk)
 
-    
-
-
     return HttpResponseRedirect(reverse('blink-summary', kwargs={ 'pk' : pk }))

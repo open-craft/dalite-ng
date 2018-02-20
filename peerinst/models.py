@@ -432,7 +432,7 @@ class BlinkAnswer(models.Model):
     question = models.ForeignKey(BlinkQuestion)
     answer_choice = models.PositiveSmallIntegerField(_('Answer choice'))
     vote_time = models.DateTimeField()
-    
+
 
 class Teacher(models.Model):
     user = models.OneToOneField(
