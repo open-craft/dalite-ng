@@ -56,7 +56,8 @@
   {% endif %}
   <ol>
   {% for a in object.blinks.all %}
-    <li> <a href="{% url 'blink-summary' a.key %}">Access Code: {{a.key}}</a> - Prompt: {{a|safe|striptags}}
+    <li> {{a|safe|striptags}}
+      <a href="{% url 'blink-summary' a.key %}"> START -> {{a.key}}</a>
     {% if object.image %}
     <div class="question-text" id="question-image">
       <img src="{{ object.image.url }}"

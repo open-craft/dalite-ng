@@ -25,8 +25,9 @@ You do not have any blink questions.  You can select and modify an existing blin
     <form action="{% url 'modify-teacher-blinks' teacher.id %}" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_blink" name="blink" value="{{g.pk}}"></input>
-        <a href="{% url 'blink-summary' g.key %}">Access Code: {{g.key}}</a> - Prompt: {{g|safe|striptags}}  <input type="submit" value="clear" /> Remove
+        {{g|safe|striptags}}  <input type="submit" value="clear" /> Remove
     </form>
+    <a href="{% url 'blink-summary' g.key %}"> START -> {{g.key}}</a>
     {% if g.question.image %}
     <div class="question-text" id="question-image">
       <img src="{{ g.question.image.url }}"
@@ -46,8 +47,14 @@ You do not have any blink questions.  You can select and modify an existing blin
     <form action="{% url 'modify-teacher-blinks' teacher.id %}" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_blinks" name="blink" value="{{g.pk}}"></input>
-        Access Code: {{g.key}} - Prompt: {{g|safe|striptags}}<input type="submit" value="add" />
+        {{g|safe|striptags}}<input type="submit" value="add" />
     </form>
+    {% if g.question.image %}
+    <div class="question-text" id="question-image">
+      <img src="{{ g.question.image.url }}"
+           width=200 alt="object.question.image_alt_text">
+    </div>
+    {% endif %}
   </li>
   {% endif %}
 {% endfor %}
