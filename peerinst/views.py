@@ -874,18 +874,17 @@ class BlinkQuestionDetailView(DetailView):
             self.object.active = True
             self.object.activate_time = datetime.datetime.now()
             self.object.save()
-            time_limit = 30
+            time_limit = 3
 
             # clear responses for testing
             #self.object.blinkanswer_set.all().delete()
 
         else:
-            time_limit = max(30-(timezone.now()-self.object.activate_time).seconds,0)
+            time_limit = max(3-(timezone.now()-self.object.activate_time).seconds,0)
 
         context['time_limit'] = time_limit
 
         return context
-
 
 
 def blink_count(request,pk):
@@ -896,11 +895,6 @@ def blink_count(request,pk):
     context['count'] = blinkquestion.blinkanswer_set.count()
 
     return JsonResponse(context)
-
-
-def blink_results(request,pk):
-
-    pass
 
 
 def blink_state(request,pk):
@@ -921,3 +915,17 @@ def blink_state(request,pk):
             context['state'] = 'failure'
 
     return JsonResponse(context)
+
+
+def blink_results(request,pk):
+
+    results = {}
+
+    blinkquestion = BlinkQuestion.objects.get(pk=pk)
+
+    c=1
+    for label, text in blinkquestion.question.get_choices():
+        results[label] = blinkquestion.blinkanswer_set.filter(answer_choice=c).count()
+        c=c+1
+
+    return JsonResponse(results)

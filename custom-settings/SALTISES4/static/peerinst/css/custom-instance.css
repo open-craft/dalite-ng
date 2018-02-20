@@ -20,3 +20,10 @@ h1 {
 #check {
   color:  #54c0db;
 }
+.blink_rect {
+  fill: #54c0db;
+  opacity: 0.8;
+}
+#timer-bg {
+  fill:  #54c0db;
+}

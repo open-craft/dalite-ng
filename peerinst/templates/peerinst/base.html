@@ -26,7 +26,6 @@
     <header>
       <div class="wrapper">
         <div><a href="{% include 'peerinst/custom-instance-link.html' %}"><img src="{% static 'peerinst/img/logo.png' %}" alt="site-logo" id="logo"></a> <a href="{% url 'assignment-list' %}" style="color:white;">{% include 'peerinst/custom-instance-header.html' %}</a></div>
-        <div style="text-align:center;font-size:10pt;"></div>
         <div style="text-align:right;font-size:10pt;line-height:1.2;">
           {% if user.is_authenticated %}
             {% if user.teacher %}

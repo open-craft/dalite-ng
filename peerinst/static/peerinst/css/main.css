@@ -167,7 +167,7 @@ input[type="submit"].thumbs-down {
 }
 .wrapper {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
 }
 header {
@@ -225,4 +225,27 @@ a {
   margin-bottom:6pt;
   line-height: 1.2;
   list-style: circle outside;
+}
+.blink_labels {
+  font-size: 10pt;
+  fill: white;
+}
+.blink_rect {
+  fill: gray;
+  opacity: 0.4;
+}
+.axis {
+  font-size: 10pt;
+  opacity:0.6;
+}
+.note {
+  font-size: 10pt;
+}
+
+
+
+@media (max-width: 400px) {
+  ul {
+    -webkit-padding-start: 20px;
+  }
 }

@@ -417,6 +417,22 @@ class Institution(models.Model):
         verbose_name = _('institution')
         verbose_name_plural = _('institutions')
 
+class BlinkQuestion(models.Model):
+    question = models.ForeignKey(Question)
+    active = models.BooleanField(default=False)
+    activate_time = models.DateTimeField(blank=True)
+    deactivate_time = models.DateTimeField(blank=True)
+    key = models.CharField(
+        unique=True,
+        max_length=8,
+        primary_key=True,
+    )
+
+class BlinkAnswer(models.Model):
+    question = models.ForeignKey(BlinkQuestion)
+    answer_choice = models.PositiveSmallIntegerField(_('Answer choice'))
+    vote_time = models.DateTimeField()
+    
 
 class Teacher(models.Model):
     user = models.OneToOneField(
@@ -426,6 +442,7 @@ class Teacher(models.Model):
     institutions = models.ManyToManyField(Institution, blank=True)
     disciplines = models.ManyToManyField(Discipline, blank=True)
     assignments = models.ManyToManyField(Assignment, blank=True)
+    blinks = models.ManyToManyField(BlinkQuestion, blank=True)
     groups = models.ManyToManyField(StudentGroup, blank=True)
 
     def get_absolute_url(self):
@@ -441,19 +458,3 @@ class Teacher(models.Model):
     #Reporting structure
     #Front-end assignment making
     #Sorting by label "easy, tricky, peer, hard"
-
-
-class BlinkQuestion(models.Model):
-    question = models.ForeignKey(Question)
-    active = models.BooleanField(default=False)
-    activate_time = models.DateTimeField()
-    key = models.CharField(
-        unique=True,
-        max_length=8,
-        primary_key=True,
-    )
-
-
-class BlinkAnswer(models.Model):
-    question = models.ForeignKey(BlinkQuestion)
-    answer_choice = models.PositiveSmallIntegerField(_('Answer choice'))

@@ -13,29 +13,37 @@
 
 <h2>{{object.question.title}}</h2>
 <p>{{object.question.text|safe}}</p>
-{% for label, choice in object.question.get_choices %}
-<ul>
-  <li>{{label}}. {{choice|safe}}</li>
-</ul>
-{% endfor %}
-
-Number of respondents: <span id="counter">{{object.blinkanswer_set.count}}</span>
-
 <div>
-  <svg id="timer" width=100 height=100 style="display: block;margin: auto;"></svg>
+<div style="display:inline;float:left;max-width:400px;">
+  <ul>
+{% for label, choice in object.question.get_choices %}
+  <li>{{label}}. {{choice|safe}}</li>
+
+{% endfor %}
+</ul>
 </div>
+<svg id="timer" width=300 height=200 style="display:block;margin: auto;"></svg>
+<svg id="results" width=300 height=200 style="display:none;margin: auto;"></svg>
+</div>
+<div style="clear:both;"></div>
+
+<div class="note">
+  Number of respondents: <span id="counter">{{object.blinkanswer_set.count}}</span>
+</div>
+
 
 <script>
 var csrftoken = Cookies.get('csrftoken');
 
 // AJAX
-function update_count(url,callback) {
+function get(url,callback) {
   var request = new XMLHttpRequest();
   request.open("GET",url);
   request.onreadystatechange = function() {
     if (request.readyState === 4 && request.status === 200) {
       var type = request.getResponseHeader("Content-Type");
       if (type === 'application/json') {
+        console.info(request.responseText);
         callback(JSON.parse(request.responseText));
       }
       else {
@@ -52,7 +60,7 @@ function set_counter(json) {
 }
 
 // Schedule AJAX event
-var counterID = window.setInterval(update_count,1000,"{% url 'blink-count' pk=object.pk %}",set_counter);
+var counterID = window.setInterval(get,1000,"{% url 'blink-count' pk=object.pk %}",set_counter);
 
 // Countdown
 var startTime = parseInt({{ time_limit }});
@@ -61,7 +69,7 @@ var svg = d3.select("#timer"),
 width = +svg.attr("width"),
 height = +svg.attr("height");
 
-var r = Math.min(width/2,height/2);
+var r = 0.6*Math.min(width/2,height/2);
 
 var g = svg.append("g")
 .attr("transform","translate("+width/2+","+height/2+")");
@@ -70,8 +78,7 @@ g.append("circle")
 .attr("id","timer-bg")
 .attr("x",0)
 .attr("y",0)
-.attr("r",r)
-.style("fill","blue");
+.attr("r",r);
 
 var time = g.append("text")
 .attr("x",0)
@@ -121,11 +128,67 @@ function update_time(){
       d3.select("#timer-bg").style('fill','red');
       // Close the question
       changeQuestionState("{% url 'blink-state' pk=object.pk %}",false,getResponse);
+      // Get and show results
+      get("{% url 'blink-results' pk=object.pk %}",showResults)
       return 0;
     }
   });
 }
 
+function showResults(data){
+  // Partly based on: https://bl.ocks.org/mbostock/3048450
+  var timer = d3.select("#timer").style("display","none");
+
+  var svg = d3.select("#results")
+  .style('display','block');
+
+  var margin = {left:30,right:30,top:30,bottom:30};
+
+  var width = +svg.attr("width") - margin.left - margin.right;
+  var height = +svg.attr("height") - margin.top - margin.bottom;
+
+  var g = svg.append("g")
+  .attr('transform','translate('+margin.left+','+margin.top+')');
+
+  var x = d3.scaleBand().domain(d3.keys(data).sort()).rangeRound([0,width]).padding(0.1);
+  var y = d3.scaleLinear().domain([0,Math.max(...d3.values(data))]).rangeRound([height,0]);
+
+  g.append("g")
+  .attr("class", "axis axis--x")
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x));
+
+  g.append("g")
+  .attr("class", "axis axis--y")
+  .style("opacity",0)
+  .call(d3.axisLeft(y));
+
+  g.append("g")
+  .selectAll("rect")
+  .data(d3.entries(data))
+  .enter().append("rect")
+  .attr("class","blink_rect")
+  .attr("x",function(d){return x(d.key);})
+  .attr("y",function(d){return y(0);})
+  .attr("width",x.bandwidth())
+  .attr("height",0)
+  .transition()
+  .duration(1000)
+  .attr("y",function(d){return y(d.value);})
+  .attr("height",function(d){return y(0)-y(d.value);});
+
+  g.append("g")
+  .selectAll("text")
+  .data(d3.entries(data))
+  .enter().append("text")
+  .attr("class","blink_labels")
+  .attr("x",function(d){return x(d.key)+0.9*x.bandwidth();})
+  .attr("y",function(d){return y(0.02);})
+  .attr("text-anchor","end")
+  .text(function(d) {if (d.value>0) {return d.value;}});
+
+  // show average response time per choice1
+}
 
 </script>
 
