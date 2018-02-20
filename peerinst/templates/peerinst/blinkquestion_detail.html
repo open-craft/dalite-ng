@@ -31,6 +31,15 @@
   Number of respondents: <span id="counter">{{object.blinkanswer_set.count}}</span>
 </div>
 
+{% if request.user.is_authenticated %}
+<input id="reset_button" type="button" style="display:none;" value="Reset" onclick="reset()">
+<script>
+function reset(){
+  location="{% url 'blink-reset' pk=object.pk %}"
+}
+</script>
+{% endif %}
+
 
 <script>
 var csrftoken = Cookies.get('csrftoken');
@@ -108,7 +117,7 @@ function changeQuestionState(url,state,callback) {
   else {
     request.send("active=on");
   }
-
+  return;
 }
 
 function getResponse(response) {
@@ -126,6 +135,7 @@ function update_time(){
       clearInterval(counterID);
       clearInterval(timerID);
       d3.select("#timer-bg").style('fill','red');
+      d3.select("#reset_button").style('display','block');
       // Close the question
       changeQuestionState("{% url 'blink-state' pk=object.pk %}",false,getResponse);
       // Get and show results
@@ -189,6 +199,7 @@ function showResults(data){
 
   // show average response time per choice1
 }
+
 
 </script>
 

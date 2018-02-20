@@ -44,6 +44,7 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 from django.utils import timezone
 from django.views.generic.detail import SingleObjectMixin
+from django.contrib.sessions.models import Session
 
 LOGGER = logging.getLogger(__name__)
 
@@ -838,6 +839,7 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
                 models.BlinkAnswer(
                     question=self.object,
                     answer_choice=form.cleaned_data['first_answer_choice'],
+                    vote_time=timezone.now()
                 ).save()
                 self.request.session['BQid_'+self.object.key] = True
             else:
@@ -875,9 +877,6 @@ class BlinkQuestionDetailView(DetailView):
             self.object.activate_time = datetime.datetime.now()
             self.object.save()
             time_limit = 3
-
-            # clear responses for testing
-            #self.object.blinkanswer_set.all().delete()
 
         else:
             time_limit = max(3-(timezone.now()-self.object.activate_time).seconds,0)
@@ -929,3 +928,15 @@ def blink_results(request,pk):
         c=c+1
 
     return JsonResponse(results)
+
+
+# This is a very temporary approach with minimum checking for permissions
+@login_required
+def blink_reset(request,pk):
+
+    blinkquestion = BlinkQuestion.objects.get(pk=pk)
+
+    
+
+
+    return HttpResponseRedirect(reverse('blink-summary', kwargs={ 'pk' : pk }))
