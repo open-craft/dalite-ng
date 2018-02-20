@@ -766,6 +766,24 @@ class TeacherAssignments(LoginRequiredMixin,ListView):
         return context
 
 
+class TeacherBlinks(LoginRequiredMixin,ListView):
+
+    model = Teacher
+    template_name = 'peerinst/teacher_blinks.html'
+
+    def get_queryset(self):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        return BlinkQuestion.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherBlinks, self).get_context_data(**kwargs)
+        context['teacher'] = self.teacher
+        #context['form'] = forms.TeacherGroupsForm()
+
+        return context
+
+
+
 def modify_assignment(request,pk):
 
     if request.method=="POST" and request.user.is_authenticated():
@@ -783,6 +801,25 @@ def modify_assignment(request,pk):
             pass
 
     return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : pk }))
+
+
+def modify_blink(request,pk):
+
+    if request.method=="POST" and request.user.is_authenticated():
+        form = forms.TeacherBlinksForm(request.POST)
+        try:
+            teacher = Teacher.objects.get(user=request.user)
+            if form.is_valid():
+                blink = form.cleaned_data['blink']
+                if blink in teacher.blinks.all():
+                    teacher.blinks.remove(blink)
+                else:
+                    teacher.blinks.add(blink)
+                teacher.save()
+        except:
+            pass
+
+    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : pk }))
 
 
 class TeacherGroups(LoginRequiredMixin,ListView):

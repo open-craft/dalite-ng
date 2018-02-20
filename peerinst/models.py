@@ -428,6 +428,9 @@ class BlinkQuestion(models.Model):
         primary_key=True,
     )
 
+    def __unicode__(self):
+        return self.question.text
+
 class BlinkAnswer(models.Model):
     question = models.ForeignKey(BlinkQuestion)
     answer_choice = models.PositiveSmallIntegerField(_('Answer choice'))

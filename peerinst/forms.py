@@ -88,6 +88,10 @@ class TeacherAssignmentsForm(forms.Form):
     """Simple form to help update teacher assignments"""
     assignment = forms.ModelChoiceField(queryset=Assignment.objects.all())
 
+class TeacherBlinksForm(forms.Form):
+    """Simple form to help update teacher blinks"""
+    blink = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())
+
 
 class BlinkAnswerForm(forms.Form):
     """Form to select one of the answer choices."""

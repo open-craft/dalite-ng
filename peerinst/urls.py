@@ -34,6 +34,11 @@ urlpatterns = [
     url(r'^teacher/(?P<pk>[0-9]+)/$', views.TeacherUpdate.as_view(), name='teacher-update'),
     url(r'^teacher/(?P<pk>[0-9]+)/assignments/$', views.TeacherAssignments.as_view(), name='teacher-assignments'),
     url(r'^teacher/(?P<pk>[0-9]+)/assignments/modify/$', views.modify_assignment, name='modify-teacher-assignments'),
+
+    url(r'^teacher/(?P<pk>[0-9]+)/blinks/$', views.TeacherBlinks.as_view(), name='teacher-blinks'),
+    url(r'^teacher/(?P<pk>[0-9]+)/blinks/modify/$', views.modify_blink, name='modify-teacher-blinks'),
+
+
     url(r'^teacher/(?P<pk>[0-9]+)/groups/$', views.TeacherGroups.as_view(), name='teacher-groups'),
     url(r'^teacher/(?P<pk>[0-9]+)/groups/modify/$', views.modify_group, name='modify-teacher-groups'),
     url(r'^login/$', login, name='login'),
