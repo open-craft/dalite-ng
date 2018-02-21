@@ -9,7 +9,7 @@
 <p>{{object.question.text|safe}}</p>
 <form method="post">
   {% csrf_token %}
-  {{ form.errors }}
+  {{ form.field_errors }}
   {{ form }}
   <div>
     <input type="submit" value="{% block submit_button %}{% trans 'Submit' %}{% endblock %}" />
