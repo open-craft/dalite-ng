@@ -1026,6 +1026,15 @@ def blink_latest_results(request,pk):
     return JsonResponse(results)
 
 
+def blink_status(request,pk):
+
+    blinkquestion = BlinkQuestion.objects.get(pk=pk)
+
+    response = {}
+    response['status'] = blinkquestion.active
+
+    return JsonResponse(response)
+
 # This is a very temporary approach with minimum checking for permissions
 @login_required
 def blink_reset(request,pk):

@@ -232,7 +232,6 @@ a {
 }
 .blink_rect {
   fill: gray;
-  opacity: 0.4;
 }
 .axis {
   font-size: 10pt;

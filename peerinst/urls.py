@@ -51,4 +51,5 @@ urlpatterns = [
     url(r'^blink/(?P<pk>[0-9]+)/close/$', views.blink_close, name='blink-close'),
     url(r'^blink/(?P<pk>[0-9]+)/latest_results/$', views.blink_latest_results, name='blink-results'),
     url(r'^blink/(?P<pk>[0-9]+)/reset/$', views.blink_reset, name='blink-reset'),
+    url(r'^blink/(?P<pk>[0-9]+)/status/$', views.blink_status, name='blink-status'),
 ]
