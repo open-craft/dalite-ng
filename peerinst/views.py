@@ -871,6 +871,9 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
     template_name = 'peerinst/blink.html'
     model = BlinkQuestion
 
+    #def get_round(self):
+
+
     def form_valid(self,form):
         self.object = self.get_object()
         try:
@@ -890,7 +893,7 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
                         vote_time=timezone.now(),
                         voting_round=blinkround,
                     ).save()
-                    self.request.session['BQid_'+self.object.key+'_R_'+str(blinkround.id)] = True
+                    self.request.session['BQid_'+self.object.key+'_R_'+str(blinkround.id)] = form.cleaned_data['first_answer_choice']
                 except:
                     return HttpResponse("Error.  Try voting again.")
             else:
@@ -909,6 +912,7 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
     def get_context_data(self, **kwargs):
         context = super(BlinkQuestionFormView, self).get_context_data(**kwargs)
         context['object'] = self.object
+        #context['answer_choice'] = self.request.session['BQid_'+self.object.key+'_R_'+str(blinkround.id)]
 
         return context
 
