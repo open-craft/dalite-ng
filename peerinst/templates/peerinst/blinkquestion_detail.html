@@ -16,8 +16,7 @@
 <p>{{object.question.text|safe}}</p>
     {% if object.question.image %}
     <div>
-      <img <img style="display:block;margin:auto;padding:10pt;" src="{{ object.question.image.url }}"
-           width=200 alt="object.image_alt_text">
+      <img style="display:block;margin:auto;" src="{{ object.question.image.url }}" alt="object.image_alt_text">
     </div>
     {% endif %}
 <div>

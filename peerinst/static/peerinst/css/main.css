@@ -7,8 +7,12 @@ p {
     margin: 0.25em 0;
 }
 img {
-    max-width: 100%;
+    max-width: 80%;
+    max-height: 300px;
+    width: auto;
     height: auto;
+    padding-top:10pt;
+    padding-bottom:10pt;
 }
 dt  {
     clear:left;
@@ -243,8 +247,13 @@ a {
 
 
 
-@media (max-width: 400px) {
+@media (max-width: 450px) {
   ul {
     -webkit-padding-start: 20px;
+  }
+  img {
+    width: 100%;
+    max-height: 200px;
+    width: auto;
   }
 }
