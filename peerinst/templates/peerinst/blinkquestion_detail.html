@@ -23,8 +23,14 @@
 <div style="display:inline;float:left;max-width:400px;">
   <ul>
 {% for label, choice in object.question.get_choices %}
-  <li>{{label}}. {{choice|safe}}</li>
-
+  <li>
+    {% if not request.user.is_authenticated and label = latest_answer_choice %}
+      <span style="font-weight:bold;">{{label}}.</span>
+    {% else %}
+      {{label}}.
+    {% endif %}
+    {{choice|safe}}
+  </li>
 {% endfor %}
 </ul>
 </div>
@@ -35,7 +41,7 @@
 
 <div class="note">
   Round: {{round}}<br>
-  Number of respondents: <span id="counter">0</span>
+  Number of respondents: <span id="counter"></span>
 </div>
 
 {% if request.user.is_authenticated %}

@@ -25,7 +25,7 @@ You do not have any blink questions.  You can select and modify an existing blin
     <form action="{% url 'modify-teacher-blinks' teacher.id %}" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_blink" name="blink" value="{{g.pk}}"></input>
-        {{g|safe|striptags}}  <input type="submit" value="clear" /> Remove
+        {{g|safe|striptags}}  <input type="submit" value="clear" />
     </form>
     <a href="{% url 'blink-summary' g.key %}"> START -> {{g.key}}</a>
     {% if g.question.image %}

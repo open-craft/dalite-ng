@@ -788,7 +788,6 @@ class TeacherBlinks(LoginRequiredMixin,ListView):
         return context
 
 
-
 def modify_assignment(request,pk):
 
     if request.method=="POST" and request.user.is_authenticated():
@@ -877,6 +876,8 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
 
     def form_valid(self,form):
         self.object = self.get_object()
+
+        # get blink round should become a method in blinkquestion model
         try:
             blinkround=BlinkRound.objects.get(question=self.object,deactivate_time__isnull=True)
             print(blinkround)
@@ -894,7 +895,8 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
                         vote_time=timezone.now(),
                         voting_round=blinkround,
                     ).save()
-                    self.request.session['BQid_'+self.object.key+'_R_'+str(blinkround.id)] = form.cleaned_data['first_answer_choice']
+                    self.request.session['BQid_'+self.object.key+'_R_'+str(blinkround.id)] = True
+                    self.request.session['BQid_'+self.object.key] = form.cleaned_data['first_answer_choice']
                 except:
                     return HttpResponse("Error.  Try voting again.")
             else:
@@ -913,7 +915,6 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
     def get_context_data(self, **kwargs):
         context = super(BlinkQuestionFormView, self).get_context_data(**kwargs)
         context['object'] = self.object
-        #context['answer_choice'] = self.request.session['BQid_'+self.object.key+'_R_'+str(blinkround.id)]
 
         return context
 
@@ -954,12 +955,13 @@ class BlinkQuestionDetailView(DetailView):
             # Get current round, if any
             try:
                 r = BlinkRound.objects.get(question=self.object,deactivate_time__isnull=True)
-                print(r)
                 elapsed_time = (timezone.now()-r.activate_time).seconds
                 time_left = max(self.object.time_limit - elapsed_time,0)
             except:
-                print(self.object)
                 time_left = 0
+
+            # Get latest vote, if any
+            context['latest_answer_choice'] = self.object.question.get_choice_label(int(self.request.session.get('BQid_'+self.object.key,0)))
 
         context['round'] = BlinkRound.objects.filter(question=self.object).count()
         context['time_left'] = time_left
@@ -970,7 +972,13 @@ class BlinkQuestionDetailView(DetailView):
 def blink_count(request,pk):
 
     blinkquestion = BlinkQuestion.objects.get(pk=pk)
-    blinkround = BlinkRound.objects.get(question=blinkquestion,deactivate_time__isnull=True)
+    try:
+        blinkround = BlinkRound.objects.get(question=blinkquestion,deactivate_time__isnull=True)
+    except:
+        try:
+            blinkround = BlinkRound.objects.filter(question=blinkquestion).latest('deactivate_time')
+        except:
+            return JsonResponse()
 
     context = {}
     context['count'] = BlinkAnswer.objects.filter(voting_round=blinkround).count()
