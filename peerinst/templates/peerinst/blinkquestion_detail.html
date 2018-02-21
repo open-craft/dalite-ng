@@ -178,8 +178,9 @@ function update_time(){
           console.info("Checking status of poll");
           get("{% url 'blink-status' pk=object.pk %}",processStatus);
         }
-        // Check round closed
+        // Check round is closed
         var checkID = window.setInterval(blinkStatus,1000);
+        window.setTimeout(clearInterval,5000,checkID);
       }
       return 0;
     }
@@ -235,7 +236,7 @@ function showResults(data){
         return 0.8;
       }
     }
-  })  
+  })
   .transition()
   .duration(1000)
   .attr("y",function(d){return y(d.value);})
