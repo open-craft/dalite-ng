@@ -34,7 +34,8 @@
 <div style="clear:both;"></div>
 
 <div class="note">
-  Number of respondents: <span id="counter">{{object.blinkanswer_set.count}}</span>
+  Round: {{round}}<br>
+  Number of respondents: <span id="counter">0</span>
 </div>
 
 {% if request.user.is_authenticated %}
@@ -44,8 +45,16 @@ function reset(){
   location="{% url 'blink-reset' pk=object.pk %}"
 }
 </script>
+{% else %}
+<input id="reset_button" type="button" style="display:none;" value="Retry" onclick="retry()">
+<script>
+function retry(){
+  location="{% url 'blink-question' pk=object.pk %}"
+}
+</script>
 {% endif %}
 
+<input id="next_button" type="button" style="display:none;" value="Next">
 
 <script>
 var csrftoken = Cookies.get('csrftoken');
@@ -78,7 +87,7 @@ function set_counter(json) {
 var counterID = window.setInterval(get,1000,"{% url 'blink-count' pk=object.pk %}",set_counter);
 
 // Countdown
-var startTime = parseInt({{ time_limit }});
+var startTime = parseInt({{ time_left }});
 
 var svg = d3.select("#timer"),
 width = +svg.attr("width"),
@@ -131,6 +140,12 @@ function getResponse(response) {
   return;
 }
 
+function getResults(response) {
+  // Get and show results
+  get("{% url 'blink-results' pk=object.pk %}",showResults);
+  return;
+}
+
 function update_time(){
   time.text(function(){
     startTime=startTime-1;
@@ -141,11 +156,11 @@ function update_time(){
       clearInterval(counterID);
       clearInterval(timerID);
       d3.select("#timer-bg").style('fill','red');
-      d3.select("#reset_button").style('display','block');
-      // Close the question
-      changeQuestionState("{% url 'blink-state' pk=object.pk %}",false,getResponse);
-      // Get and show results
-      get("{% url 'blink-results' pk=object.pk %}",showResults)
+      d3.select("#reset_button").style('display','inline');
+      d3.select("#next_button").style('display','inline');
+      // Close the question.  Be careful here... it is a wasted use of POST for non-authenticated users.
+      // Also, if student browser is just slightly ahead of teacher, getResults will get results from prior round!
+      changeQuestionState("{% url 'blink-close' pk=object.pk %}",false,getResults);
       return 0;
     }
   });

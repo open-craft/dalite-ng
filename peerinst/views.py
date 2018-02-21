@@ -35,7 +35,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer
+from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound
 from django.contrib.auth.models import User
 
 
@@ -869,16 +869,26 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
 
     def form_valid(self,form):
         self.object = self.get_object()
-        if self.request.session.get('BQid_'+self.object.key, False):
-            return HttpResponseRedirect(reverse('blink-summary',  kwargs={ 'pk' : self.object.pk }))
+        try:
+            blinkround=BlinkRound.objects.get(question=self.object,deactivate_time__isnull=True)
+            print(blinkround)
+        except:
+            return HttpResponse("Voting not open.")
+
+        if self.request.session.get('BQid_'+self.object.key+'_R_'+str(blinkround.id), False):
+            return HttpResponse("Error.  You can only vote once.")
         else:
             if self.object.active:
-                models.BlinkAnswer(
-                    question=self.object,
-                    answer_choice=form.cleaned_data['first_answer_choice'],
-                    vote_time=timezone.now()
-                ).save()
-                self.request.session['BQid_'+self.object.key] = True
+                try:
+                    models.BlinkAnswer(
+                        question=self.object,
+                        answer_choice=form.cleaned_data['first_answer_choice'],
+                        vote_time=timezone.now(),
+                        voting_round=blinkround,
+                    ).save()
+                    self.request.session['BQid_'+self.object.key+'_R_'+str(blinkround.id)] = True
+                except:
+                    return HttpResponse("Error.  Try voting again.")
             else:
                 return HttpResponse("Voting is closed.")
 
@@ -911,14 +921,39 @@ class BlinkQuestionDetailView(DetailView):
         # Set question to active in order to accept responses
         if self.request.user.is_authenticated():
             self.object.active = True
-            self.object.activate_time = datetime.datetime.now()
+            if not self.object.time_limit:
+                self.object.time_limit = 30
+
+            time_left = self.object.time_limit
             self.object.save()
-            time_limit = 3
 
+            # Close any open rounds
+            open_rounds = BlinkRound.objects.filter(question=self.object).filter(deactivate_time__isnull=True)
+            for open_round in open_rounds:
+                open_round.deactivate_time = timezone.now()
+                open_round.save()
+
+            # Create round
+            r = BlinkRound(
+                question=self.object,
+                activate_time=datetime.datetime.now()
+            )
+            r.save()
+
+            print(r.activate_time)
         else:
-            time_limit = max(3-(timezone.now()-self.object.activate_time).seconds,0)
+            # Get current round, if any
+            try:
+                r = BlinkRound.objects.get(question=self.object,deactivate_time__isnull=True)
+                print(r)
+                elapsed_time = (timezone.now()-r.activate_time).seconds
+                time_left = max(self.object.time_limit - elapsed_time,0)
+            except:
+                print(self.object)
+                time_left = 0
 
-        context['time_limit'] = time_limit
+        context['round'] = BlinkRound.objects.filter(question=self.object).count()
+        context['time_left'] = time_left
 
         return context
 
@@ -926,14 +961,15 @@ class BlinkQuestionDetailView(DetailView):
 def blink_count(request,pk):
 
     blinkquestion = BlinkQuestion.objects.get(pk=pk)
+    blinkround = BlinkRound.objects.get(question=blinkquestion,deactivate_time__isnull=True)
 
     context = {}
-    context['count'] = blinkquestion.blinkanswer_set.count()
+    context['count'] = BlinkAnswer.objects.filter(voting_round=blinkround).count()
 
     return JsonResponse(context)
 
 
-def blink_state(request,pk):
+def blink_close(request,pk):
 
     context = {}
 
@@ -941,9 +977,14 @@ def blink_state(request,pk):
         form = forms.BlinkQuestionStateForm(request.POST)
         try:
             blinkquestion = BlinkQuestion.objects.get(pk=pk)
+            blinkround = BlinkRound.objects.get(question=blinkquestion,deactivate_time__isnull=True)
+            print(blinkround)
             if form.is_valid():
                 blinkquestion.active = form.cleaned_data['active']
                 blinkquestion.save()
+                blinkround.deactivate_time = timezone.now()
+                blinkround.save()
+                print(blinkround.deactivate_time)
                 context['state'] = 'success'
             else:
                 context['state'] = 'failure'
@@ -953,15 +994,16 @@ def blink_state(request,pk):
     return JsonResponse(context)
 
 
-def blink_results(request,pk):
+def blink_latest_results(request,pk):
 
     results = {}
 
     blinkquestion = BlinkQuestion.objects.get(pk=pk)
+    blinkround = BlinkRound.objects.filter(question=blinkquestion).latest('deactivate_time')
 
     c=1
     for label, text in blinkquestion.question.get_choices():
-        results[label] = blinkquestion.blinkanswer_set.filter(answer_choice=c).count()
+        results[label] = BlinkAnswer.objects.filter(question=blinkquestion).filter(voting_round=blinkround).filter(answer_choice=c).count()
         c=c+1
 
     return JsonResponse(results)
@@ -971,6 +1013,6 @@ def blink_results(request,pk):
 @login_required
 def blink_reset(request,pk):
 
-    blinkquestion = BlinkQuestion.objects.get(pk=pk)
+    #blinkquestion = BlinkQuestion.objects.get(pk=pk)
 
     return HttpResponseRedirect(reverse('blink-summary', kwargs={ 'pk' : pk }))

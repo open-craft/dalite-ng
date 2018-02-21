@@ -417,11 +417,11 @@ class Institution(models.Model):
         verbose_name = _('institution')
         verbose_name_plural = _('institutions')
 
+
 class BlinkQuestion(models.Model):
     question = models.ForeignKey(Question)
     active = models.BooleanField(default=False)
-    activate_time = models.DateTimeField(blank=True)
-    deactivate_time = models.DateTimeField(blank=True)
+    time_limit = models.PositiveSmallIntegerField(_('Time limit'),null=True)
     key = models.CharField(
         unique=True,
         max_length=8,
@@ -431,10 +431,18 @@ class BlinkQuestion(models.Model):
     def __unicode__(self):
         return self.question.text
 
+
+class BlinkRound(models.Model):
+    question = models.ForeignKey(BlinkQuestion)
+    activate_time = models.DateTimeField()
+    deactivate_time = models.DateTimeField(null=True)
+
+
 class BlinkAnswer(models.Model):
     question = models.ForeignKey(BlinkQuestion)
     answer_choice = models.PositiveSmallIntegerField(_('Answer choice'))
     vote_time = models.DateTimeField()
+    voting_round = models.ForeignKey(BlinkRound)
 
 
 class Teacher(models.Model):
