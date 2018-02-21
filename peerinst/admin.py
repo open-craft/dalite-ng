@@ -90,7 +90,7 @@ class QuestionAdmin(admin.ModelAdmin):
     inlines = [AnswerChoiceInline, AnswerInline]
     list_display = ['title', 'discipline']
     ordering = ['discipline']
-    search_fields = ['title','text','category']
+    search_fields = ['title','text','category__title']
 
 
 @admin.register(Category)
