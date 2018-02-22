@@ -807,25 +807,6 @@ def modify_assignment(request,pk):
     return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : pk }))
 
 
-def modify_blink(request,pk):
-
-    if request.method=="POST" and request.user.is_authenticated():
-        form = forms.TeacherBlinksForm(request.POST)
-        try:
-            teacher = Teacher.objects.get(user=request.user)
-            if form.is_valid():
-                blink = form.cleaned_data['blink']
-                if blink in teacher.blinks.all():
-                    teacher.blinks.remove(blink)
-                else:
-                    teacher.blinks.add(blink)
-                teacher.save()
-        except:
-            pass
-
-    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : pk }))
-
-
 class TeacherGroups(LoginRequiredMixin,ListView):
 
     model = Teacher
@@ -1034,6 +1015,20 @@ def blink_status(request,pk):
     response['status'] = blinkquestion.active
 
     return JsonResponse(response)
+
+
+def blink_set_current(request,pk):
+
+    if request.method=="POST" and request.user.is_authenticated():
+        try:
+            blink = BlinkQuestion.objects.get(pk=pk)
+            blink.current = (not blink.current)
+            blink.save()
+        except:
+            pass
+
+    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : request.user.id }))
+
 
 # This is a very temporary approach with minimum checking for permissions
 @login_required

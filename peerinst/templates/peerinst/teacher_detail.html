@@ -50,21 +50,18 @@
 
 <div>
   <h2>Blink Questions</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-blinks' teacher.id %}">Select/add a new blink question</a></div>
+  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-blinks' teacher.id %}">Add/remove blink questions</a></div>
   {% if not object.blinks.all %}
   You do not have any blink questions.
   {% endif %}
   <ol>
   {% for a in object.blinks.all %}
-    <li> {{a|safe|striptags}}
-      <a href="{% url 'blink-summary' a.key %}"> START -> {{a.key}}</a>
-    {% if object.image %}
-    <div class="question-text" id="question-image">
-      <img src="{{ object.image.url }}"
-           width=200 alt="object.image_alt_text">
-    </div>
+    {% if a.current %}
+      <li style="margin-bottom:10px;"> {{a|safe|striptags}}<br>
+        Question url: <span style="font-weight:bold;">{% url 'blink-question' a.key %}</span><br>
+        <a href="{% url 'blink-summary' a.key %}"><input type="button" value="START"></a>
+      </li>
     {% endif %}
-    </li>
   {% endfor %}
   </ol>
 </div>

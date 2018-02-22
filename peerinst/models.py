@@ -420,6 +420,7 @@ class Institution(models.Model):
 
 class BlinkQuestion(models.Model):
     question = models.ForeignKey(Question)
+    current = models.BooleanField(default=True)
     active = models.BooleanField(default=False)
     time_limit = models.PositiveSmallIntegerField(_('Time limit'),null=True)
     key = models.CharField(
