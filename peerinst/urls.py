@@ -45,7 +45,7 @@ urlpatterns = [
     url(r'^welcome/$', views.welcome, name='welcome'),
     url(r'^logout/$', views.logout_view, name='logout'),
 
-    
+
     # testing
     url(r'^blink/(?P<pk>[0-9]+)/$', views.BlinkQuestionFormView.as_view(), name='blink-question'),
     url(r'^blink/(?P<pk>[0-9]+)/summary/$', views.BlinkQuestionDetailView.as_view(), name='blink-summary'),
@@ -55,4 +55,5 @@ urlpatterns = [
     url(r'^blink/(?P<pk>[0-9]+)/reset/$', views.blink_reset, name='blink-reset'),
     url(r'^blink/(?P<pk>[0-9]+)/status/$', views.blink_status, name='blink-status'),
     url(r'^blink/(?P<pk>[0-9]+)/set_current/$', views.blink_set_current, name='blink-set-current'),
+    url(r'^blink/(?P<pk>[0-9]+)/create/$', views.blink_create, name='blink-create'),
 ]

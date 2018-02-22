@@ -32,7 +32,7 @@ You do not have any blink questions.  You can select and modify an existing blin
       <img style="display:block;margin:auto;
       padding-top:10pt;
       padding-bottom:10pt;"  src="{{ g.question.image.url }}"
-           alt="object.question.image_alt_text">
+           alt="g.question.image_alt_text">
     </div>
     {% endif %}
   </li>
@@ -55,7 +55,7 @@ You do not have any blink questions.  You can select and modify an existing blin
       <img style="display:block;margin:auto;
       padding-top:10pt;
       padding-bottom:10pt;" src="{{ g.question.image.url }}"
-           alt="object.question.image_alt_text">
+           alt="g.question.image_alt_text">
     </div>
     {% endif %}
   </li>
@@ -68,6 +68,10 @@ You do not have any blink questions.  You can select and modify an existing blin
 <ol>
 {% for g in suggested_questions %}
   <li>{{g.text|safe|striptags}}
+    <form action="{% url 'blink-create' g.pk %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="add" />
+    </form>
     {% if g.image %}
     <div>
       <img style="display:block;margin:auto;

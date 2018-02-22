@@ -35,7 +35,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound
+from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, Question
 from django.contrib.auth.models import User
 
 
@@ -773,10 +773,9 @@ class TeacherBlinks(LoginRequiredMixin,ListView):
 
     def get_queryset(self):
         self.teacher = get_object_or_404(Teacher, user=self.request.user)
-        return BlinkQuestion.objects.all()
+        return BlinkQuestion.objects.all() # I don't think this is ever used
 
     def get_context_data(self, **kwargs):
-        from .models import Question
         context = super(TeacherBlinks, self).get_context_data(**kwargs)
         context['teacher'] = self.teacher
         teacher_discipline_questions=Question.objects.filter(discipline__in=self.teacher.disciplines.all())
@@ -844,7 +843,6 @@ def modify_group(request,pk):
 
 
 
-
 #testing
 class BlinkQuestionFormView(SingleObjectMixin,FormView):
 
@@ -853,7 +851,6 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
     model = BlinkQuestion
 
     #def get_round(self):
-
 
     def form_valid(self,form):
         self.object = self.get_object()
@@ -1024,6 +1021,28 @@ def blink_set_current(request,pk):
             blink = BlinkQuestion.objects.get(pk=pk)
             blink.current = (not blink.current)
             blink.save()
+        except:
+            pass
+
+    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : request.user.id }))
+
+
+def blink_create(request,pk):
+
+    if request.method=="POST" and request.user.is_authenticated():
+        key = random.randrange(10000000,99999999)
+        while key in BlinkQuestion.objects.all():
+            key = random.randrange(10000000,99999999)
+        try:
+            blink = BlinkQuestion(
+                question=Question.objects.get(pk=pk),
+                time_limit=30,
+                key=key,
+            )
+            blink.save()
+            teacher = Teacher.objects.get(user=request.user)
+            teacher.blinks.add(blink)
+            teacher.save()
         except:
             pass
 
