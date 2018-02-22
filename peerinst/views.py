@@ -778,10 +778,12 @@ class TeacherBlinks(LoginRequiredMixin,ListView):
     def get_context_data(self, **kwargs):
         context = super(TeacherBlinks, self).get_context_data(**kwargs)
         context['teacher'] = self.teacher
+        
         teacher_discipline_questions=Question.objects.filter(discipline__in=self.teacher.disciplines.all())
-
+        
+        teacher_blink_questions = [bk.question for bk in self.teacher.blinks.all()]
         #send back in context questions that are not already a part of that teacher's blinks
-        context['suggested_questions']=[q for q in teacher_discipline_questions if q not in self.teacher.blinks.all()]
+        context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
         #context['form'] = forms.TeacherGroupsForm()
 
         return context
