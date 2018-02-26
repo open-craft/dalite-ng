@@ -470,3 +470,21 @@ class Teacher(models.Model):
     #Reporting structure
     #Front-end assignment making
     #Sorting by label "easy, tricky, peer, hard"
+
+
+class BlinkAssignment(models.Model):
+    identifier = models.CharField(
+        _('identifier'), primary_key=True, max_length=100,
+        help_text=_('A unique identifier for this blink assignment')
+    )
+    title = models.CharField(_('Title'), max_length=200)
+    blinkquestions = models.ManyToManyField(BlinkQuestion,blank=True)
+
+    def __unicode__(self):
+        return u'{} - questions: {}'.format(self.title,'-'.join(q.question.title for q in self.blinkquestions.all()))
+
+    class Meta:
+        verbose_name = _('blinkassignment')
+        verbose_name_plural = _('blinkassignments')
+
+
