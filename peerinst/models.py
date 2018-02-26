@@ -478,7 +478,7 @@ class BlinkAssignment(models.Model):
         help_text=_('A unique identifier for this blink assignment')
     )
     title = models.CharField(_('Title'), max_length=200)
-    blinkquestions = models.ManyToManyField(BlinkQuestion,blank=True)
+    blinkquestions = models.ManyToManyField(BlinkQuestion,through='BlinkAssignmentQuestion')
 
     def __unicode__(self):
         return u'{} - questions: {}'.format(self.title,'-'.join(q.question.title for q in self.blinkquestions.all()))
@@ -487,4 +487,12 @@ class BlinkAssignment(models.Model):
         verbose_name = _('blinkassignment')
         verbose_name_plural = _('blinkassignments')
 
+
+class BlinkAssignmentQuestion(models.Model):
+    blinkassignment = models.ForeignKey(BlinkAssignment,on_delete=models.CASCADE)
+    blinkquestion = models.ForeignKey(BlinkQuestion,on_delete=models.CASCADE)
+    rank = models.IntegerField()
+
+    class Meta:
+        ordering = ['rank']
 

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from django.test import TestCase
-from ..models import Question,BlinkQuestion,BlinkAssignment
+from ..models import Question,BlinkQuestion,BlinkAssignment,BlinkAssignmentQuestion
 from django.db.models import Count
 
 class BlinkAssignmentTestCase(TestCase):
     fixtures=['peerinst_test_data.yaml']
 
-    def test_blinkassignment_model(self):
+    def test_blinkassignment(self):
         test_title = 'testA1'
 
         a1 = BlinkAssignment(title=test_title)
@@ -21,7 +21,12 @@ class BlinkAssignmentTestCase(TestCase):
         q2 = BlinkQuestion(question=qs[1],key='456')
         q2.save()
 
-        a1.blinkquestions.add(q1,q2)
-        a1.save()
+
+        assignment_ordering = BlinkAssignmentQuestion(blinkassignment=a1,blinkquestion=q1,rank=2)
+        assignment_ordering.save()
+
+        assignment_ordering = BlinkAssignmentQuestion(blinkassignment=a1,blinkquestion=q2,rank=1)
+        assignment_ordering.save()
+
 
         self.assertEqual(a1.blinkquestions.all().count(),2)
