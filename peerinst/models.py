@@ -495,8 +495,38 @@ class BlinkAssignmentQuestion(models.Model):
     blinkquestion = models.ForeignKey(BlinkQuestion,on_delete=models.CASCADE)
     rank = models.IntegerField()
 
-    # def move_up_rank(self):
-    #     other_
+    ## https://djangosnippets.org/snippets/998/
+    def move_down_rank(self):
+        try:
+            next_q = BlinkAssignmentQuestion.objects.filter(blinkassignment__title=self.blinkassignment.title).\
+            filter(rank__gt=self.rank)[0]
+
+            next_rank = next_q.rank
+            next_q.rank = self.rank
+            next_q.save()
+            self.rank = next_rank
+            self.save()
+
+        except IndexError as e:
+            pass
+
+        return
+
+    def move_up_rank(self):
+        try:
+            previous_q = BlinkAssignmentQuestion.objects.filter(blinkassignment__title=self.blinkassignment.title).\
+            filter(rank__lt=self.rank)[0]
+
+            previous_rank = previous_q.rank
+            previous_q.rank = self.rank
+            previous_q.save()
+            self.rank = previous_rank
+            self.save()
+
+        except IndexError as e:
+            pass
+
+        return
 
     def __unicode__(self):
         return u'{} : rank {} - {}-{}'.format(self.blinkassignment.title,\
