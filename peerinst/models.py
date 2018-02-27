@@ -481,7 +481,9 @@ class BlinkAssignment(models.Model):
     blinkquestions = models.ManyToManyField(BlinkQuestion,through='BlinkAssignmentQuestion')
 
     def __unicode__(self):
-        return u'{} - questions: {}'.format(self.title,'-'.join(q.question.title for q in self.blinkquestions.all()))
+        return u'{} < {} >'.format(self.title,\
+            ' ; '.join(\
+                'rank {} - {}'.format(q.rank,q.blinkquestion.question.title) for q in self.blinkassignmentquestion_set.all()))
 
     class Meta:
         verbose_name = _('blinkassignment')
@@ -492,6 +494,15 @@ class BlinkAssignmentQuestion(models.Model):
     blinkassignment = models.ForeignKey(BlinkAssignment,on_delete=models.CASCADE)
     blinkquestion = models.ForeignKey(BlinkQuestion,on_delete=models.CASCADE)
     rank = models.IntegerField()
+
+    # def move_up_rank(self):
+    #     other_
+
+    def __unicode__(self):
+        return u'{} : rank {} - {}-{}'.format(self.blinkassignment.title,\
+            self.rank,\
+            self.blinkquestion.question.id,\
+            self.blinkquestion.question.title)
 
     class Meta:
         ordering = ['rank']
