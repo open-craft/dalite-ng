@@ -446,6 +446,10 @@ class BlinkAnswer(models.Model):
     voting_round = models.ForeignKey(BlinkRound)
 
 
+class BlinkScript(model.Models):
+    blinks = models.ManyToManyField(BlinkQuestion)
+
+
 class Teacher(models.Model):
     user = models.OneToOneField(
         User,
