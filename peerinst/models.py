@@ -446,8 +446,70 @@ class BlinkAnswer(models.Model):
     voting_round = models.ForeignKey(BlinkRound)
 
 
-class BlinkScript(model.Models):
-    blinks = models.ManyToManyField(BlinkQuestion)
+class BlinkAssignment(models.Model):
+    title = models.CharField(_('Title'), max_length=200)
+    blinkquestions = models.ManyToManyField(BlinkQuestion,through='BlinkAssignmentQuestion')
+    key = models.CharField(
+        unique=True,
+        max_length=8,
+    )
+
+    def __unicode__(self):
+        return u'{} < {} >'.format(self.title,\
+            ' ; '.join(\
+                'rank {} - {}'.format(q.rank,q.blinkquestion.question.title) for q in self.blinkassignmentquestion_set.all()))
+
+    class Meta:
+        verbose_name = _('blinkassignment')
+        verbose_name_plural = _('blinkassignments')
+
+
+class BlinkAssignmentQuestion(models.Model):
+    blinkassignment = models.ForeignKey(BlinkAssignment,on_delete=models.CASCADE)
+    blinkquestion = models.ForeignKey(BlinkQuestion,on_delete=models.CASCADE)
+    rank = models.IntegerField()
+
+    ## https://djangosnippets.org/snippets/998/
+    def move_down_rank(self):
+        try:
+            next_q = BlinkAssignmentQuestion.objects.filter(blinkassignment__title=self.blinkassignment.title).\
+            filter(rank__gt=self.rank)[0]
+
+            next_rank = next_q.rank
+            next_q.rank = self.rank
+            next_q.save()
+            self.rank = next_rank
+            self.save()
+
+        except IndexError as e:
+            pass
+
+        return
+
+    def move_up_rank(self):
+        try:
+            previous_q = BlinkAssignmentQuestion.objects.filter(blinkassignment__title=self.blinkassignment.title).\
+            filter(rank__lt=self.rank)[0]
+
+            previous_rank = previous_q.rank
+            previous_q.rank = self.rank
+            previous_q.save()
+            self.rank = previous_rank
+            self.save()
+
+        except IndexError as e:
+            pass
+
+        return
+
+    def __unicode__(self):
+        return u'{} : rank {} - {}-{}'.format(self.blinkassignment.title,\
+            self.rank,\
+            self.blinkquestion.question.id,\
+            self.blinkquestion.question.title)
+
+    class Meta:
+        ordering = ['rank']
 
 
 class Teacher(models.Model):
@@ -460,6 +522,7 @@ class Teacher(models.Model):
     assignments = models.ManyToManyField(Assignment, blank=True)
     blinks = models.ManyToManyField(BlinkQuestion, blank=True)
     groups = models.ManyToManyField(StudentGroup, blank=True)
+    blinkassignments = models.ManyToManyField(BlinkAssignment,blank=True)
 
     def get_absolute_url(self):
         return reverse('teacher', kwargs={'pk': self.pk})

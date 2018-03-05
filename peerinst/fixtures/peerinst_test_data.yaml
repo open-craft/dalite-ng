@@ -1,3 +1,6 @@
+- fields: {username: 'mock_user', password: 'good_pwd'}
+  model: auth.user
+  pk: 123
 - fields: {answer_style: 0, image: '', text: Text of question 1, title: Question 1
       in assignment 1, video_url: ''}
   model: peerinst.question
