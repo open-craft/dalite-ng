@@ -446,39 +446,13 @@ class BlinkAnswer(models.Model):
     voting_round = models.ForeignKey(BlinkRound)
 
 
-class Teacher(models.Model):
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        )
-    institutions = models.ManyToManyField(Institution, blank=True)
-    disciplines = models.ManyToManyField(Discipline, blank=True)
-    assignments = models.ManyToManyField(Assignment, blank=True)
-    blinks = models.ManyToManyField(BlinkQuestion, blank=True)
-    groups = models.ManyToManyField(StudentGroup, blank=True)
-
-    def get_absolute_url(self):
-        return reverse('teacher', kwargs={'pk': self.pk})
-
-    def __unicode__(self):
-        return self.user.username
-
-    class Meta:
-        verbose_name = _('teacher')
-        verbose_name_plural = _('teachers')
-
-    #Reporting structure
-    #Front-end assignment making
-    #Sorting by label "easy, tricky, peer, hard"
-
-
 class BlinkAssignment(models.Model):
-    identifier = models.CharField(
-        _('identifier'), primary_key=True, max_length=100,
-        help_text=_('A unique identifier for this blink assignment')
-    )
     title = models.CharField(_('Title'), max_length=200)
     blinkquestions = models.ManyToManyField(BlinkQuestion,through='BlinkAssignmentQuestion')
+    key = models.CharField(
+        unique=True,
+        max_length=8,
+    )
 
     def __unicode__(self):
         return u'{} < {} >'.format(self.title,\
@@ -537,3 +511,29 @@ class BlinkAssignmentQuestion(models.Model):
     class Meta:
         ordering = ['rank']
 
+
+class Teacher(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        )
+    institutions = models.ManyToManyField(Institution, blank=True)
+    disciplines = models.ManyToManyField(Discipline, blank=True)
+    assignments = models.ManyToManyField(Assignment, blank=True)
+    blinks = models.ManyToManyField(BlinkQuestion, blank=True)
+    groups = models.ManyToManyField(StudentGroup, blank=True)
+    blinkassignments = models.ManyToManyField(BlinkAssignment,blank=True)
+
+    def get_absolute_url(self):
+        return reverse('teacher', kwargs={'pk': self.pk})
+
+    def __unicode__(self):
+        return self.user.username
+
+    class Meta:
+        verbose_name = _('teacher')
+        verbose_name_plural = _('teachers')
+
+    #Reporting structure
+    #Front-end assignment making
+    #Sorting by label "easy, tricky, peer, hard"
