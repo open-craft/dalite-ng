@@ -778,9 +778,9 @@ class TeacherBlinks(LoginRequiredMixin,ListView):
     def get_context_data(self, **kwargs):
         context = super(TeacherBlinks, self).get_context_data(**kwargs)
         context['teacher'] = self.teacher
-        
+
         teacher_discipline_questions=Question.objects.filter(discipline__in=self.teacher.disciplines.all())
-        
+
         teacher_blink_questions = [bk.question for bk in self.teacher.blinks.all()]
         #send back in context questions that are not already a part of that teacher's blinks
         context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
@@ -1058,3 +1058,6 @@ def blink_reset(request,pk):
     #blinkquestion = BlinkQuestion.objects.get(pk=pk)
 
     return HttpResponseRedirect(reverse('blink-summary', kwargs={ 'pk' : pk }))
+
+def welcome(request):
+    return TemplateResponse(request, 'registration/welcome.html')

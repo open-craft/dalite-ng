@@ -41,6 +41,7 @@ urlpatterns = [
 
     url(r'^teacher/(?P<pk>[0-9]+)/groups/$', views.TeacherGroups.as_view(), name='teacher-groups'),
     url(r'^teacher/(?P<pk>[0-9]+)/groups/modify/$', views.modify_group, name='modify-teacher-groups'),
+    url(r'^welcome/$', views.welcome, name='welcome'),
     url(r'^login/$', login, name='login'),
     url(r'^welcome/$', views.welcome, name='welcome'),
     url(r'^logout/$', views.logout_view, name='logout'),

@@ -169,7 +169,7 @@ input[type="submit"].thumbs-down {
 }
 .wrapper {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 60% 40%;
   align-items: center;
 }
 header {
@@ -241,6 +241,23 @@ a {
 }
 .note {
   font-size: 10pt;
+}
+
+
+/* login */
+form[action*="login"] {
+  width:fit-content;
+  width:-moz-fit-content;
+  font-size: 10pt;
+}
+#id_username, #id_password {
+  padding: 1px;
+  margin: 0px;
+  border-width: thin;
+  height: 25px;
+  width: 200px;
+  box-sizing: border-box;
+  margin-bottom: 5px;
 }
 
 
