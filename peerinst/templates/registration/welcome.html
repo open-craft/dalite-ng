@@ -38,7 +38,7 @@ svg.attr("width",document.body.offsetWidth);
 
 var width = +svg.attr("width"),
 height = +svg.attr("height"),
-margin = {top:40,bottom:40,left:40,right:40};
+margin = {top:1,bottom:1,left:1,right:1};
 
 var innerWidth = width-margin.left-margin.right,
 innerHeight = height-margin.top-margin.bottom;
@@ -53,7 +53,7 @@ y = d3.scaleLinear().domain([-1,1]).range([-innerHeight/2,innerHeight/2]);
 var xAxis = g.append("g").style("opacity",0).call(d3.axisBottom(x)),
 yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
 
-var xPoints = d3.range(0,2*Math.PI,0.2);
+var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/20));
 
 function f(v,x,t,a) {
   return a*Math.sin(x-v*t);
@@ -62,24 +62,32 @@ function f(v,x,t,a) {
 var a1 = 1;
 var a2 = 0.8;
 
+// Maybe run other wave backwards?
+// Add third wave?
+// Add different colours for overlap?
+// Interpolate curve instead of line
+
 var line1 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(0.001,d,d3.now(),a1)); });
+    .y(function(d) { return y(f(0.001,d,d3.now(),a1)); })
+    .curve(d3.curveNatural);
 
 var line2 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(0.002,d,d3.now(),a2)); });
+    .y(function(d) { return y(f(0.002,d,d3.now(),a2)); })
+    .curve(d3.curveNatural);
 
 var intersection1 = d3.area()
     .x(line1.x())
     .y0(y(0))
-    .y1(line1.y());
-
+    .y1(line1.y())
+    .curve(d3.curveNatural);
 
 var intersection2 = d3.area()
     .x(line2.x())
     .y0(y(0))
-    .y1(line2.y());
+    .y1(line2.y())
+    .curve(d3.curveNatural);
 
 var wave1 = g.append("g")
   .selectAll(".a")
