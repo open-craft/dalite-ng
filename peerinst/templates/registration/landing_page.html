@@ -27,6 +27,7 @@
 
 {% block body %}
 
+
 <div id="welcome">
   <svg id="animation" width=800 height=400></svg>
 <div>
@@ -59,17 +60,17 @@ function f(v,x,t,a) {
   return a*Math.sin(x-0.5*v*t);
 }
 
-var a1 = 1;
-var a2 = 0.6;
-var a3 = 0.5;
+var a1 = 0.5;
+var a2 = 0.3;
+var a3 = 0.4;
 
 var v1 = 0.001;
 var v2 = 0.0018;
 var v3 = -0.001;
 
 var y1 = 0;
-var y2 = -0.2;
-var y3 = +0.1;
+var y2 = -0.1;
+var y3 = +0.05;
 
 // Maybe run other wave backwards?
 // Add third wave?
@@ -110,7 +111,7 @@ var intersection3 = d3.area()
     .y1(line3.y())
     .curve(d3.curveNatural);
 
-var wave1 = g.append("g")
+/*var wave1 = g.append("g")
   .selectAll(".a")
   .data(xPoints)
   .enter().append("circle")
@@ -127,8 +128,8 @@ var wave1 = g.append("g")
           .transition()
             .on("start", repeat);
       });
-
-var wave2 = g.append("g")
+*/
+/*var wave2 = g.append("g")
   .selectAll(".b")
   .data(xPoints)
   .enter().append("circle")
@@ -145,8 +146,8 @@ var wave2 = g.append("g")
           .transition()
             .on("start", repeat);
       });
-
-var wave3 = g.append("g")
+*/
+/*var wave3 = g.append("g")
   .selectAll(".b")
   .data(xPoints)
   .enter().append("circle")
@@ -163,12 +164,12 @@ var wave3 = g.append("g")
           .transition()
             .on("start", repeat);
       });
-
+*/
 g.append("path")
   .datum(xPoints)
   .attr("class","line")
   .attr("stroke","white")
-  .attr("stroke-width",2)
+  .attr("stroke-width",1)
   .attr("fill","none")
   .attr("d",line1)
   .transition()
@@ -184,7 +185,7 @@ g.append("path")
   .datum(xPoints)
   .attr("class","line")
   .attr("stroke","white")
-  .attr("stroke-width",2)
+  .attr("stroke-width",1)
   .attr("fill","none")
   .attr("d",line2)
   .transition()
@@ -200,7 +201,7 @@ g.append("path")
   .datum(xPoints)
   .attr("class","line")
   .attr("stroke","white")
-  .attr("stroke-width",2)
+  .attr("stroke-width",1)
   .attr("fill","none")
   .attr("d",line3)
   .transition()
@@ -215,8 +216,7 @@ g.append("path")
 g.append("path")
   .datum(xPoints)
   .attr("class","intersection")
-  .attr("fill","white")
-  .style("opacity",0.2)
+  .attr("fill",d3.rgb(244,244,244,0.2))
   .attr("d",intersection1)
   .transition()
   .duration(50)
@@ -230,8 +230,7 @@ g.append("path")
 g.append("path")
   .datum(xPoints)
   .attr("class","intersection")
-  .attr("fill","white")
-  .style("opacity",0.4)
+  .attr("fill",d3.rgb(244,244,244,0.4))
   .attr("d",intersection2)
   .transition()
   .duration(50)
@@ -245,8 +244,7 @@ g.append("path")
 g.append("path")
   .datum(xPoints)
   .attr("class","intersection")
-  .attr("fill",d3.rgb(10,71,83))
-  .style("opacity",0.4)
+  .attr("fill",d3.rgb(0,66,102,0.4))
   .attr("d",intersection3)
   .transition()
   .duration(50)
@@ -286,13 +284,27 @@ g.append("text")
 });
 
 g.append("text")
-.attr("x",margin.left+innerWidth/2+200)
+.attr("x",margin.left+innerWidth/2+175)
 .attr("y",y(0))
+.attr("dx",-110)
 .attr("dy","16pt")
 .attr("fill","white")
 .attr("text-anchor","end")
-.style("font-size","16pt")
-.text("by SALTISE-S4");
+.style("font-family","Cardo, serif")
+.style("font-style",'italic')
+.style("font-size","14pt")
+.text("by")
+
+g.append("text")
+.attr("x",margin.left+innerWidth/2+145)
+.attr("y",y(0))
+.attr("dx","20pt")
+.attr("dy","16pt")
+.attr("fill","white")
+.attr("text-anchor","end")
+.style("font-size","14pt")
+.text("SALTISE-S4");
+
 }
 logo();
 window.addEventListener("resize",logo);

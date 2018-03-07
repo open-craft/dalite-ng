@@ -39,7 +39,7 @@ from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, B
 from django.contrib.auth.models import User
 
 
-#testing
+#blink
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.utils import timezone
