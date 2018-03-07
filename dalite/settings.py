@@ -106,7 +106,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'custom-settings/'+CUSTOM_SETTINGS+'/static'),
 )
 
-LOGIN_URL = 'login'
+# LOGIN_URL = 'login'
+LOGIN_URL = 'landing_page'
 
 LOGIN_REDIRECT_URL = 'welcome'
 
