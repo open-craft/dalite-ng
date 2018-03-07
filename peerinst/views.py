@@ -49,10 +49,14 @@ from django.contrib.sessions.models import Session
 LOGGER = logging.getLogger(__name__)
 
 
+def landing_page(request):
+    return TemplateResponse(request, 'registration/landing_page.html')
+
+
 def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
-    return HttpResponseRedirect(reverse('login'))
+    return HttpResponseRedirect(reverse('landing_page'))
 
 
 def welcome(request):
@@ -1058,6 +1062,3 @@ def blink_reset(request,pk):
     #blinkquestion = BlinkQuestion.objects.get(pk=pk)
 
     return HttpResponseRedirect(reverse('blink-summary', kwargs={ 'pk' : pk }))
-
-def welcome(request):
-    return TemplateResponse(request, 'registration/welcome.html')

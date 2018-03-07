@@ -56,25 +56,38 @@ yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
 var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/20));
 
 function f(v,x,t,a) {
-  return a*Math.sin(x-v*t);
+  return a*Math.sin(x-0.5*v*t);
 }
 
 var a1 = 1;
-var a2 = 0.8;
+var a2 = 0.6;
+var a3 = 0.5;
+
+var v1 = 0.001;
+var v2 = 0.0018;
+var v3 = -0.001;
+
+var y1 = 0;
+var y2 = -0.2;
+var y3 = +0.1;
 
 // Maybe run other wave backwards?
 // Add third wave?
 // Add different colours for overlap?
-// Interpolate curve instead of line
 
 var line1 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(0.001,d,d3.now(),a1)); })
+    .y(function(d) { return y(f(v1,d,d3.now(),a1)+y1); })
     .curve(d3.curveNatural);
 
 var line2 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(0.002,d,d3.now(),a2)); })
+    .y(function(d) { return y(f(v2,d,d3.now(),a2)+y2); })
+    .curve(d3.curveNatural);
+
+var line3 = d3.line()
+    .x(function(d) { return x(d); })
+    .y(function(d) { return y(f(v3,d,d3.now(),a3)+y3); })
     .curve(d3.curveNatural);
 
 var intersection1 = d3.area()
@@ -84,9 +97,17 @@ var intersection1 = d3.area()
     .curve(d3.curveNatural);
 
 var intersection2 = d3.area()
-    .x(line2.x())
-    .y0(y(0))
+    .x0(line1.x())
+    .y0(line1.y())
+    .x1(line2.x())
     .y1(line2.y())
+    .curve(d3.curveNatural);
+
+var intersection3 = d3.area()
+    .x0(line1.x())
+    .y0(line1.y())
+    .x1(line3.x())
+    .y1(line3.y())
     .curve(d3.curveNatural);
 
 var wave1 = g.append("g")
@@ -95,14 +116,50 @@ var wave1 = g.append("g")
   .enter().append("circle")
   .attr("class","a")
   .attr("cx",function(d){return x(d)})
-  .attr("cy",function(d){return y(f(0.001,d,d3.now(),a1))})
+  .attr("cy",function(d){return y(f(v1,d,d3.now(),a1)+y1)})
   .attr("r",1)
   .attr("fill","white")
   .transition()
   .duration(50)
   .on("start", function repeat() {
         d3.active(this)
-            .attr("cy",function(d){return y(f(0.001,d,d3.now(),a1))})
+            .attr("cy",function(d){return y(f(v1,d,d3.now(),a1)+y1)})
+          .transition()
+            .on("start", repeat);
+      });
+
+var wave2 = g.append("g")
+  .selectAll(".b")
+  .data(xPoints)
+  .enter().append("circle")
+  .attr("class","b")
+  .attr("cx",function(d){return x(d)})
+  .attr("cy",function(d){return y(f(v2,d,d3.now(),a2)+y2)})
+  .attr("r",1)
+  .attr("fill","white")
+  .transition()
+  .duration(50)
+  .on("start", function repeat() {
+        d3.active(this)
+            .attr("cy",function(d){return y(f(v2,d,d3.now(),a2)+y2)})
+          .transition()
+            .on("start", repeat);
+      });
+
+var wave3 = g.append("g")
+  .selectAll(".b")
+  .data(xPoints)
+  .enter().append("circle")
+  .attr("class","b")
+  .attr("cx",function(d){return x(d)})
+  .attr("cy",function(d){return y(f(v3,d,d3.now(),a3)+y3)})
+  .attr("r",1)
+  .attr("fill","white")
+  .transition()
+  .duration(50)
+  .on("start", function repeat() {
+        d3.active(this)
+            .attr("cy",function(d){return y(f(v3,d,d3.now(),a3)+y3)})
           .transition()
             .on("start", repeat);
       });
@@ -123,24 +180,6 @@ g.append("path")
             .on("start", repeat);
       });
 
-var wave2 = g.append("g")
-  .selectAll(".b")
-  .data(xPoints)
-  .enter().append("circle")
-  .attr("class","b")
-  .attr("cx",function(d){return x(d)})
-  .attr("cy",function(d){return y(f(0.002,d,d3.now(),a2))})
-  .attr("r",1)
-  .attr("fill","white")
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
-        d3.active(this)
-            .attr("cy",function(d){return y(f(0.002,d,d3.now(),a2))})
-          .transition()
-            .on("start", repeat);
-      });
-
 g.append("path")
   .datum(xPoints)
   .attr("class","line")
@@ -157,6 +196,21 @@ g.append("path")
             .on("start", repeat);
       });
 
+g.append("path")
+  .datum(xPoints)
+  .attr("class","line")
+  .attr("stroke","white")
+  .attr("stroke-width",2)
+  .attr("fill","none")
+  .attr("d",line3)
+  .transition()
+  .duration(50)
+  .on("start", function repeat() {
+        d3.active(this)
+            .attr("d",line3)
+          .transition()
+            .on("start", repeat);
+      });
 
 g.append("path")
   .datum(xPoints)
@@ -188,6 +242,21 @@ g.append("path")
             .on("start", repeat);
       });
 
+g.append("path")
+  .datum(xPoints)
+  .attr("class","intersection")
+  .attr("fill",d3.rgb(10,71,83))
+  .style("opacity",0.4)
+  .attr("d",intersection3)
+  .transition()
+  .duration(50)
+  .on("start", function repeat() {
+        d3.active(this)
+            .attr("d",intersection3)
+          .transition()
+            .on("start", repeat);
+      });
+
 g.append("text")
 .attr("x",margin.left+innerWidth/2)
 .attr("dx","25pt")
@@ -195,7 +264,11 @@ g.append("text")
 .attr("fill","white")
 .attr("text-anchor","middle")
 .style("font-size","40pt")
-.text("DALITE");
+.style("cursor","pointer")
+.text("DALITE")
+.on("click",function(){
+  window.location="{% url 'login' %}"
+});
 
 g.append("text")
 .attr("x",margin.left+innerWidth/2)
@@ -206,7 +279,11 @@ g.append("text")
 .style("font-family","Cardo, serif")
 .style("font-style",'italic')
 .style("font-size","40pt")
-.text("my");
+.style("cursor","pointer")
+.text("my")
+.on("click",function(){
+  window.location="{% url 'login' %}"
+});
 
 g.append("text")
 .attr("x",margin.left+innerWidth/2+200)
@@ -215,7 +292,7 @@ g.append("text")
 .attr("fill","white")
 .attr("text-anchor","end")
 .style("font-size","16pt")
-.text("by SALTISE-S4")
+.text("by SALTISE-S4");
 }
 logo();
 window.addEventListener("resize",logo);
