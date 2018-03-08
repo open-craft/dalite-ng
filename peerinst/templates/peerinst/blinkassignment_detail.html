@@ -27,13 +27,13 @@
       {{a.blinkquestion.question.title|safe|striptags}}
     </strong>
     - {{a.blinkquestion.question.text|safe|striptags}}
-    <form style="display:inline;" action="{% url 'blinkAssignment-update' a.pk %}" method="post">
+    <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
         <input type="hidden" name="rank" value="up" />
         <input type="submit" value="arrow_upward" />
     </form>
-    <form style="display:inline;" action="{% url 'blinkAssignment-update' a.pk %}" method="post">
+    <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
         <input type="hidden" name="rank" value="down" />

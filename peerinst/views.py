@@ -1088,20 +1088,21 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
     model = BlinkAssignment
 
     def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
         if request.user.is_authenticated():
             form = forms.RankForm(request.POST)
             if form.is_valid():
                 relationship = form.cleaned_data['q']
                 operation = form.cleaned_data['rank']
-                print(relationship)
                 if operation == "down":
                     relationship.move_down_rank()
                 if operation == "up":
                     relationship.move_up_rank()
+
                 relationship.save()
 
-                return render_to_response(self.get_context_data())
+                return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
             else:
-                return HttpResponse("doesn't work")
+                return HttpResponse("error")
         else:
-            pass
+            return HttpResponse("error")

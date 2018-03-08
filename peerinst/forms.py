@@ -117,5 +117,5 @@ class BlinkQuestionStateForm(ModelForm):
 
 class RankForm(forms.Form):
     """Form to handle reordering of questions."""
-    q = forms.ModelChoiceField(queryset=BlinkAssignmentQuestion.objects.all())
+    q = forms.ModelChoiceField(queryset=BlinkAssignmentQuestion.objects.all(), to_field_name="blinkquestion_id")
     rank = forms.CharField(max_length=100,widget=forms.HiddenInput)
