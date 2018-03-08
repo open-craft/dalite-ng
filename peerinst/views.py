@@ -1087,6 +1087,12 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
 
     model = BlinkAssignment
 
+    def get_context_data(self, **kwargs):
+        context = super(BlinkAssignmentUpdate, self).get_context_data(**kwargs)
+        context['teacher'] = Teacher.objects.get(user=self.request.user)
+
+        return context
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if request.user.is_authenticated():
