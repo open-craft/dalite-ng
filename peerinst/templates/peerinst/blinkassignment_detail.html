@@ -1,0 +1,45 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block body %}
+
+<style>
+  input[type="submit"] {
+    font-family: 'Material Icons';
+    font-size: 10pt;
+    padding:1pt;
+    margin-left:3pt;
+
+  }
+  img {
+    max-width:50%;
+    max-height:200px;
+  }
+</style>
+
+
+<h1>Update blink script</h1>
+<h2>{{object.title}}</h2>
+<ol>
+{% for a in object.blinkassignmentquestion_set.all %}
+  <li>
+    <strong>
+      {{a.blinkquestion.question.title|safe|striptags}}
+    </strong>
+    - {{a.blinkquestion.question.text|safe|striptags}}
+    <form style="display:inline;" action="{% url 'blinkAssignment-update' a.pk %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
+        <input type="hidden" name="rank" value="up" />
+        <input type="submit" value="arrow_upward" />
+    </form>
+    <form style="display:inline;" action="{% url 'blinkAssignment-update' a.pk %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
+        <input type="hidden" name="rank" value="down" />
+        <input type="submit" value="arrow_downward" />
+    </form>
+  </li>
+{% endfor %}
+</ol>
+{% endblock %}

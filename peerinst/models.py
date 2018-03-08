@@ -472,7 +472,8 @@ class BlinkAssignmentQuestion(models.Model):
     ## https://djangosnippets.org/snippets/998/
     def move_down_rank(self):
         try:
-            next_q = BlinkAssignmentQuestion.objects.filter(blinkassignment__title=self.blinkassignment.title).\
+            next_q = BlinkAssignmentQuestion.objects.\
+            filter(blinkassignment__title=self.blinkassignment.title).\
             filter(rank__gt=self.rank)[0]
 
             next_rank = next_q.rank
@@ -488,7 +489,8 @@ class BlinkAssignmentQuestion(models.Model):
 
     def move_up_rank(self):
         try:
-            previous_q = BlinkAssignmentQuestion.objects.filter(blinkassignment__title=self.blinkassignment.title).\
+            previous_q = BlinkAssignmentQuestion.objects.\
+            filter(blinkassignment__title=self.blinkassignment.title).\
             filter(rank__lt=self.rank)[0]
 
             previous_rank = previous_q.rank

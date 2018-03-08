@@ -47,7 +47,7 @@ urlpatterns = [
     url(r'^logout/$', views.logout_view, name='logout'),
 
 
-    # testing
+    # blink
     url(r'^blink/(?P<pk>[0-9]+)/$', views.BlinkQuestionFormView.as_view(), name='blink-question'),
     url(r'^blink/(?P<pk>[0-9]+)/summary/$', views.BlinkQuestionDetailView.as_view(), name='blink-summary'),
     url(r'^blink/(?P<pk>[0-9]+)/count/$', views.blink_count, name='blink-count'),
@@ -57,4 +57,6 @@ urlpatterns = [
     url(r'^blink/(?P<pk>[0-9]+)/status/$', views.blink_status, name='blink-status'),
     url(r'^blink/(?P<pk>[0-9]+)/set_current/$', views.blink_set_current, name='blink-set-current'),
     url(r'^blink/(?P<pk>[0-9]+)/create/$', views.blink_create, name='blink-create'),
+    url(r'^blinkAssignment/create/$', views.BlinkAssignmentCreate.as_view(), name='blinkAssignment-create'),
+    url(r'^blinkAssignment/(?P<pk>[0-9]+)/update/$', views.BlinkAssignmentUpdate.as_view(), name='blinkAssignment-update'),
 ]

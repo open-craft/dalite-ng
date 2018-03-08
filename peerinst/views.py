@@ -18,7 +18,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView
 from django.views.generic.base import TemplateView, View
-from django.views.generic.edit import FormView, UpdateView
+from django.views.generic.edit import FormView, UpdateView, CreateView
 from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
@@ -35,7 +35,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, Question
+from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question
 from django.contrib.auth.models import User
 
 
@@ -848,8 +848,7 @@ def modify_group(request,pk):
     return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : pk }))
 
 
-
-#testing
+#Blink
 class BlinkQuestionFormView(SingleObjectMixin,FormView):
 
     form_class = forms.BlinkAnswerForm
@@ -1062,3 +1061,47 @@ def blink_reset(request,pk):
     #blinkquestion = BlinkQuestion.objects.get(pk=pk)
 
     return HttpResponseRedirect(reverse('blink-summary', kwargs={ 'pk' : pk }))
+
+
+class BlinkAssignmentCreate(LoginRequiredMixin,CreateView):
+    model = BlinkAssignment
+    fields = ['title']
+
+    def form_valid(self, form):
+        key = random.randrange(10000000,99999999)
+        while key in BlinkAssignment.objects.all():
+            key = random.randrange(10000000,99999999)
+        form.instance.key = key
+        return super(BlinkAssignmentCreate,self).form_valid(form)
+
+    def get_success_url(self):
+        try:
+            teacher = Teacher.objects.get(user=self.request.user)
+            teacher.blinkassignments.add(self.object)
+            return reverse('teacher', kwargs={'pk': teacher.id})
+        except:
+            return reverse('welcome')
+
+
+class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
+
+    model = BlinkAssignment
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            form = forms.RankForm(request.POST)
+            if form.is_valid():
+                relationship = form.cleaned_data['q']
+                operation = form.cleaned_data['rank']
+                print(relationship)
+                if operation == "down":
+                    relationship.move_down_rank()
+                if operation == "up":
+                    relationship.move_up_rank()
+                relationship.save()
+
+                return render_to_response(self.get_context_data())
+            else:
+                return HttpResponse("doesn't work")
+        else:
+            pass

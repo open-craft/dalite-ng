@@ -5,7 +5,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from .models import StudentGroup, Assignment
+from .models import StudentGroup, Assignment, BlinkAssignmentQuestion
 
 
 #testing
@@ -113,3 +113,9 @@ class BlinkQuestionStateForm(ModelForm):
     class Meta:
         model = BlinkQuestion
         fields = ['active']
+
+
+class RankForm(forms.Form):
+    """Form to handle reordering of questions."""
+    q = forms.ModelChoiceField(queryset=BlinkAssignmentQuestion.objects.all())
+    rank = forms.CharField(max_length=100,widget=forms.HiddenInput)
