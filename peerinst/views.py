@@ -9,10 +9,11 @@ import random
 import re
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import get_object_or_404, render_to_response, redirect
 from django.template.response import TemplateResponse
+from django.utils.decorators import method_decorator
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
@@ -742,9 +743,17 @@ def reset_question(request, assignment_id, question_id):
     return HttpResponseRedirect(reverse('question', kwargs={'assignment_id' : assignment.pk, 'question_id' : question.pk}))
 
 
+# Views for Teacher
+
 class TeacherDetailView(LoginRequiredMixin,DetailView):
 
     model = Teacher
+
+    def dispatch(self, *args, **kwargs):
+        if self.request.user == Teacher.objects.get(pk=kwargs['pk']).user:
+            return super(TeacherDetailView, self).dispatch(*args, **kwargs)
+        else:
+            return HttpResponse('error!')
 
 
 class TeacherUpdate(LoginRequiredMixin,UpdateView):
@@ -962,9 +971,7 @@ def blink_assignment_start(request,pk):
 
     # Deactivate all blinkAssignments
     for a in teacher.blinkassignments.all():
-        print(a.active)
         a.active = False
-        a.key
         a.save()
 
     # Activate _this_ blinkAssignment
@@ -979,6 +986,7 @@ def blink_assignment_start(request,pk):
 
 
 def blink_get_next(request,pk):
+    """ View to process next question in a series of blink questions based on state."""
 
     try:
         # Get BlinkQuestion
