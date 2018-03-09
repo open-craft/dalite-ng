@@ -744,25 +744,27 @@ def reset_question(request, assignment_id, question_id):
 
 
 # Views for Teacher
-
-class TeacherDetailView(LoginRequiredMixin,DetailView):
-
-    model = Teacher
+class TeacherMixin(LoginRequiredMixin,View):
 
     def dispatch(self, *args, **kwargs):
         if self.request.user == Teacher.objects.get(pk=kwargs['pk']).user:
-            return super(TeacherDetailView, self).dispatch(*args, **kwargs)
+            return super(TeacherMixin, self).dispatch(*args, **kwargs)
         else:
-            return HttpResponse('error!')
+            return HttpResponse('Access denied!')
 
 
-class TeacherUpdate(LoginRequiredMixin,UpdateView):
+class TeacherDetailView(TeacherMixin,DetailView):
+
+    model = Teacher
+
+
+class TeacherUpdate(TeacherMixin,UpdateView):
 
     model = Teacher
     fields = ['institutions','disciplines']
 
 
-class TeacherAssignments(LoginRequiredMixin,ListView):
+class TeacherAssignments(TeacherMixin,ListView):
 
     model = Teacher
     template_name = 'peerinst/teacher_assignments.html'
@@ -779,7 +781,7 @@ class TeacherAssignments(LoginRequiredMixin,ListView):
         return context
 
 
-class TeacherBlinks(LoginRequiredMixin,ListView):
+class TeacherBlinks(TeacherMixin,ListView):
 
     model = Teacher
     template_name = 'peerinst/teacher_blinks.html'
@@ -821,7 +823,7 @@ def modify_assignment(request,pk):
     return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : pk }))
 
 
-class TeacherGroups(LoginRequiredMixin,ListView):
+class TeacherGroups(TeacherMixin,ListView):
 
     model = Teacher
     template_name = 'peerinst/teacher_groups.html'
