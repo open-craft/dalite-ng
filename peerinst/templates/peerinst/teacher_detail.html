@@ -79,8 +79,7 @@
       <span class="admin-link" ><a href="{% url 'blinkAssignment-update' a.pk %}">Edit</a></span>
       <br>
     Script url: <span style="font-weight:bold;">{% url 'blink-question' a.key %}</span><br>
-    <!-- pass extra context for script -->
-    <a href="{% url 'blink-summary' a.key %}"><input type="button" value="START"></a>
+    <a href="{% url 'blinkAssignment-start' a.key %}"><input type="button" value="START"></a>
     </li>
   {% endfor %}
   </ol>

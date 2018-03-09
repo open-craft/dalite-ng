@@ -117,10 +117,12 @@ class BlinkQuestionStateForm(ModelForm):
 
 class RankBlinkForm(forms.Form):
     """Form to handle reordering or deletion of blinkquestions in a blinkassignment."""
+    # Might be better to set the queryset to limit to teacher's blink set
     q = forms.ModelChoiceField(queryset=BlinkAssignmentQuestion.objects.all(), to_field_name="blinkquestion_id")
     rank = forms.CharField(max_length=5,widget=forms.HiddenInput)
 
 
 class AddBlinkForm(forms.Form):
     """Form to add a blinkquestion to a blinkassignment."""
+    # Might be better to set the queryset to limit to teacher's blinks
     q = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())

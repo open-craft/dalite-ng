@@ -951,6 +951,56 @@ class BlinkQuestionDetailView(DetailView):
 
         return context
 
+@login_required
+def blink_assignment_start(request,pk):
+
+    # Get teacher
+    try:
+        teacher = Teacher.objects.get(user=request.user)
+    except:
+        return HttpResponse("user not a teacher")
+
+    # Deactivate all blinkAssignments
+    for a in teacher.blinkassignments.all():
+        print(a.active)
+        a.active = False
+        a.key
+        a.save()
+
+    # Activate _this_ blinkAssignment
+    try:
+        blinkassignment = teacher.blinkassignments.get(key=pk)
+        blinkassignment.active = True
+        blinkassignment.save()
+    except:
+        return HttpResponse("blink assignment does not belong to this teacher or does not exist")
+
+    return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkquestions.first().pk} ))
+
+
+def blink_get_next(request,pk):
+
+    try:
+        # Get BlinkQuestion
+        blinkquestion = BlinkQuestion.objects.get(pk=pk)
+        # Get Teacher (should only ever be one object returned)
+        teacher = blinkquestion.teacher_set.first()
+        # Check the active BlinkAssignment, if any
+        blinkassignment = teacher.blinkassignments.get(active=True)
+        # Get rank of question in list
+        for q in blinkassignment.blinkassignmentquestion_set.all():
+            if q.blinkquestion == blinkquestion:
+                rank = q.rank
+                break
+        # Redirect to next, if exists
+        if rank < blinkassignment.blinkassignmentquestion_set.count():
+            return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
+        else:
+            return HttpResponse("done all questions")
+
+    except:
+        return HttpResponse("error")
+
 
 def blink_count(request,pk):
 
@@ -1064,6 +1114,7 @@ def blink_reset(request,pk):
 
 
 class BlinkAssignmentCreate(LoginRequiredMixin,CreateView):
+
     model = BlinkAssignment
     fields = ['title']
 

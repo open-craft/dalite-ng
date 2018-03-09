@@ -61,7 +61,12 @@ function retry(){
 </script>
 {% endif %}
 
-<input id="next_button" type="button" style="display:none;" value="Next">
+<input id="next_button" type="button" style="display:none;" value="Next" onclick="next()">
+<script>
+function next(){
+  location="{% url 'blink-get-next' pk=object.pk %}"
+}
+</script>
 
 <script>
 var csrftoken = Cookies.get('csrftoken');

@@ -453,6 +453,7 @@ class BlinkAssignment(models.Model):
         unique=True,
         max_length=8,
     )
+    active = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'{} < {} >'.format(self.title,\
