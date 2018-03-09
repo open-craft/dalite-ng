@@ -31,16 +31,54 @@
     <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
+        <input type="hidden" name="rank" value="clear" />
+        <input type="submit" value="clear" />
+    </form>
+    {% if forloop.counter > 1 %}
+    <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
         <input type="hidden" name="rank" value="up" />
         <input type="submit" value="arrow_upward" />
     </form>
+    {% endif %}
+    {% if not forloop.last %}
     <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
         <input type="hidden" name="rank" value="down" />
         <input type="submit" value="arrow_downward" />
     </form>
+    {% endif %}
   </li>
 {% endfor %}
 </ol>
+
+<h2>Available blinks</h2>
+<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-blinks' teacher.id %}">Add/remove blink questions</a></div>
+{% if not teacher.blinks.all %}
+You do not have any blink questions.
+{% endif %}
+<ol>
+{% for g in teacher.blinks.all %}
+  {% if g not in object.blinkquestions.all %}
+  <li> {{g|safe|striptags}}
+    <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="q" value="{{g.pk}}" />
+        <input type="submit" value="add" />
+    </form>
+    {% if g.question.image %}
+    <div>
+      <img style="display:block;margin:auto;
+      padding-top:10pt;
+      padding-bottom:10pt;"  src="{{ g.question.image.url }}"
+           alt="g.question.image_alt_text">
+    </div>
+    {% endif %}
+  </li>
+  {% endif %}
+{% endfor %}
+</ol>
+
 {% endblock %}

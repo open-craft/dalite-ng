@@ -1096,19 +1096,37 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if request.user.is_authenticated():
-            form = forms.RankForm(request.POST)
+            form = forms.RankBlinkForm(request.POST)
             if form.is_valid():
                 relationship = form.cleaned_data['q']
                 operation = form.cleaned_data['rank']
                 if operation == "down":
                     relationship.move_down_rank()
+                    relationship.save()
                 if operation == "up":
                     relationship.move_up_rank()
-
-                relationship.save()
+                    relationship.save()
+                if operation == "clear":
+                    relationship.delete()
 
                 return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
             else:
-                return HttpResponse("error")
+                form = forms.AddBlinkForm(request.POST)
+                if form.is_valid():
+                    blinkquestion = form.cleaned_data['q']
+                    if not blinkquestion in self.object.blinkquestions.all():
+                        print(self.object.blinkquestions.count())
+                        relationship = BlinkAssignmentQuestion(
+                            blinkassignment=self.object,
+                            blinkquestion=blinkquestion,
+                            rank=self.object.blinkquestions.count()+1,
+                        )
+                        relationship.save()
+                    else:
+                        return HttpResponse("error")
+
+                    return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
+                else:
+                    return HttpResponse("error")
         else:
             return HttpResponse("error")
