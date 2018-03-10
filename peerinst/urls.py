@@ -38,7 +38,7 @@ urlpatterns = [
     url(r'^teacher/(?P<pk>[0-9]+)/blinks/$', views.TeacherBlinks.as_view(), name='teacher-blinks'),
     url(r'^teacher/(?P<pk>[0-9]+)/groups/$', views.TeacherGroups.as_view(), name='teacher-groups'),
 
-    # Auth 
+    # Auth
     url(r'^landing_page/$', views.landing_page, name='landing_page'),
     url(r'^login/$', login, name='login'),
     url(r'^welcome/$', views.welcome, name='welcome'),
@@ -52,7 +52,6 @@ urlpatterns = [
     url(r'^blink/(?P<pk>[0-9]+)/latest_results/$', views.blink_latest_results, name='blink-results'),
     url(r'^blink/(?P<pk>[0-9]+)/reset/$', views.blink_reset, name='blink-reset'),
     url(r'^blink/(?P<pk>[0-9]+)/status/$', views.blink_status, name='blink-status'),
-    url(r'^blink/(?P<pk>[0-9]+)/set_current/$', views.blink_set_current, name='blink-set-current'),
     url(r'^blink/(?P<pk>[0-9]+)/get_next/$', views.blink_get_next, name='blink-get-next'),
     url(r'^blink/(?P<pk>[0-9]+)/create/$', views.blink_create, name='blink-create'),
     url(r'^blinkAssignment/create/$', views.BlinkAssignmentCreate.as_view(), name='blinkAssignment-create'),

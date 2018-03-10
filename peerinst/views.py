@@ -820,20 +820,15 @@ class TeacherBlinks(TeacherMixin,ListView):
 
         return context
 
-
-def blink_set_current(request,pk):
-
-    if request.method=="POST" and request.user.is_authenticated():
-        try:
-            blink = BlinkQuestion.objects.get(pk=pk)
+    def post(self, request, *args, **kwargs):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        form = forms.TeacherBlinksForm(request.POST)
+        if form.is_valid():
+            blink = form.cleaned_data["blink"]
             blink.current = (not blink.current)
             blink.save()
-        except:
-            pass
 
-    teacher = get_object_or_404(Teacher, user=request.user)
-
-    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : teacher.id }))
+        return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : self.teacher.pk }))
 
 
 def blink_create(request,pk):

@@ -26,10 +26,11 @@ You do not have any blink questions.  You can select and modify an existing blin
 <ol>
 {% for g in teacher.blinks.all %}
  {% if g.current %}
-  <li>
-    <form action="{% url 'blink-set-current' g.pk %}" method="post">
+  <li>{{g|safe}}
+    <form style="display:inline" action="" method="post">
         {% csrf_token %}
-        {{g|safe|striptags}}  <input type="submit" value="clear" />
+        <input type="hidden" name="blink" value="{{g.pk}}" />
+        <input type="submit" value="clear" />
     </form>
     {% if g.question.image %}
     <div>
@@ -49,10 +50,11 @@ You do not have any blink questions.  You can select and modify an existing blin
 <ol>
 {% for g in teacher.blinks.all %}
   {% if not g.current %}
-  <li>
-    <form action="{% url 'blink-set-current' g.pk %}" method="post">
+  <li>{{g|safe}}
+    <form style="display:inline" action="" method="post">
         {% csrf_token %}
-        {{g|safe|striptags}}  <input type="submit" value="add" />
+        <input type="hidden" name="blink" value="{{g.pk}}" />
+        <input type="submit" value="add" />
     </form>
     {% if g.question.image %}
     <div>
@@ -71,7 +73,7 @@ You do not have any blink questions.  You can select and modify an existing blin
 <h2>All questions in discipline</h2>
 <ol>
 {% for g in suggested_questions %}
-  <li>{{g.text|safe|striptags}}
+  <li>{{g.text|safe}}
     <form action="{% url 'blink-create' g.pk %}" method="post">
         {% csrf_token %}
         <input type="submit" value="add" />
