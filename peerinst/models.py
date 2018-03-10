@@ -475,7 +475,7 @@ class BlinkAssignmentQuestion(models.Model):
         try:
             next_q = BlinkAssignmentQuestion.objects.\
             filter(blinkassignment__title=self.blinkassignment.title).\
-            filter(rank__gt=self.rank)[0]
+            filter(rank__gt=self.rank).first()
 
             next_rank = next_q.rank
             next_q.rank = self.rank
@@ -492,7 +492,7 @@ class BlinkAssignmentQuestion(models.Model):
         try:
             previous_q = BlinkAssignmentQuestion.objects.\
             filter(blinkassignment__title=self.blinkassignment.title).\
-            filter(rank__lt=self.rank)[0]
+            filter(rank__lt=self.rank).last()
 
             previous_rank = previous_q.rank
             previous_q.rank = self.rank
