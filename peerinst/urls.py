@@ -30,24 +30,21 @@ urlpatterns = [
         url(r'^attribution_analysis/$', admin_views.AttributionAnalysis.as_view(),
             name='attribution-analysis'),
     ])),
+
+    # Teachers
     url(r'^teacher-account/(?P<pk>[0-9]+)/$', views.TeacherDetailView.as_view(), name='teacher'),
     url(r'^teacher/(?P<pk>[0-9]+)/$', views.TeacherUpdate.as_view(), name='teacher-update'),
     url(r'^teacher/(?P<pk>[0-9]+)/assignments/$', views.TeacherAssignments.as_view(), name='teacher-assignments'),
-    url(r'^teacher/(?P<pk>[0-9]+)/assignments/modify/$', views.modify_assignment, name='modify-teacher-assignments'),
-
     url(r'^teacher/(?P<pk>[0-9]+)/blinks/$', views.TeacherBlinks.as_view(), name='teacher-blinks'),
-
-
-
     url(r'^teacher/(?P<pk>[0-9]+)/groups/$', views.TeacherGroups.as_view(), name='teacher-groups'),
-    url(r'^teacher/(?P<pk>[0-9]+)/groups/modify/$', views.modify_group, name='modify-teacher-groups'),
+
+    # Admin
     url(r'^landing_page/$', views.landing_page, name='landing_page'),
     url(r'^login/$', login, name='login'),
     url(r'^welcome/$', views.welcome, name='welcome'),
     url(r'^logout/$', views.logout_view, name='logout'),
 
-
-    # blink
+    # Blink
     url(r'^blink/(?P<pk>[0-9]+)/$', views.BlinkQuestionFormView.as_view(), name='blink-question'),
     url(r'^blink/(?P<pk>[0-9]+)/summary/$', views.BlinkQuestionDetailView.as_view(), name='blink-summary'),
     url(r'^blink/(?P<pk>[0-9]+)/count/$', views.blink_count, name='blink-count'),

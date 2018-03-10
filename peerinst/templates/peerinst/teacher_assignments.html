@@ -22,7 +22,7 @@ You do not have any assignments.  You can select and modify an existing assignme
 <ol>
 {% for g in teacher.assignments.all %}
   <li>
-    <form action="{% url 'modify-teacher-assignments' teacher.id %}" method="post">
+    <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
         {{g}}  <input type="submit" value="clear" /> Edit
@@ -37,7 +37,7 @@ You do not have any assignments.  You can select and modify an existing assignme
 {% for g in object_list.all %}
   {% if g not in teacher.assignments.all %}
   <li>
-    <form action="{% url 'modify-teacher-assignments' teacher.id %}" method="post">
+    <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
         {{g}}  <input type="submit" value="add" />

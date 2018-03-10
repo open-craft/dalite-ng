@@ -743,7 +743,8 @@ def reset_question(request, assignment_id, question_id):
     return HttpResponseRedirect(reverse('question', kwargs={'assignment_id' : assignment.pk, 'question_id' : question.pk}))
 
 
-# Views for Teacher
+# Views related to Teacher
+
 class TeacherMixin(LoginRequiredMixin,View):
 
     def dispatch(self, *args, **kwargs):
@@ -776,9 +777,21 @@ class TeacherAssignments(TeacherMixin,ListView):
     def get_context_data(self, **kwargs):
         context = super(TeacherAssignments, self).get_context_data(**kwargs)
         context['teacher'] = self.teacher
-        #context['form'] = forms.TeacherGroupsForm()
 
         return context
+
+    def post(self, request, *args, **kwargs):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        form = forms.TeacherAssignmentsForm(request.POST)
+        if form.is_valid():
+            assignment = form.cleaned_data['assignment']
+            if assignment in self.teacher.assignments.all():
+                self.teacher.assignments.remove(assignment)
+            else:
+                self.teacher.assignments.add(assignment)
+            self.teacher.save()
+
+        return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : self.teacher.pk }))
 
 
 class TeacherBlinks(TeacherMixin,ListView):
@@ -804,25 +817,6 @@ class TeacherBlinks(TeacherMixin,ListView):
         return context
 
 
-def modify_assignment(request,pk):
-
-    if request.method=="POST" and request.user.is_authenticated():
-        form = forms.TeacherAssignmentsForm(request.POST)
-        try:
-            teacher = Teacher.objects.get(user=request.user)
-            if form.is_valid():
-                assignment = form.cleaned_data['assignment']
-                if assignment in teacher.assignments.all():
-                    teacher.assignments.remove(assignment)
-                else:
-                    teacher.assignments.add(assignment)
-                teacher.save()
-        except:
-            pass
-
-    return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : pk }))
-
-
 class TeacherGroups(TeacherMixin,ListView):
 
     model = Teacher
@@ -839,24 +833,18 @@ class TeacherGroups(TeacherMixin,ListView):
 
         return context
 
-
-def modify_group(request,pk):
-
-    if request.method=="POST" and request.user.is_authenticated():
+    def post(self, request, *args, **kwargs):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
         form = forms.TeacherGroupsForm(request.POST)
-        try:
-            teacher = Teacher.objects.get(user=request.user)
-            if form.is_valid():
-                group = form.cleaned_data['group']
-                if group in teacher.groups.all():
-                    teacher.groups.remove(group)
-                else:
-                    teacher.groups.add(group)
-                teacher.save()
-        except:
-            pass
+        if form.is_valid():
+            group = form.cleaned_data['group']
+            if group in self.teacher.groups.all():
+                self.teacher.groups.remove(group)
+            else:
+                self.teacher.groups.add(group)
+            self.teacher.save()
 
-    return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : pk }))
+        return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : self.teacher.pk }))
 
 
 #Blink

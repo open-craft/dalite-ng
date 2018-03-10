@@ -22,7 +22,7 @@ You are not currently following any student groups.  You can select groups to fo
 <ol>
 {% for g in teacher.groups.all %}
   <li>
-    <form action="{% url 'modify-teacher-groups' teacher.id %}" method="post">
+    <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
         {{g}}  <input type="submit" value="clear" />
@@ -41,7 +41,7 @@ You are not currently following any student groups.  You can select groups to fo
 {% for g in object_list.all %}
   {% if g not in teacher.groups.all %}
   <li>
-    <form action="{% url 'modify-teacher-groups' teacher.id %}" method="post">
+    <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
         {{g}}  <input type="submit" value="add" />
