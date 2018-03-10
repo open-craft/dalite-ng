@@ -49,7 +49,7 @@
 </div>
 
 <div>
-  <h2>Blink Questions</h2>
+  <h2>Blink questions</h2>
   <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-blinks' teacher.id %}">Add/remove blink questions</a></div>
   {% if not object.blinks.all %}
   You do not have any blink questions.
@@ -68,7 +68,7 @@
 
 
 <div>
-  <h2>Blink Scripts</h2>
+  <h2>Blink scripts</h2>
   <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'blinkAssignment-create' %}">Create a new blink script</a></div>
   {% if not object.blinkassignments.all %}
   A blink script is a series of blink questions strung together into one activity.  You do not have any blink scripts.

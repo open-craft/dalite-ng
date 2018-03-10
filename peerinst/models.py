@@ -461,8 +461,8 @@ class BlinkAssignment(models.Model):
                 'rank {} - {}'.format(q.rank,q.blinkquestion.question.title) for q in self.blinkassignmentquestion_set.all()))
 
     class Meta:
-        verbose_name = _('blinkassignment')
-        verbose_name_plural = _('blinkassignments')
+        verbose_name = _('blink assignment')
+        verbose_name_plural = _('blink assignments')
 
 
 class BlinkAssignmentQuestion(models.Model):

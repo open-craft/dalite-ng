@@ -49,6 +49,7 @@ from django.contrib.sessions.models import Session
 
 LOGGER = logging.getLogger(__name__)
 
+# Views related to Auth
 
 def landing_page(request):
     return TemplateResponse(request, 'registration/landing_page.html')
@@ -75,6 +76,8 @@ class LoginRequiredMixin(object):
         return login_required(view)
 
 
+# Views related to debugging
+
 class AssignmentListView(LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
@@ -93,6 +96,8 @@ class QuestionListView(LoginRequiredMixin, ListView):
         context.update(assignment=self.assignment)
         return context
 
+
+# Views related to Question
 
 class QuestionMixin(object):
 
@@ -810,11 +815,47 @@ class TeacherBlinks(TeacherMixin,ListView):
         teacher_discipline_questions=Question.objects.filter(discipline__in=self.teacher.disciplines.all())
 
         teacher_blink_questions = [bk.question for bk in self.teacher.blinks.all()]
-        #send back in context questions that are not already a part of that teacher's blinks
+        # Send as context questions not already part of teacher's blinks
         context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
-        #context['form'] = forms.TeacherGroupsForm()
 
         return context
+
+
+def blink_set_current(request,pk):
+
+    if request.method=="POST" and request.user.is_authenticated():
+        try:
+            blink = BlinkQuestion.objects.get(pk=pk)
+            blink.current = (not blink.current)
+            blink.save()
+        except:
+            pass
+
+    teacher = get_object_or_404(Teacher, user=request.user)
+
+    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : teacher.id }))
+
+
+def blink_create(request,pk):
+
+    if request.method=="POST" and request.user.is_authenticated():
+        key = random.randrange(10000000,99999999)
+        while key in BlinkQuestion.objects.all():
+            key = random.randrange(10000000,99999999)
+        try:
+            blink = BlinkQuestion(
+                question=Question.objects.get(pk=pk),
+                time_limit=30,
+                key=key,
+            )
+            blink.save()
+            teacher = Teacher.objects.get(user=request.user)
+            teacher.blinks.add(blink)
+            teacher.save()
+        except:
+            pass
+
+    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : teacher.id }))
 
 
 class TeacherGroups(TeacherMixin,ListView):
@@ -847,7 +888,8 @@ class TeacherGroups(TeacherMixin,ListView):
         return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : self.teacher.pk }))
 
 
-#Blink
+# Views relatd to Blink
+
 class BlinkQuestionFormView(SingleObjectMixin,FormView):
 
     form_class = forms.BlinkAnswerForm
@@ -1067,39 +1109,6 @@ def blink_status(request,pk):
     return JsonResponse(response)
 
 
-def blink_set_current(request,pk):
-
-    if request.method=="POST" and request.user.is_authenticated():
-        try:
-            blink = BlinkQuestion.objects.get(pk=pk)
-            blink.current = (not blink.current)
-            blink.save()
-        except:
-            pass
-
-    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : request.user.id }))
-
-
-def blink_create(request,pk):
-
-    if request.method=="POST" and request.user.is_authenticated():
-        key = random.randrange(10000000,99999999)
-        while key in BlinkQuestion.objects.all():
-            key = random.randrange(10000000,99999999)
-        try:
-            blink = BlinkQuestion(
-                question=Question.objects.get(pk=pk),
-                time_limit=30,
-                key=key,
-            )
-            blink.save()
-            teacher = Teacher.objects.get(user=request.user)
-            teacher.blinks.add(blink)
-            teacher.save()
-        except:
-            pass
-
-    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : request.user.id }))
 
 
 # This is a very temporary approach with minimum checking for permissions
