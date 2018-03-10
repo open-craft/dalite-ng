@@ -822,35 +822,32 @@ class TeacherBlinks(TeacherMixin,ListView):
 
     def post(self, request, *args, **kwargs):
         self.teacher = get_object_or_404(Teacher, user=self.request.user)
-        form = forms.TeacherBlinksForm(request.POST)
-        if form.is_valid():
-            blink = form.cleaned_data["blink"]
-            blink.current = (not blink.current)
-            blink.save()
+        if request.POST.get('blink',False):
+            form = forms.TeacherBlinksForm(request.POST)
+            if form.is_valid():
+                blink = form.cleaned_data["blink"]
+                blink.current = (not blink.current)
+                blink.save()
+
+        if request.POST.get('new_blink',False):
+            form = forms.CreateBlinkForm(request.POST)
+            if form.is_valid():
+                key = random.randrange(10000000,99999999)
+                while key in BlinkQuestion.objects.all():
+                    key = random.randrange(10000000,99999999)
+                try:
+                    blink = BlinkQuestion(
+                        question=form.cleaned_data['new_blink'],
+                        time_limit=30,
+                        key=key,
+                    )
+                    blink.save()
+                    self.teacher.blinks.add(blink)
+                    self.teacher.save()
+                except:
+                    return HttpResponse("error")
 
         return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : self.teacher.pk }))
-
-
-def blink_create(request,pk):
-
-    if request.method=="POST" and request.user.is_authenticated():
-        key = random.randrange(10000000,99999999)
-        while key in BlinkQuestion.objects.all():
-            key = random.randrange(10000000,99999999)
-        try:
-            blink = BlinkQuestion(
-                question=Question.objects.get(pk=pk),
-                time_limit=30,
-                key=key,
-            )
-            blink.save()
-            teacher = Teacher.objects.get(user=request.user)
-            teacher.blinks.add(blink)
-            teacher.save()
-        except:
-            pass
-
-    return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : teacher.id }))
 
 
 class TeacherGroups(TeacherMixin,ListView):

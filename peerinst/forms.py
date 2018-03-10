@@ -5,7 +5,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from .models import StudentGroup, Assignment, BlinkAssignmentQuestion
+from .models import StudentGroup, Assignment, BlinkAssignmentQuestion, Question
 
 
 #testing
@@ -92,6 +92,11 @@ class TeacherAssignmentsForm(forms.Form):
 class TeacherBlinksForm(forms.Form):
     """Simple form to help update teacher blinks"""
     blink = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())
+
+
+class CreateBlinkForm(forms.Form):
+    """Simple form to help create blink for teacher"""
+    new_blink = forms.ModelChoiceField(queryset=Question.objects.all())
 
 
 class BlinkAnswerForm(forms.Form):

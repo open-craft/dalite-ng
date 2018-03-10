@@ -74,8 +74,9 @@ You do not have any blink questions.  You can select and modify an existing blin
 <ol>
 {% for g in suggested_questions %}
   <li>{{g.text|safe}}
-    <form action="{% url 'blink-create' g.pk %}" method="post">
+    <form action="" method="post">
         {% csrf_token %}
+        <input type="hidden" name="new_blink" value="{{g.pk}}" />
         <input type="submit" value="add" />
     </form>
     {% if g.image %}
