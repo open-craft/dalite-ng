@@ -27,7 +27,7 @@
       <div class="wrapper">
         <div>
           <a href="{% include 'peerinst/custom-instance-link.html' %}"><img src="{% static 'peerinst/img/logo.png' %}" alt="site-logo" id="logo"></a>
-          {% if request.META.HTTP_HOST in request.META.HTTP_REFERER %}
+          {% if not user.student %}
             <a href="{% url 'assignment-list' %}" style="color:white;">{% include 'peerinst/custom-instance-header.html' %}</a>
           {% else %}
             {% include 'peerinst/custom-instance-header.html' %}
@@ -41,7 +41,7 @@
               User: {{ request.user.username }}
             {% endif %}
             <br>
-            {% if request.META.HTTP_HOST in request.META.HTTP_REFERER %}
+            {% if not user.student %}
               <a href="{% url 'logout' %}" style="color:white;font-weight:bold;">Logout</a>
             {% endif %}
           {% endif %}

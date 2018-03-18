@@ -11,15 +11,22 @@ from . import admin_views
 from . import views
 
 urlpatterns = [
+    # DALITE
+    # Assignment table of contents - Enforce sameorigin to prevent access from LMS
     url(r'^$', xframe_options_sameorigin(views.AssignmentListView.as_view()), name='assignment-list'),
-    url(r'^assignment/(?P<assignment_id>[^/]+)/', include([
-        url(r'^$', xframe_options_sameorigin(views.QuestionListView.as_view()), name='question-list'),
-        url(r'(?P<question_id>\d+)/', include([
-            url(r'^$', views.question, name='question'),
+    url(r'^assignment/(?P<assignment_id>[^/]+)/', include([\
+        # Question table of contents for assignment - Enforce sameorigin to prevent access from LMS
+        url(r'^$', xframe_options_sameorigin(views.QuestionListView.as_view()), name='question-list'),\
+        url(r'(?P<question_id>\d+)/', include([\
+            # Dalite question
+            url(r'^$', views.question, name='question'),\
+            # Question reset (for testing purposes) - Enforce sameorigin to prevent access from LMS
             url(r'^reset/$', views.reset_question, name='reset-question'),
         ])),
     ])),
     url(r'^heartbeat/$', views.HeartBeatUrl.as_view(), name='heartbeat'),
+
+    # Admin
     url(r'^admin/$', admin_views.AdminIndexView.as_view(), name='admin-index'),
     url(r'^admin/peerinst/', include([
         url(r'^assignment_results/(?P<assignment_id>[^/]+)/', include([

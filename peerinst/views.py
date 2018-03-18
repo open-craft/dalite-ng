@@ -76,14 +76,28 @@ class LoginRequiredMixin(object):
         return login_required(view)
 
 
-# Views related to debugging
+def student_check(user):
+    try:
+        if user.student:
+            return False
+    except:
+        return True
 
-class AssignmentListView(LoginRequiredMixin, ListView):
+
+class NoStudentsMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(NoStudentsMixin, cls).as_view(**initkwargs)
+        view = login_required(view)
+        return user_passes_test(student_check)(view)
+
+
+class AssignmentListView(NoStudentsMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
 
 
-class QuestionListView(LoginRequiredMixin, ListView):
+class QuestionListView(NoStudentsMixin, ListView):
     """List of questions used for debugging purposes."""
     model = models.Assignment
 

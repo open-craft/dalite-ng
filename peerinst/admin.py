@@ -133,7 +133,6 @@ class AnswerAdmin(admin.ModelAdmin):
 class TeacherAdmin(admin.ModelAdmin):
     pass
 
-
 @admin.register(BlinkQuestion)
 class BlinkQuestionAdmin(admin.ModelAdmin):
     pass
@@ -141,19 +140,23 @@ class BlinkQuestionAdmin(admin.ModelAdmin):
 @admin.register(BlinkRound)
 class BlinkRoundAdmin(admin.ModelAdmin):
     pass
-# For testing only.  To be removed.
-#admin.register(Student)
-#class StudentAdmin(admin.ModelAdmin):
-#    pass
-@admin.register(StudentGroup)
-class StudentGroupAdmin(admin.ModelAdmin):
-    pass
+
 @admin.register(BlinkAnswer)
 class BlinkAnswerAdmin(admin.ModelAdmin):
     pass
+
 @admin.register(BlinkAssignment)
 class BlinkAssignmentAdmin(admin.ModelAdmin):
     pass
+
 @admin.register(BlinkAssignmentQuestion)
 class BlinkAssignmentQuestionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(StudentGroup)
+class StudentGroupAdmin(admin.ModelAdmin):
     pass
