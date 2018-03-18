@@ -25,16 +25,25 @@
     <!-- Custom header for local instance of dalite-ng -->
     <header>
       <div class="wrapper">
-        <div><a href="{% include 'peerinst/custom-instance-link.html' %}"><img src="{% static 'peerinst/img/logo.png' %}" alt="site-logo" id="logo"></a> <a href="{% url 'assignment-list' %}" style="color:white;">{% include 'peerinst/custom-instance-header.html' %}</a></div>
+        <div>
+          <a href="{% include 'peerinst/custom-instance-link.html' %}"><img src="{% static 'peerinst/img/logo.png' %}" alt="site-logo" id="logo"></a>
+          {% if request.META.HTTP_HOST in request.META.HTTP_REFERER %}
+            <a href="{% url 'assignment-list' %}" style="color:white;">{% include 'peerinst/custom-instance-header.html' %}</a>
+          {% else %}
+            {% include 'peerinst/custom-instance-header.html' %}
+          {% endif %}
+        </div>
         <div style="text-align:right;font-size:10pt;line-height:1.2;">
           {% if user.is_authenticated %}
             {% if user.teacher %}
-            Teacher: <a href="{% url 'teacher' pk=user.teacher.pk %}" style="color:white;font-weight:bold;">{{ request.user.username }}</a>
+              Teacher: <a href="{% url 'teacher' pk=user.teacher.pk %}" style="color:white;font-weight:bold;">{{ request.user.username }}</a>
             {% else %}
-            User: {{ request.user.username }}
+              User: {{ request.user.username }}
             {% endif %}
-          <br>
-          <a href="{% url 'logout' %}" style="color:white;font-weight:bold;">Logout</a>
+            <br>
+            {% if request.META.HTTP_HOST in request.META.HTTP_REFERER %}
+              <a href="{% url 'logout' %}" style="color:white;font-weight:bold;">Logout</a>
+            {% endif %}
           {% endif %}
         </div>
       </div>
