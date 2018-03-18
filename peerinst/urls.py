@@ -4,13 +4,16 @@ from __future__ import unicode_literals
 from django.conf.urls import include, url
 from django.contrib.auth.views import login
 
+#testing
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+
 from . import admin_views
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.AssignmentListView.as_view(), name='assignment-list'),
+    url(r'^$', xframe_options_sameorigin(views.AssignmentListView.as_view()), name='assignment-list'),
     url(r'^assignment/(?P<assignment_id>[^/]+)/', include([
-        url(r'^$', views.QuestionListView.as_view(), name='question-list'),
+        url(r'^$', xframe_options_sameorigin(views.QuestionListView.as_view()), name='question-list'),
         url(r'(?P<question_id>\d+)/', include([
             url(r'^$', views.question, name='question'),
             url(r'^reset/$', views.reset_question, name='reset-question'),

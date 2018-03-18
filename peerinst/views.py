@@ -39,13 +39,13 @@ from .admin_views import get_question_rationale_aggregates
 from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question
 from django.contrib.auth.models import User
 
-
 #blink
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.utils import timezone
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.sessions.models import Session
+
 
 LOGGER = logging.getLogger(__name__)
 
