@@ -88,10 +88,10 @@ def student_check(user):
     except:
         try:
             if user.student:
-                # Block students
+                # Block Students
                 return False
         except:
-            # Allow through all non-students, i.e. "guests"
+            # Allow through all non-Students, i.e. "guests"
             return True
 
 class NoStudentsMixin(object):
@@ -774,27 +774,27 @@ def reset_question(request, assignment_id, question_id):
 
 # Views related to Teacher
 
-class TeacherMixin(LoginRequiredMixin,View):
+class TeacherBase(LoginRequiredMixin,View):
 
     def dispatch(self, *args, **kwargs):
         if self.request.user == Teacher.objects.get(pk=kwargs['pk']).user:
-            return super(TeacherMixin, self).dispatch(*args, **kwargs)
+            return super(TeacherBase, self).dispatch(*args, **kwargs)
         else:
             return HttpResponse('Access denied!')
 
 
-class TeacherDetailView(TeacherMixin,DetailView):
+class TeacherDetailView(TeacherBase,DetailView):
 
     model = Teacher
 
 
-class TeacherUpdate(TeacherMixin,UpdateView):
+class TeacherUpdate(TeacherBase,UpdateView):
 
     model = Teacher
     fields = ['institutions','disciplines']
 
 
-class TeacherAssignments(TeacherMixin,ListView):
+class TeacherAssignments(TeacherBase,ListView):
 
     model = Teacher
     template_name = 'peerinst/teacher_assignments.html'
@@ -823,7 +823,7 @@ class TeacherAssignments(TeacherMixin,ListView):
         return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : self.teacher.pk }))
 
 
-class TeacherBlinks(TeacherMixin,ListView):
+class TeacherBlinks(TeacherBase,ListView):
 
     model = Teacher
     template_name = 'peerinst/teacher_blinks.html'
@@ -874,7 +874,7 @@ class TeacherBlinks(TeacherMixin,ListView):
         return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : self.teacher.pk }))
 
 
-class TeacherGroups(TeacherMixin,ListView):
+class TeacherGroups(TeacherBase,ListView):
 
     model = Teacher
     template_name = 'peerinst/teacher_groups.html'
