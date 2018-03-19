@@ -69,6 +69,10 @@ def welcome(request):
         return HttpResponseRedirect(reverse('assignment-list'))
 
 
+def access_denied(request):
+    return HttpResponse('Access denied')
+
+
 class LoginRequiredMixin(object):
     @classmethod
     def as_view(cls, **initkwargs):
@@ -78,26 +82,32 @@ class LoginRequiredMixin(object):
 
 def student_check(user):
     try:
-        if user.student:
-            return False
+        if user.teacher:
+            # Let through Teachers unconditionally
+            return True
     except:
-        return True
-
+        try:
+            if user.student:
+                # Block students
+                return False
+        except:
+            # Allow through all non-students, i.e. "guests"
+            return True
 
 class NoStudentsMixin(object):
+    """A simple mixin to explicitly allow Teacher but prevent Student access to a view."""
     @classmethod
     def as_view(cls, **initkwargs):
         view = super(NoStudentsMixin, cls).as_view(**initkwargs)
-        view = login_required(view)
-        return user_passes_test(student_check)(view)
+        return user_passes_test(student_check, login_url='/access_denied/')(view)
 
 
-class AssignmentListView(NoStudentsMixin, ListView):
+class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
 
 
-class QuestionListView(NoStudentsMixin, ListView):
+class QuestionListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of questions used for debugging purposes."""
     model = models.Assignment
 
