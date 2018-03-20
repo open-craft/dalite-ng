@@ -1033,8 +1033,25 @@ def blink_assignment_start(request,pk):
     return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkquestions.first().pk} ))
 
 
+def blink_get_current(request,username):
+    """View to redirect user to current question for teacher."""
+
+    try:
+        # Get teacher
+        teacher = Teacher.objects.get(user__username=username)
+    except:
+        return HttpResponse("Teacher does not exist")
+
+    try:
+        # Get their current active blinkquestion, if any, and redirect
+        blinkquestion = BlinkQuestion.objects.get(active=True)
+        return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
+    except:
+        return HttpResponse("Teacher has no active questions")
+
+
 def blink_get_next(request,pk):
-    """ View to process next question in a series of blink questions based on state."""
+    """View to process next question in a series of blink questions based on state."""
 
     try:
         # Get BlinkQuestion
@@ -1050,12 +1067,17 @@ def blink_get_next(request,pk):
                 break
         # Redirect to next, if exists
         if rank < blinkassignment.blinkassignmentquestion_set.count():
-            return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
+            # Teacher to new summary page
+            if teacher == request.user.teacher:
+                return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
+            # Others to new question page
+            else:
+                return HttpResponseRedirect(reverse('blink-question', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
         else:
-            return HttpResponse("done all questions")
+            return HttpResponse("Done all questions")
 
     except:
-        return HttpResponse("error")
+        return HttpResponse("Error")
 
 
 def blink_count(request,pk):
