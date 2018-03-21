@@ -969,8 +969,9 @@ class BlinkQuestionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BlinkQuestionDetailView, self).get_context_data(**kwargs)
 
-        # Check for Teacher or Student
-        if Teacher.objects.filter(user=self.request.user).exists():
+        # Check if this user is a Teacher
+        # Need another check that this Teacher owns this BlinkQuestion
+        if Teacher.objects.filter(user__username=self.request.user).exists():
             # Set all blinks for this teacher to inactive.  Add TeacherBase mixin???
             for b in self.request.user.teacher.blinks.all():
                 b.active = False
