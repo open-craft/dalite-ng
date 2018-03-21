@@ -904,7 +904,7 @@ class TeacherGroups(TeacherBase,ListView):
         return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : self.teacher.pk }))
 
 
-# Views relatd to Blink
+# Views related to Blink
 
 class BlinkQuestionFormView(SingleObjectMixin,FormView):
 
@@ -969,12 +969,11 @@ class BlinkQuestionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BlinkQuestionDetailView, self).get_context_data(**kwargs)
         # Set all blinks for this teacher to inactive.  Add TeacherBase mixin???
-        self.request.user.teacher.blinks.active = False
         for b in self.request.user.teacher.blinks.all():
             b.active = False
             b.save()
 
-        # Set question to active in order to accept responses
+        # Set _this_ question to active in order to accept responses
         if self.request.user.is_authenticated():
             self.object.active = True
             if not self.object.time_limit:
