@@ -1038,7 +1038,7 @@ def blink_assignment_start(request,pk):
     except:
         return HttpResponse("blink assignment does not belong to this teacher or does not exist")
 
-    return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkquestions.first().pk} ))
+    return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkquestions.order_by('blinkassignmentquestion__rank').first().pk} ))
 
 
 def blink_get_current(request,username):
