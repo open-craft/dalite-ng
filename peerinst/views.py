@@ -968,6 +968,12 @@ class BlinkQuestionDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(BlinkQuestionDetailView, self).get_context_data(**kwargs)
+        # Set all blinks for this teacher to inactive.  Add TeacherBase mixin???
+        self.request.user.teacher.blinks.active = False
+        for b in self.request.user.teacher.blinks.all():
+            b.active = False
+            b.save()
+
         # Set question to active in order to accept responses
         if self.request.user.is_authenticated():
             self.object.active = True
@@ -1044,7 +1050,7 @@ def blink_get_current(request,username):
 
     try:
         # Get their current active blinkquestion, if any, and redirect
-        blinkquestion = BlinkQuestion.objects.get(active=True)
+        blinkquestion = teacher.blinks.get(active=True)
         return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
     except:
         return HttpResponse("Teacher has no active questions")
