@@ -968,13 +968,15 @@ class BlinkQuestionDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(BlinkQuestionDetailView, self).get_context_data(**kwargs)
-        # Set all blinks for this teacher to inactive.  Add TeacherBase mixin???
-        for b in self.request.user.teacher.blinks.all():
-            b.active = False
-            b.save()
 
-        # Set _this_ question to active in order to accept responses
-        if self.request.user.is_authenticated():
+        # Check for Teacher or Student
+        if Teacher.objects.filter(user=self.request.user).exists():
+            # Set all blinks for this teacher to inactive.  Add TeacherBase mixin???
+            for b in self.request.user.teacher.blinks.all():
+                b.active = False
+                b.save()
+
+            # Set _this_ question to active in order to accept responses
             self.object.active = True
             if not self.object.time_limit:
                 self.object.time_limit = 30
