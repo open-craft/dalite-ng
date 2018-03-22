@@ -74,6 +74,12 @@
             });
         });
     </script>
+
+    <script>
+      // Query window.parent and set background color of iframe to background color of parent
+      console.info(window.parent.document.body.style.backgroundColor);
+    </script>
+
     {% block scripts %}{% endblock %}
   </body>
 </html>

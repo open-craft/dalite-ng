@@ -1058,6 +1058,23 @@ def blink_get_current(request,username):
         return HttpResponse("Teacher has no active questions")
 
 
+def blink_get_current_url(request,username):
+    """View to check current question url for teacher."""
+
+    try:
+        # Get teacher
+        teacher = Teacher.objects.get(user__username=username)
+    except:
+        return HttpResponse("error")
+
+    try:
+        # Get their current active blinkquestion, if any, and redirect
+        blinkquestion = teacher.blinks.get(active=True)
+        return HttpResponse(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
+    except:
+        return HttpResponse("error")
+
+
 def blink_get_next(request,pk):
     """View to process next question in a series of blink questions based on state."""
 

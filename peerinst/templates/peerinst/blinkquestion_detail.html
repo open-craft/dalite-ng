@@ -16,9 +16,7 @@
 <p>{{object.question.text|safe}}</p>
     {% if object.question.image %}
     <div>
-      <img style="display:block;margin:auto;
-      padding-top:10pt;
-      padding-bottom:10pt;" src="{{ object.question.image.url }}" alt="object.image_alt_text">
+      <img src="{{ object.question.image.url }}" alt="object.image_alt_text" style="display:block;margin:auto;padding-top:10pt;padding-bottom:10pt;" >
     </div>
     {% endif %}
 <div>
@@ -61,7 +59,9 @@ function retry(){
 </script>
 {% endif %}
 
+{% if request.user.is_authenticated %}
 <input id="next_button" type="button" style="display:none;" value="Next" onclick="next()">
+{% endif %}
 <script>
 function next(){
   location="{% url 'blink-get-next' pk=object.pk %}"
@@ -157,6 +157,19 @@ function getResults(response) {
   return;
 }
 
+function checkRedirect(response) {
+  function compare(response){
+    if (response != "error"){
+      if (window.location.pathname != response) {
+      next();
+    }
+  }
+    return;
+  }
+  get("{% url 'blink-get-current-url' username='parea' %}",compare);
+  return;
+}
+
 function update_time(){
   time.text(function(){
     startTime=startTime-1;
@@ -169,7 +182,7 @@ function update_time(){
       d3.select("#timer-bg").style('fill','red');
       d3.select("#reset_button").style('display','inline');
       d3.select("#next_button").style('display','inline');
-      // Close the question if authenticated, otherwise get results
+      // Close the question if authenticated, otherwise get results and start checking for redirect
       if ({{request.user.is_authenticated|lower}}){
         changeQuestionState("{% url 'blink-close' pk=object.pk %}",false,getResults);
       }
@@ -178,6 +191,8 @@ function update_time(){
           if (response['status'] == false) {
             clearInterval(checkID);
             getResults();
+            console.info("Checking for redirect");
+            var checkURLID = window.setInterval(checkRedirect,1000);
           }
         }
         function blinkStatus() {
