@@ -1075,13 +1075,16 @@ def blink_get_next(request,pk):
                 break
         # Redirect to next, if exists
         if rank < blinkassignment.blinkassignmentquestion_set.count()-1:
-            # Teacher to new summary page
-            if teacher==Teacher.objects.get(user__username=request.user):
-                print(blinkassignment.blinkassignmentquestion_set.all())
+
+            try:
+                # Teacher to new summary page
+                # Check existence of teacher (exception thrown otherwise)
+                teacher = Teacher.objects.get(user__username=request.user)
                 return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
-            # Others to new question page
-            else:
+            except:
+                # Others to new question page
                 return HttpResponseRedirect(reverse('blink-question', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
+
         else:
             return HttpResponse("Done all questions")
 
