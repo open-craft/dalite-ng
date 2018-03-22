@@ -1074,9 +1074,10 @@ def blink_get_next(request,pk):
                 rank = q.rank
                 break
         # Redirect to next, if exists
-        if rank < blinkassignment.blinkassignmentquestion_set.count():
+        if rank < blinkassignment.blinkassignmentquestion_set.count()-1:
             # Teacher to new summary page
-            if teacher == request.user.teacher:
+            if teacher==Teacher.objects.get(user__username=request.user):
+                print(blinkassignment.blinkassignmentquestion_set.all())
                 return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
             # Others to new question page
             else:
@@ -1114,13 +1115,12 @@ def blink_close(request,pk):
         try:
             blinkquestion = BlinkQuestion.objects.get(pk=pk)
             blinkround = BlinkRound.objects.get(question=blinkquestion,deactivate_time__isnull=True)
-            print(blinkround)
             if form.is_valid():
                 blinkquestion.active = form.cleaned_data['active']
                 blinkquestion.save()
                 blinkround.deactivate_time = timezone.now()
                 blinkround.save()
-                print(blinkround.deactivate_time)
+                #print(blinkround.deactivate_time)
                 context['state'] = 'success'
             else:
                 context['state'] = 'failure'
@@ -1212,6 +1212,7 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
                     relationship.save()
                 if operation == "clear":
                     relationship.delete()
+                    relationship.renumber()
 
                 return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
             else:
@@ -1223,7 +1224,7 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
                         relationship = BlinkAssignmentQuestion(
                             blinkassignment=self.object,
                             blinkquestion=blinkquestion,
-                            rank=self.object.blinkquestions.count()+1,
+                            rank=self.object.blinkquestions.count(),
                         )
                         relationship.save()
                     else:

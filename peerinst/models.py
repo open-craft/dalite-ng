@@ -505,6 +505,23 @@ class BlinkAssignmentQuestion(models.Model):
 
         return
 
+    def renumber(self):
+        try:
+            all_q = BlinkAssignmentQuestion.objects.\
+            filter(blinkassignment__title=self.blinkassignment.title).\
+            order_by('rank')
+
+            r = 0
+            for q in all_q:
+                q.rank = r
+                q.save() 
+                r = r + 1
+
+        except IndexError as e:
+            pass
+
+        return
+
     def __unicode__(self):
         return u'{} : rank {} - {}-{}'.format(self.blinkassignment.title,\
             self.rank,\
