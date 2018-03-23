@@ -912,20 +912,28 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
     template_name = 'peerinst/blink.html'
     model = BlinkQuestion
 
-    #def get_round(self):
-
     def form_valid(self,form):
         self.object = self.get_object()
 
-        # get blink round should become a method in blinkquestion model
         try:
             blinkround=BlinkRound.objects.get(question=self.object,deactivate_time__isnull=True)
-            print(blinkround)
         except:
-            return HttpResponse("Voting not open.")
+            return TemplateResponse(
+                self.request,
+                'peerinst/blink_error.html',
+                context={
+                    'message':"Voting not open",
+                    'url':reverse('blink-get-current', kwargs={'username': self.object.teacher_set.first().user.username})
+                    })
 
         if self.request.session.get('BQid_'+self.object.key+'_R_'+str(blinkround.id), False):
-            return HttpResponse("Error.  You can only vote once.")
+            return TemplateResponse(
+                self.request,
+                'peerinst/blink_error.html',
+                context={
+                    'message':"You may only vote once",
+                    'url':reverse('blink-get-current', kwargs={'username': self.object.teacher_set.first().user.username})
+                    })
         else:
             if self.object.active:
                 try:
@@ -940,7 +948,7 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
                 except:
                     return HttpResponse("Error.  Try voting again.")
             else:
-                return HttpResponse("Voting is closed.")
+                return TemplateResponse(self.request,'peerinst/blink_error.html',context={'message':"Voting is closed"})
 
         return super(BlinkQuestionFormView,self).form_valid(form)
 
@@ -1052,9 +1060,12 @@ def blink_get_current(request,username):
         return HttpResponse("Teacher does not exist")
 
     try:
-        # Redirect to current active blinkquestion, if any
+        # Redirect to current active blinkquestion, if any, if this user has not voted yet
         blinkquestion = teacher.blinks.get(active=True)
-        return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
+        if self.request.session.get('BQid_'+self.object.key+'_R_'+str(blinkround.id), False):
+             return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : blinkquestion.pk}))
+        else:
+            return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
     except:
         # Else, redirect to summary for last active question
         latest_round = BlinkRound.objects.filter(question__in=teacher.blinks.all()).latest('activate_time')
@@ -1081,13 +1092,6 @@ def blink_get_current_url(request,username):
             return HttpResponse(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
         except:
             return HttpResponse("stop")
-            
-        #### Should probably return latest active question if no currently active questions
-        # If no active questions, but there is an active assignment, return latest active question
-        #return HttpResponse("Teacher has no active questions")
-        # If no active questions or assignments, return signal to stop AJAX check in js to reduce server load
-        # Move this logic to get_current_url too
-
 
 
 def blink_get_next(request,pk):
