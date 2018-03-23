@@ -155,21 +155,6 @@ function getResults(response) {
   return;
 }
 
-function checkRedirect(response) {
-  function compare(response){
-    console.info(response);
-    if (response != "error"){
-      if (window.location.pathname != response) {
-        location = response;
-    }
-    // Need logic to clearInterval(checkURLID) if at the end of the script
-  }
-    return;
-  }
-  get("{% url 'blink-get-current-url' username=teacher %}",compare);
-  return;
-}
-
 function update_time(){
   time.text(function(){
     startTime=startTime-1;
@@ -194,6 +179,22 @@ function update_time(){
             clearInterval(checkID);
             getResults();
             console.info("Checking for redirect");
+            function checkRedirect(response) {
+              function compare(response){
+                console.info(response);
+                if (response != "stop"){
+                  if (window.location.pathname != response) {
+                    location = response;
+                  }
+                }
+                if (response == "stop") {
+                  clearInterval(checkURLID);
+                }
+                return;
+              }
+              get("{% url 'blink-get-current-url' username=teacher %}",compare);
+              return;
+            }
             var checkURLID = window.setInterval(checkRedirect,1000);
           }
         }

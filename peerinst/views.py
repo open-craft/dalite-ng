@@ -1043,7 +1043,7 @@ def blink_assignment_start(request,pk):
 
 
 def blink_get_current(request,username):
-    """View to redirect user to current question for teacher."""
+    """View to redirect user to latest active BlinkQuestion for teacher."""
 
     try:
         # Get teacher
@@ -1052,15 +1052,13 @@ def blink_get_current(request,username):
         return HttpResponse("Teacher does not exist")
 
     try:
-        # Get their current active blinkquestion, if any, and redirect
+        # Redirect to current active blinkquestion, if any
         blinkquestion = teacher.blinks.get(active=True)
         return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
     except:
-        #### Should probably return latest active question if no currently active questions
-        # If no active questions, but there is an active assignment, return latest active question
-        return HttpResponse("Teacher has no active questions")
-        # If no active questions or assignments, return signal to stop AJAX check in js to reduce server load
-        # Move this logic to get_current_url too
+        # Else, redirect to summary for last active question
+        latest_round = BlinkRound.objects.filter(question__in=teacher.blinks.all()).latest('activate_time')
+        return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
 
 
 def blink_get_current_url(request,username):
@@ -1070,14 +1068,26 @@ def blink_get_current_url(request,username):
         # Get teacher
         teacher = Teacher.objects.get(user__username=username)
     except:
-        return HttpResponse("error")
+        return HttpResponse("Teacher does not exist")
 
     try:
-        # Get their current active blinkquestion, if any, and redirect
+        # Return url of current active blinkquestion, if any
         blinkquestion = teacher.blinks.get(active=True)
         return HttpResponse(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
     except:
-        return HttpResponse("error")
+        try:
+            blinkassignment = teacher.blinkassignments.get(active=True)
+            latest_round = BlinkRound.objects.filter(question__in=teacher.blinks.all()).latest('activate_time')
+            return HttpResponse(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
+        except:
+            return HttpResponse("stop")
+            
+        #### Should probably return latest active question if no currently active questions
+        # If no active questions, but there is an active assignment, return latest active question
+        #return HttpResponse("Teacher has no active questions")
+        # If no active questions or assignments, return signal to stop AJAX check in js to reduce server load
+        # Move this logic to get_current_url too
+
 
 
 def blink_get_next(request,pk):
@@ -1108,7 +1118,9 @@ def blink_get_next(request,pk):
                 return HttpResponseRedirect(reverse('blink-question', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
 
         else:
-            return HttpResponse("Done all questions")
+            blinkassignment.active = False
+            blinkassignment.save()
+            return HttpResponseRedirect(reverse('teacher', kwargs={'pk':teacher.pk}))
 
     except:
         return HttpResponse("Error")
