@@ -50,13 +50,6 @@ function reset(){
   location="{% url 'blink-reset' pk=object.pk %}"
 }
 </script>
-{% else %}
-<input id="reset_button" type="button" style="display:none;" value="Retry" onclick="retry()">
-<script>
-function retry(){
-  location="{% url 'blink-question' pk=object.pk %}"
-}
-</script>
 {% endif %}
 
 {% if request.user.is_authenticated %}
@@ -161,7 +154,7 @@ function checkRedirect(response) {
   function compare(response){
     if (response != "error"){
       if (window.location.pathname != response) {
-      next();
+        location = response;
     }
   }
     return;
