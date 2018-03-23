@@ -41,7 +41,9 @@
 
 <div class="note">
   Round: {{round}}<br>
-  Number of respondents: <span id="counter"></span>
+  {% if request.user.is_authenticated %}
+    Number of respondents: <span id="counter"></span>
+  {% endif %}
 </div>
 
 {% if request.user.is_authenticated %}
@@ -90,7 +92,9 @@ function set_counter(json) {
 }
 
 // Schedule AJAX event
+{% if request.user.is_authenticated %}
 var counterID = window.setInterval(get,1000,"{% url 'blink-count' pk=object.pk %}",set_counter);
+{% endif %}
 
 // Countdown
 var startTime = parseInt({{ time_left }});
@@ -171,7 +175,9 @@ function update_time(){
       return startTime;
     }
     else {
-      clearInterval(counterID);
+      {% if request.user.is_authenticated %}
+        clearInterval(counterID);
+      {% endif %}
       clearInterval(timerID);
       d3.select("#timer-bg").style('fill','red');
       d3.select("#reset_button").style('display','inline');
