@@ -6,6 +6,7 @@ from django.contrib.auth.views import login
 
 #testing
 from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.views.decorators.cache import cache_page
 
 from . import admin_views
 from . import views
@@ -64,7 +65,7 @@ urlpatterns = [
     url(r'^blink/(?P<pk>[0-9]+)/reset/$', views.blink_reset, name='blink-reset'),
     url(r'^blink/(?P<pk>[0-9]+)/status/$', views.blink_status, name='blink-status'),
     url(r'^blink/(?P<username>\w+)/$', views.blink_get_current, name='blink-get-current'),
-    url(r'^blink/(?P<username>\w+)/url$', views.blink_get_current_url, name='blink-get-current-url'),
+    url(r'^blink/(?P<username>\w+)/url/$', cache_page(1)(views.blink_get_current_url), name='blink-get-current-url'),
     url(r'^blink/(?P<pk>[0-9]+)/get_next/$', views.blink_get_next, name='blink-get-next'),
     url(r'^blinkAssignment/create/$', views.BlinkAssignmentCreate.as_view(), name='blinkAssignment-create'),
     url(r'^blinkAssignment/(?P<pk>[0-9]+)/start/$', views.blink_assignment_start, name='blinkAssignment-start'),

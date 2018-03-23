@@ -157,10 +157,12 @@ function getResults(response) {
 
 function checkRedirect(response) {
   function compare(response){
+    console.info(response);
     if (response != "error"){
       if (window.location.pathname != response) {
         location = response;
     }
+    // Need logic to clearInterval(checkURLID) if at the end of the script
   }
     return;
   }

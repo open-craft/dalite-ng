@@ -1,5 +1,6 @@
 django>=1.8.4,<1.9
 django-grappelli>=2.7.1,<2.8
+python-memcached==1.59
 mysql-python
 pillow
 

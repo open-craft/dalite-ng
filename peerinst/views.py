@@ -1056,7 +1056,11 @@ def blink_get_current(request,username):
         blinkquestion = teacher.blinks.get(active=True)
         return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
     except:
+        #### Should probably return latest active question if no currently active questions
+        # If no active questions, but there is an active assignment, return latest active question
         return HttpResponse("Teacher has no active questions")
+        # If no active questions or assignments, return signal to stop AJAX check in js to reduce server load
+        # Move this logic to get_current_url too
 
 
 def blink_get_current_url(request,username):
