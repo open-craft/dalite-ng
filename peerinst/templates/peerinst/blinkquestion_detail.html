@@ -1,4 +1,5 @@
 {% extends 'peerinst/base.html' %}
+
 {% load i18n %}
 
 {% block body %}
@@ -159,7 +160,7 @@ function checkRedirect(response) {
   }
     return;
   }
-  get("{% url 'blink-get-current-url' username='parea' %}",compare);
+  get("{% url 'blink-get-current-url' username=teacher %}",compare);
   return;
 }
 

@@ -1011,6 +1011,7 @@ class BlinkQuestionDetailView(DetailView):
             # Get latest vote, if any
             context['latest_answer_choice'] = self.object.question.get_choice_label(int(self.request.session.get('BQid_'+self.object.key,0)))
 
+        context['teacher'] = self.object.teacher_set.first().user.username
         context['round'] = BlinkRound.objects.filter(question=self.object).count()
         context['time_left'] = time_left
 

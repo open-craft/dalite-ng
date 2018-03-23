@@ -15,7 +15,10 @@
 
 <h1>My Assignments</h1>
 <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher' teacher.id %}">Back to My Account</a></div>
+<h2>Create new</h2>
+new assignment form
 <h2>Current</h2>
+Note: You can edit any assignment as long as it is only current for you.  Otherwise, you should clone it with a new name.
 {% if not teacher.groups.all %}
 You do not have any assignments.  You can select and modify an existing assignment from the list below or create a new one.
 {% endif %}
@@ -25,7 +28,7 @@ You do not have any assignments.  You can select and modify an existing assignme
     <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-        {{g}}  <input type="submit" value="clear" /> Edit
+        {{g}}  <input type="submit" value="clear" /> Edit if not current for anyone else
     </form>
   </li>
 {% endfor %}
