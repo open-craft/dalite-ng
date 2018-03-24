@@ -65,7 +65,9 @@ You do not have any blink questions.
 <ol>
 {% for g in teacher.blinkquestion_set.all %}
   {% if not g in object.blinkquestions.all %}
-  <li>{{g|safe}}
+  <li>    <strong>
+      {{g.question.title|safe|striptags}}
+    </strong> - {{g.question.text|safe}}
     <form style="display:inline" action="" method="post">
         {% csrf_token %}
         <input type="hidden" name="blink" value="{{g.pk}}" />
@@ -88,7 +90,10 @@ You do not have any blink questions.
 <h2>All questions in discipline</h2>
 <ol>
 {% for g in suggested_questions %}
-  <li>{{g.text|safe}}
+  <li>    
+    <strong>
+      {{g.title|safe|striptags}}
+    </strong> - {{g.text|safe}}
     <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" name="new_blink" value="{{g.pk}}" />
