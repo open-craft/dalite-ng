@@ -514,7 +514,7 @@ class BlinkAssignmentQuestion(models.Model):
             r = 0
             for q in all_q:
                 q.rank = r
-                q.save() 
+                q.save()
                 r = r + 1
 
         except IndexError as e:
@@ -540,8 +540,8 @@ class Teacher(models.Model):
     institutions = models.ManyToManyField(Institution, blank=True)
     disciplines = models.ManyToManyField(Discipline, blank=True)
     assignments = models.ManyToManyField(Assignment, blank=True)
-    blinks = models.ManyToManyField(BlinkQuestion, blank=True)
     groups = models.ManyToManyField(StudentGroup, blank=True)
+    blinks = models.ManyToManyField(BlinkQuestion, blank=True)
     blinkassignments = models.ManyToManyField(BlinkAssignment,blank=True)
 
     def get_absolute_url(self):
