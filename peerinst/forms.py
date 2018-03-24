@@ -131,5 +131,4 @@ class RankBlinkForm(forms.Form):
 class AddBlinkForm(forms.Form):
     """Form to add a blinkquestion to a blinkassignment."""
     # Might be better to set the queryset to limit to teacher's blinks
-    q = forms.ModelChoiceField(queryset=Question.objects.all())
-    # q = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())
+    blink = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())

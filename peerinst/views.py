@@ -1274,7 +1274,6 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
         # Send as context questions not already part of teacher's blinks
         context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
 
-
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1296,18 +1295,20 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
 
                 return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
             else:
-                form = forms.AddBlinkForm(request.POST)
+                form = forms.CreateBlinkForm(request.POST)
                 if form.is_valid():
-                    # blinkquestion = form.cleaned_data['q']
-                    question = form.cleaned_data['q']
+                    question = form.cleaned_data['new_blink']
                     key = random.randrange(10000000,99999999)
-                    blinkquestion = BlinkQuestion.create(question=question,teacher=Teacher.objects.get(user=self.request.user),key=key)
+                    blinkquestion = BlinkQuestion(
+                        question=question,
+                        teacher=Teacher.objects.get(user=self.request.user),
+                        key=key)
+                    blinkquestion.save()
                     if not blinkquestion in self.object.blinkquestions.all():
-                        print(self.object.blinkquestions.count())
                         relationship = BlinkAssignmentQuestion(
                             blinkassignment=self.object,
                             blinkquestion=blinkquestion,
-                            rank=self.object.blinkquestions.count(),
+                            rank=self.object.blinkquestions.count()+1,
                         )
                         relationship.save()
                     else:
@@ -1315,6 +1316,22 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
 
                     return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
                 else:
-                    return HttpResponse("error2")
+                    form = forms.AddBlinkForm(request.POST)
+                    print(form)
+                    if form.is_valid():
+                        blinkquestion = form.cleaned_data['blink']
+                        if not blinkquestion in self.object.blinkquestions.all():
+                            relationship = BlinkAssignmentQuestion(
+                                blinkassignment=self.object,
+                                blinkquestion=blinkquestion,
+                                rank=self.object.blinkquestions.count()+1,
+                            )
+                            relationship.save()
+                        else:
+                            return HttpResponse("error")
+
+                        return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
+                    else:
+                        return HttpResponse("error")
         else:
             return HttpResponse("error3")
