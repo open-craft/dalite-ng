@@ -1268,6 +1268,13 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
         context = super(BlinkAssignmentUpdate, self).get_context_data(**kwargs)
         context['teacher'] = Teacher.objects.get(user=self.request.user)
 
+        teacher_discipline_questions=Question.objects.filter(discipline__in=context['teacher'].disciplines.all())
+
+        teacher_blink_questions = [bk.question for bk in context['teacher'].blinkquestion_set.all()]
+        # Send as context questions not already part of teacher's blinks
+        context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
+
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1291,7 +1298,10 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
             else:
                 form = forms.AddBlinkForm(request.POST)
                 if form.is_valid():
-                    blinkquestion = form.cleaned_data['q']
+                    # blinkquestion = form.cleaned_data['q']
+                    question = form.cleaned_data['q']
+                    key = random.randrange(10000000,99999999)
+                    blinkquestion = BlinkQuestion.create(question=question,teacher=Teacher.objects.get(user=self.request.user),key=key)
                     if not blinkquestion in self.object.blinkquestions.all():
                         print(self.object.blinkquestions.count())
                         relationship = BlinkAssignmentQuestion(
@@ -1301,10 +1311,10 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
                         )
                         relationship.save()
                     else:
-                        return HttpResponse("error")
+                        return HttpResponse("error1")
 
                     return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
                 else:
-                    return HttpResponse("error")
+                    return HttpResponse("error2")
         else:
-            return HttpResponse("error")
+            return HttpResponse("error3")

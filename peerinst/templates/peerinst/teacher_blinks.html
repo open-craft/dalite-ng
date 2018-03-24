@@ -22,7 +22,7 @@
 <h2>Your current blinks</h2>
 {% if not teacher.blinkquestion_set.all %}
 You do not have any blink questions.  You can select and modify an existing blink question from the list below or create a new one.
-{% endif %}
+{% endif %} 
 <ol>
 {% for g in teacher.blinkquestion_set.all %}
  {% if g.current %}
