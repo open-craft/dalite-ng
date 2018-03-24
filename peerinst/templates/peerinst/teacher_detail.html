@@ -51,12 +51,12 @@
 <div>
   <h2>Blink questions</h2>
   <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-blinks' teacher.id %}">Add/remove blink questions</a></div>
-  {% if not object.blinks.all %}
+  {% if not object.blinkquestion_set.all %}
   You do not have any blink questions.
   {% endif %}
   Students can always access the current active question at <span style="font-weight:bold;">{% url 'blink-get-current' object.user.username %}</span>
   <ol>
-  {% for a in object.blinks.all %}
+  {% for a in object.blinkquestion_set.all %}
     {% if a.current %}
       <li style="margin-bottom:10px;"> {{a|safe|striptags}}<br>
         Question url: <span style="font-weight:bold;">{% url 'blink-question' a.key %}</span><br>
@@ -71,13 +71,13 @@
 <div>
   <h2>Blink scripts</h2>
   <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'blinkAssignment-create' %}">Create a new blink script</a></div>
-  {% if not object.blinkassignments.all %}
+  {% if not object.blinkassignment_set.all %}
   A blink script is a series of blink questions strung together into one activity.  You do not have any blink scripts.
   {% endif %}
     Students can always access the current active question at <span style="font-weight:bold;">{% url 'blink-get-current' object.user.username %}</span>
   <ol>
 
-  {% for a in object.blinkassignments.all %}
+  {% for a in object.blinkassignment_set.all %}
     <li style="margin-bottom:10px;"> {{a.title|safe|striptags}}
       <span class="admin-link" ><a href="{% url 'blinkAssignment-update' a.pk %}">Edit</a></span>
       <br>

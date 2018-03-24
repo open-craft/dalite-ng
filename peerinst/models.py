@@ -418,8 +418,30 @@ class Institution(models.Model):
         verbose_name_plural = _('institutions')
 
 
+class Teacher(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        )
+    institutions = models.ManyToManyField(Institution, blank=True)
+    disciplines = models.ManyToManyField(Discipline, blank=True)
+    assignments = models.ManyToManyField(Assignment, blank=True)
+    groups = models.ManyToManyField(StudentGroup, blank=True)
+
+    def get_absolute_url(self):
+        return reverse('teacher', kwargs={'pk': self.pk})
+
+    def __unicode__(self):
+        return self.user.username
+
+    class Meta:
+        verbose_name = _('teacher')
+        verbose_name_plural = _('teachers')
+
+
 class BlinkQuestion(models.Model):
     question = models.ForeignKey(Question)
+    teacher = models.ForeignKey(Teacher,null=True)
     current = models.BooleanField(default=True)
     active = models.BooleanField(default=False)
     time_limit = models.PositiveSmallIntegerField(_('Time limit'),null=True)
@@ -448,6 +470,7 @@ class BlinkAnswer(models.Model):
 
 class BlinkAssignment(models.Model):
     title = models.CharField(_('Title'), max_length=200)
+    teacher = models.ForeignKey(Teacher,null=True)
     blinkquestions = models.ManyToManyField(BlinkQuestion,through='BlinkAssignmentQuestion')
     key = models.CharField(
         unique=True,
@@ -530,29 +553,6 @@ class BlinkAssignmentQuestion(models.Model):
 
     class Meta:
         ordering = ['rank']
-
-
-class Teacher(models.Model):
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        )
-    institutions = models.ManyToManyField(Institution, blank=True)
-    disciplines = models.ManyToManyField(Discipline, blank=True)
-    assignments = models.ManyToManyField(Assignment, blank=True)
-    groups = models.ManyToManyField(StudentGroup, blank=True)
-    blinks = models.ManyToManyField(BlinkQuestion, blank=True)
-    blinkassignments = models.ManyToManyField(BlinkAssignment,blank=True)
-
-    def get_absolute_url(self):
-        return reverse('teacher', kwargs={'pk': self.pk})
-
-    def __unicode__(self):
-        return self.user.username
-
-    class Meta:
-        verbose_name = _('teacher')
-        verbose_name_plural = _('teachers')
 
     #Reporting structure
     #Front-end assignment making

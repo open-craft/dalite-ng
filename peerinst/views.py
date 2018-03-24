@@ -838,7 +838,7 @@ class TeacherBlinks(TeacherBase,ListView):
 
         teacher_discipline_questions=Question.objects.filter(discipline__in=self.teacher.disciplines.all())
 
-        teacher_blink_questions = [bk.question for bk in self.teacher.blinks.all()]
+        teacher_blink_questions = [bk.question for bk in self.teacher.blinkquestion_set.all()]
         # Send as context questions not already part of teacher's blinks
         context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
 
@@ -862,12 +862,11 @@ class TeacherBlinks(TeacherBase,ListView):
                 try:
                     blink = BlinkQuestion(
                         question=form.cleaned_data['new_blink'],
+                        teacher=self.teacher,
                         time_limit=30,
                         key=key,
                     )
                     blink.save()
-                    self.teacher.blinks.add(blink)
-                    self.teacher.save()
                 except:
                     return HttpResponse("error")
 
@@ -923,7 +922,7 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
                 'peerinst/blink_error.html',
                 context={
                     'message':"Voting is closed",
-                    'url':reverse('blink-get-current', kwargs={'username': self.object.teacher_set.first().user.username})
+                    'url':reverse('blink-get-current', kwargs={'username': self.object.teacher.user.username})
                     })
 
         if self.request.session.get('BQid_'+self.object.key+'_R_'+str(blinkround.id), False):
@@ -932,7 +931,7 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
                 'peerinst/blink_error.html',
                 context={
                     'message':"You may only vote once",
-                    'url':reverse('blink-get-current', kwargs={'username': self.object.teacher_set.first().user.username})
+                    'url':reverse('blink-get-current', kwargs={'username': self.object.teacher.user.username})
                     })
         else:
             if self.object.active:
@@ -951,7 +950,7 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
                         'peerinst/blink_error.html',
                         context={
                             'message':"Error; try voting again",
-                            'url':reverse('blink-get-current', kwargs={'username': self.object.teacher_set.first().user.username})
+                            'url':reverse('blink-get-current', kwargs={'username': self.object.teacher.user.username})
                             })
             else:
                 return TemplateResponse(
@@ -959,7 +958,7 @@ class BlinkQuestionFormView(SingleObjectMixin,FormView):
                     'peerinst/blink_error.html',
                     context={
                         'message':"Voting is closed",
-                        'url':reverse('blink-get-current', kwargs={'username': self.object.teacher_set.first().user.username})
+                        'url':reverse('blink-get-current', kwargs={'username': self.object.teacher.user.username})
                         })
 
         return super(BlinkQuestionFormView,self).form_valid(form)
@@ -994,10 +993,10 @@ class BlinkQuestionDetailView(DetailView):
 
             # Check question belongs to this Teacher
             teacher = Teacher.objects.get(user__username=self.request.user)
-            if self.object in teacher.blinks.all():
+            if self.object.teacher == teacher:
 
                 # Set all blinks for this teacher to inactive
-                for b in teacher.blinks.all():
+                for b in teacher.blinkquestion_set.all():
                     b.active = False
                     b.save()
 
@@ -1035,7 +1034,7 @@ class BlinkQuestionDetailView(DetailView):
             # Get latest vote, if any
             context['latest_answer_choice'] = self.object.question.get_choice_label(int(self.request.session.get('BQid_'+self.object.key,0)))
 
-        context['teacher'] = self.object.teacher_set.first().user.username
+        context['teacher'] = self.object.teacher.user.username
         context['round'] = BlinkRound.objects.filter(question=self.object).count()
         context['time_left'] = time_left
 
@@ -1051,10 +1050,10 @@ def blink_assignment_start(request,pk):
         teacher = Teacher.objects.get(user__username=request.user)
         blinkassignment = BlinkAssignment.objects.get(key=pk)
 
-        if blinkassignment in teacher.blinkassignments.all():
+        if blinkassignment.teacher == teacher:
 
             # Deactivate all blinkAssignments
-            for a in teacher.blinkassignments.all():
+            for a in teacher.blinkassignment_set.all():
                 a.active = False
                 a.save()
 
@@ -1091,9 +1090,9 @@ def blink_get_next(request,pk):
         # Get BlinkQuestion
         blinkquestion = BlinkQuestion.objects.get(pk=pk)
         # Get Teacher (should only ever be one object returned)
-        teacher = blinkquestion.teacher_set.first()
+        teacher = blinkquestion.teacher
         # Check the active BlinkAssignment, if any
-        blinkassignment = teacher.blinkassignments.get(active=True)
+        blinkassignment = teacher.blinkassignment_set.get(active=True)
         # Get rank of question in list
         for q in blinkassignment.blinkassignmentquestion_set.all():
             if q.blinkquestion == blinkquestion:
@@ -1105,7 +1104,7 @@ def blink_get_next(request,pk):
             try:
                 # Teacher to new summary page
                 # Check existence of teacher (exception thrown otherwise)
-                teacher = Teacher.objects.get(user__username=request.user)
+                user_role = Teacher.objects.get(user__username=request.user)
                 return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
             except:
                 # Others to new question page
@@ -1131,7 +1130,7 @@ def blink_get_current(request,username):
 
     try:
         # Redirect to current active blinkquestion, if any, if this user has not voted yet in this round
-        blinkquestion = teacher.blinks.get(active=True)
+        blinkquestion = teacher.blinkquestion_set.get(active=True)
         blinkround = blinkquestion.blinkround_set.latest('activate_time')
         if request.session.get('BQid_'+blinkquestion.key+'_R_'+str(blinkround.id), False):
              return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : blinkquestion.pk}))
@@ -1139,7 +1138,7 @@ def blink_get_current(request,username):
             return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
     except:
         # Else, redirect to summary for last active question
-        latest_round = BlinkRound.objects.filter(question__in=teacher.blinks.all()).latest('activate_time')
+        latest_round = BlinkRound.objects.filter(question__in=teacher.blinkquestion_set.all()).latest('activate_time')
         return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
 
 # AJAX functions
@@ -1155,12 +1154,12 @@ def blink_get_current_url(request,username):
 
     try:
         # Return url of current active blinkquestion, if any
-        blinkquestion = teacher.blinks.get(active=True)
+        blinkquestion = teacher.blinkquestion_set.get(active=True)
         return HttpResponse(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
     except:
         try:
-            blinkassignment = teacher.blinkassignments.get(active=True)
-            latest_round = BlinkRound.objects.filter(question__in=teacher.blinks.all()).latest('activate_time')
+            blinkassignment = teacher.blinkassignment_set.get(active=True)
+            latest_round = BlinkRound.objects.filter(question__in=teacher.blinkquestion_set.all()).latest('activate_time')
             return HttpResponse(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
         except:
             return HttpResponse("stop")
@@ -1197,7 +1196,6 @@ def blink_close(request,pk):
                 blinkquestion.save()
                 blinkround.deactivate_time = timezone.now()
                 blinkround.save()
-                #print(blinkround.deactivate_time)
                 context['state'] = 'success'
             else:
                 context['state'] = 'failure'
@@ -1251,12 +1249,12 @@ class BlinkAssignmentCreate(LoginRequiredMixin,CreateView):
         while key in BlinkAssignment.objects.all():
             key = random.randrange(10000000,99999999)
         form.instance.key = key
+        form.instance.teacher = Teacher.objects.get(user=self.request.user)
         return super(BlinkAssignmentCreate,self).form_valid(form)
 
     def get_success_url(self):
         try:
             teacher = Teacher.objects.get(user=self.request.user)
-            teacher.blinkassignments.add(self.object)
             return reverse('teacher', kwargs={'pk': teacher.id})
         except:
             return reverse('welcome')

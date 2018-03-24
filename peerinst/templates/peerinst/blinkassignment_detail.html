@@ -56,11 +56,11 @@
 
 <h2>Available blinks</h2>
 <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-blinks' teacher.id %}">Add/remove blink questions</a></div>
-{% if not teacher.blinks.all %}
+{% if not teacher.blinkquestion_set.all %}
 You do not have any blink questions.
 {% endif %}
 <ol>
-{% for g in teacher.blinks.all %}
+{% for g in teacher.blinkquestion_set.all %}
   {% if g not in object.blinkquestions.all %}
   <li> {{g|safe|striptags}}
     <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
