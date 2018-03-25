@@ -107,6 +107,7 @@ class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     model = models.Assignment
 
 class AssignmentCreateView(NoStudentsMixin, LoginRequiredMixin,CreateView):
+    """ view for making a new assignment """
     model = models.Assignment
     fields = ['identifier','title','questions']
 
@@ -114,6 +115,13 @@ class AssignmentCreateView(NoStudentsMixin, LoginRequiredMixin,CreateView):
     # def form_valid(self, form):
     #     form.instance.created_by = Teacher.objects.get(user=self.request.user)
     #     return super(AssignmentCreateView,self).form_valid(form)
+
+
+class AssignmentUpdateView(NoStudentsMixin,LoginRequiredMixin,UpdateView):
+    """ view for updating assignment """
+    model = models.Assignment
+    fields = ['questions']
+    template_name_suffix = '_update_form'
 
 
 class QuestionListView(NoStudentsMixin, LoginRequiredMixin, ListView):

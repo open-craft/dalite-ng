@@ -25,6 +25,7 @@ urlpatterns = [
             # Question reset (for testing purposes) - Enforce sameorigin to prevent access from LMS
             url(r'^reset/$', views.reset_question, name='reset-question'),
         ])),
+        url(r'^update/$',views.AssignmentUpdateView.as_view(),name='assignment-update')
     ])),
     url(r'^heartbeat/$', views.HeartBeatUrl.as_view(), name='heartbeat'),
 

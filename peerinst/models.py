@@ -276,6 +276,7 @@ class Assignment(models.Model):
     )
     title = models.CharField(_('Title'), max_length=200)
     questions = models.ManyToManyField(Question, verbose_name=_('Questions'))
+    ### for when we tie assignments to teachers
     # teacher = ForeignKey(Teacher,blank=True)
 
     def __unicode__(self):
@@ -283,6 +284,9 @@ class Assignment(models.Model):
 
     def get_absolute_url(self):
         return reverse('assignment-list')#, kwargs={'pk': self.pk})
+        ### attempt to redirect to assignment-update after assignment-create
+        # return reverse('assignment-update',kwargs={'assignment_id': self.pk})
+
 
     class Meta:
         verbose_name = _('assignment')
