@@ -283,7 +283,7 @@ class Assignment(models.Model):
         return self.identifier
 
     def get_absolute_url(self):
-        return reverse('assignment-list')#, kwargs={'pk': self.pk})
+        return reverse('question-list', kwargs={'assignment_id': self.identifier})
         ### attempt to redirect to assignment-update after assignment-create
         # return reverse('assignment-update',kwargs={'assignment_id': self.pk})
 

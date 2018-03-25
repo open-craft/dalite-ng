@@ -2,7 +2,8 @@
 {% load i18n %}
 
 {% block body %}
-<h1>{% trans 'Questions' %}</h1>
+<h1>Assignment: {{assignment.title}}</h1>
+<h2>{% trans 'Questions' %}</h2>
 {% if user.is_staff %}
   <div class="admin-link"><a href="{% url 'admin_index_wrapper' %}">Click here to add or edit content</a></div>
 {% endif %}
