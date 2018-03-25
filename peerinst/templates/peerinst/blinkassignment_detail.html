@@ -25,9 +25,9 @@
 {% for a in object.blinkassignmentquestion_set.all %}
   <li>
     <strong>
-      {{a.blinkquestion.question.title|safe|striptags}}
+      {{a.blinkquestion.question.title|safe}}
     </strong>
-    - {{a.blinkquestion.question.text|safe|striptags}}
+    - {{a.blinkquestion.question.text|safe}}
     <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
@@ -66,7 +66,7 @@ You do not have any blink questions.
 {% for g in teacher.blinkquestion_set.all %}
   {% if not g in object.blinkquestions.all %}
   <li>    <strong>
-      {{g.question.title|safe|striptags}}
+      {{g.question.title|safe}}
     </strong> - {{g.question.text|safe}}
     <form style="display:inline" action="" method="post">
         {% csrf_token %}
@@ -92,7 +92,7 @@ You do not have any blink questions.
 {% for g in suggested_questions %}
   <li>    
     <strong>
-      {{g.title|safe|striptags}}
+      {{g.title|safe}}
     </strong> - {{g.text|safe}}
     <form action="" method="post">
         {% csrf_token %}

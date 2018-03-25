@@ -276,6 +276,7 @@ class Assignment(models.Model):
     )
     title = models.CharField(_('Title'), max_length=200)
     questions = models.ManyToManyField(Question, verbose_name=_('Questions'))
+    # teacher = ForeignKey(Teacher,blank=True)
 
     def __unicode__(self):
         return self.identifier

@@ -108,7 +108,13 @@ class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
 
 class AssignmentCreateView(NoStudentsMixin, LoginRequiredMixin,CreateView):
     model = models.Assignment
-    fields = ['identifier','title']
+    fields = ['identifier','title','questions']
+
+    ### for when we start tying assignments to teachers
+    # def form_valid(self, form):
+    #     form.instance.created_by = Teacher.objects.get(user=self.request.user)
+    #     return super(AssignmentCreateView,self).form_valid(form)
+
 
 class QuestionListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of questions used for debugging purposes."""
