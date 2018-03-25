@@ -123,6 +123,9 @@ class AssignmentUpdateView(NoStudentsMixin,LoginRequiredMixin,UpdateView):
     fields = ['questions']
     template_name_suffix = '_update_form'
 
+    def get_object(self):
+        return get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
+
 
 class QuestionListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of questions used for debugging purposes."""
