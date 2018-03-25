@@ -280,6 +280,9 @@ class Assignment(models.Model):
     def __unicode__(self):
         return self.identifier
 
+    def get_absolute_url(self):
+        return reverse('assignment-list')#, kwargs={'pk': self.pk})
+
     class Meta:
         verbose_name = _('assignment')
         verbose_name_plural = _('assignments')

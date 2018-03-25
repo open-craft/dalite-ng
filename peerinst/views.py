@@ -106,6 +106,9 @@ class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
 
+class AssignmentCreateView(NoStudentsMixin, LoginRequiredMixin,CreateView):
+    model = models.Assignment
+    fields = ['identifier','title']
 
 class QuestionListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of questions used for debugging purposes."""
