@@ -1081,7 +1081,6 @@ def blink_assignment_start(request,pk):
                 'url':reverse('logout')
                 })
 
-### clean to here
 
 def blink_get_next(request,pk):
     """View to process next question in a series of blink questions based on state."""
@@ -1140,6 +1139,7 @@ def blink_get_current(request,username):
         # Else, redirect to summary for last active question
         latest_round = BlinkRound.objects.filter(question__in=teacher.blinkquestion_set.all()).latest('activate_time')
         return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
+
 
 # AJAX functions
 
@@ -1299,25 +1299,30 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
                 if form.is_valid():
                     question = form.cleaned_data['new_blink']
                     key = random.randrange(10000000,99999999)
-                    blinkquestion = BlinkQuestion(
-                        question=question,
-                        teacher=Teacher.objects.get(user=self.request.user),
-                        key=key)
-                    blinkquestion.save()
-                    if not blinkquestion in self.object.blinkquestions.all():
-                        relationship = BlinkAssignmentQuestion(
-                            blinkassignment=self.object,
-                            blinkquestion=blinkquestion,
-                            rank=self.object.blinkquestions.count()+1,
-                        )
+                    while key in BlinkQuestion.objects.all():
+                        key = random.randrange(10000000,99999999)
+                    try:
+                        blinkquestion = BlinkQuestion(
+                            question=question,
+                            teacher=Teacher.objects.get(user=self.request.user),
+                            time_limit=30,
+                            key=key,
+                            )
+                        blinkquestion.save()
+
+                        if not blinkquestion in self.object.blinkquestions.all():
+                            relationship = BlinkAssignmentQuestion(
+                                blinkassignment=self.object,
+                                blinkquestion=blinkquestion,
+                                rank=self.object.blinkquestions.count()+1,
+                            )
                         relationship.save()
-                    else:
-                        return HttpResponse("error1")
+                    except:
+                        return HttpResponse("error")
 
                     return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
                 else:
                     form = forms.AddBlinkForm(request.POST)
-                    print(form)
                     if form.is_valid():
                         blinkquestion = form.cleaned_data['blink']
                         if not blinkquestion in self.object.blinkquestions.all():
