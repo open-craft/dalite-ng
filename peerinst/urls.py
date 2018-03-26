@@ -15,6 +15,7 @@ urlpatterns = [
     # DALITE
     # Assignment table of contents - Enforce sameorigin to prevent access from LMS
     url(r'^$', xframe_options_sameorigin(views.AssignmentListView.as_view()), name='assignment-list'),
+    url(r'^assignment/create/$', views.AssignmentCreateView.as_view(), name='assignment-create'),
     url(r'^assignment/(?P<assignment_id>[^/]+)/', include([\
         # Question table of contents for assignment - Enforce sameorigin to prevent access from LMS
         url(r'^$', xframe_options_sameorigin(views.QuestionListView.as_view()), name='question-list'),\
@@ -24,6 +25,7 @@ urlpatterns = [
             # Question reset (for testing purposes) - Enforce sameorigin to prevent access from LMS
             url(r'^reset/$', views.reset_question, name='reset-question'),
         ])),
+        url(r'^update/$',views.AssignmentUpdateView.as_view(),name='assignment-update')
     ])),
     url(r'^heartbeat/$', views.HeartBeatUrl.as_view(), name='heartbeat'),
 

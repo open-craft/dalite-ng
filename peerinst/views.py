@@ -106,6 +106,26 @@ class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
 
+class AssignmentCreateView(NoStudentsMixin, LoginRequiredMixin,CreateView):
+    """ view for making a new assignment """
+    model = models.Assignment
+    fields = ['identifier','title','questions']
+
+    ### for when we start tying assignments to teachers
+    # def form_valid(self, form):
+    #     form.instance.created_by = Teacher.objects.get(user=self.request.user)
+    #     return super(AssignmentCreateView,self).form_valid(form)
+
+
+class AssignmentUpdateView(NoStudentsMixin,LoginRequiredMixin,UpdateView):
+    """ view for updating assignment """
+    model = models.Assignment
+    fields = ['questions']
+    template_name_suffix = '_update_form'
+
+    def get_object(self):
+        return get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
+
 
 class QuestionListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of questions used for debugging purposes."""
