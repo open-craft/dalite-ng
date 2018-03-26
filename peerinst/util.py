@@ -81,3 +81,51 @@ class SessionStageData(object):
         self.data = None
         self.data_dict.pop(self.custom_key, None)
         self.session.modified = True
+
+def load_log_archive(json_log_archive):
+    """
+    argument:name of json file, which should be in BASE_DIR/log directory, 
+    which itself is a list of tuples. Each tuple is of form
+           (user_token,[course1,course2,...])
+
+    return: none
+    
+    usage:
+    
+    In [1]: from peerinst.util import load_log_archive as load_log_archive
+    In [2]: load_log_archive('student-group.json')
+    
+    """
+    import os,json
+    from django.contrib.auth.models import User
+    from peerinst.models import Student,StudentGroup
+    from django.conf import settings
+    
+    path_to_json = os.path.join(settings.BASE_DIR,'log',json_log_archive)
+
+    with open(path_to_json,'r') as f:
+        test=json.load(f)
+
+    new_students = 0 
+    new_groups = 0
+
+    for pair in test.items():
+        user,created_user = User.objects.get_or_create(username=pair[0])
+        if created_user:
+            user.save()
+            new_students += 1
+        student, created_student = Student.objects.get_or_create(student=user)
+        if created_student:
+            student.save()
+        for course in pair[1]:
+            group, created_group = StudentGroup.objects.get_or_create(name=course)
+            if created_group:
+                group.save()
+                new_groups += 1
+            student.groups.add(group)
+            student.save()
+
+    print('{} new students loaded into db'.format(new_students))
+    print('{} new groups loaded into db'.format(new_groups))
+
+    return 
