@@ -94,7 +94,36 @@ def load_log_archive(json_log_archive):
     
     In [1]: from peerinst.util import load_log_archive as load_log_archive
     In [2]: load_log_archive('student-group.json')
+
+
+    Notes: 
+    The argument to this function is made using the following offline code 
+    (Ideally this function should work directly from log files, TO DO):
+
+    fname = 'data_mydalite/studentlog1.log'
+    logs=[]
+    for line in open(fname,'r'):
+        logs.append(json.loads(line))
     
+    fname = 'data_mydalite/studentlog2.log'
+    for line in open(fname,'r'):
+        logs.append(json.loads(line))    
+    
+    students={}
+    for l in logs:
+        # if we have seen this student before:
+        if l['username'] in students:
+            # if this student has not been assigned to this group
+            if l['course_id'] not in students[l['username']]:
+                students[l['username']].append(l['course_id'])
+        else:
+            students[l['username']]=[]
+            students[l['username']].append(l['course_id'])
+
+    fname = 'student-group.json'
+    with open(fname,'w') as f:
+        json.dump(students,f)
+
     """
     import os,json
     from django.contrib.auth.models import User
