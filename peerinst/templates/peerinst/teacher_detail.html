@@ -43,7 +43,7 @@
   {% endif %}
   <ol>
   {% for a in object.assignments.all %}
-    <li>{{ a.identifier }}</li>
+    <li>{{ a.identifier }} <span class="admin-link" ><a href="">Report</a></span></li>
   {% endfor %}
   </ol>
 </div>

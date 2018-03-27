@@ -30,7 +30,7 @@
 </form>
 
 <h2>Current</h2>
-Note: You can edit any assignment as long as it is only current for you.  Otherwise, you should clone it with a new name.
+These are the assignments for which reports will be available (based on your selected groups).
 {% if not teacher.groups.all %}
 You do not have any assignments.  You can select and modify an existing assignment from the list below or create a new one.
 {% endif %}
@@ -40,14 +40,17 @@ You do not have any assignments.  You can select and modify an existing assignme
     <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-        {{g}}  <input class="icon" type="submit" value="clear" /> Edit if not current for anyone else
+        {{g}}  <input class="icon" type="submit" value="clear" /> <span class="admin-link" ><a href="">Edit</a></span></li>
     </form>
   </li>
 {% endfor %}
 </ol>
 
+<h2>My assignments</h2>
+These are all the assignments for which you are an author.
 
 <h2>All</h2>
+These are all the assignments in the database.
 <ol>
 {% for g in object_list.all %}
   {% if g not in teacher.assignments.all %}
