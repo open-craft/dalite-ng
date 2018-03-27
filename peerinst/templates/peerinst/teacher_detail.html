@@ -37,7 +37,7 @@
 
 <div>
   <h2>Assignments</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-assignments' teacher.id %}">Select/create a new assignment</a></div>
+  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-assignments' teacher.id %}">Select/edit/create an assignment</a></div>
   {% if not object.assignments.all %}
   You do not have any assignments.
   {% endif %}

@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
-from django.shortcuts import get_object_or_404, render_to_response, redirect
+from django.shortcuts import get_object_or_404, render, render_to_response, redirect
 from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape, format_html
@@ -105,16 +105,6 @@ class NoStudentsMixin(object):
 class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
-
-class AssignmentCreateView(NoStudentsMixin, LoginRequiredMixin,CreateView):
-    """ view for making a new assignment """
-    model = models.Assignment
-    fields = ['identifier','title','questions']
-
-    ### for when we start tying assignments to teachers
-    # def form_valid(self, form):
-    #     form.instance.created_by = Teacher.objects.get(user=self.request.user)
-    #     return super(AssignmentCreateView,self).form_valid(form)
 
 
 class AssignmentUpdateView(NoStudentsMixin,LoginRequiredMixin,UpdateView):
@@ -795,6 +785,7 @@ def reset_question(request, assignment_id, question_id):
 # Views related to Teacher
 
 class TeacherBase(LoginRequiredMixin,View):
+    """Base view for Teacher for custom authentication"""
 
     def dispatch(self, *args, **kwargs):
         if self.request.user == Teacher.objects.get(pk=kwargs['pk']).user:
@@ -815,6 +806,7 @@ class TeacherUpdate(TeacherBase,UpdateView):
 
 
 class TeacherAssignments(TeacherBase,ListView):
+    """View to modify assignments associated to Teacher"""
 
     model = Teacher
     template_name = 'peerinst/teacher_assignments.html'
@@ -826,6 +818,7 @@ class TeacherAssignments(TeacherBase,ListView):
     def get_context_data(self, **kwargs):
         context = super(TeacherAssignments, self).get_context_data(**kwargs)
         context['teacher'] = self.teacher
+        context['form'] = forms.AssignmentCreateForm()
 
         return context
 
@@ -833,17 +826,61 @@ class TeacherAssignments(TeacherBase,ListView):
         self.teacher = get_object_or_404(Teacher, user=self.request.user)
         form = forms.TeacherAssignmentsForm(request.POST)
         if form.is_valid():
-            assignment = form.cleaned_data['assignment']
+            assignment = form .cleaned_data['assignment']
             if assignment in self.teacher.assignments.all():
                 self.teacher.assignments.remove(assignment)
             else:
                 self.teacher.assignments.add(assignment)
             self.teacher.save()
+        else:
+            form  = forms.AssignmentCreateForm(request.POST)
+            if form.is_valid():
+                assignment = Assignment(
+                    identifier=form .cleaned_data['identifier'],
+                    title=form .cleaned_data['title'],
+                )
+                assignment.save()
+                self.teacher.assignments.add(assignment)
+                self.teacher.save()
+            else:
+                return render(request, self.template_name, {'teacher': self.teacher,'form': form, 'object_list':Assignment.objects.all()})
 
         return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : self.teacher.pk }))
 
 
+class TeacherGroups(TeacherBase,ListView):
+    """View to modify groups associated to Teacher"""
+
+    model = Teacher
+    template_name = 'peerinst/teacher_groups.html'
+
+    def get_queryset(self):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        return StudentGroup.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherGroups, self).get_context_data(**kwargs)
+        context['teacher'] = self.teacher
+        context['form'] = forms.TeacherGroupsForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        form = forms.TeacherGroupsForm(request.POST)
+        if form.is_valid():
+            group = form.cleaned_data['group']
+            if group in self.teacher.groups.all():
+                self.teacher.groups.remove(group)
+            else:
+                self.teacher.groups.add(group)
+            self.teacher.save()
+
+        return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : self.teacher.pk }))
+
+
 class TeacherBlinks(TeacherBase,ListView):
+    """OBSOLETE??"""
 
     model = Teacher
     template_name = 'peerinst/teacher_blinks.html'
@@ -891,37 +928,6 @@ class TeacherBlinks(TeacherBase,ListView):
                     return HttpResponse("error")
 
         return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : self.teacher.pk }))
-
-
-class TeacherGroups(TeacherBase,ListView):
-
-    model = Teacher
-    template_name = 'peerinst/teacher_groups.html'
-
-    def get_queryset(self):
-        self.teacher = get_object_or_404(Teacher, user=self.request.user)
-        return StudentGroup.objects.all()
-
-    def get_context_data(self, **kwargs):
-        context = super(TeacherGroups, self).get_context_data(**kwargs)
-        context['teacher'] = self.teacher
-        context['form'] = forms.TeacherGroupsForm()
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        self.teacher = get_object_or_404(Teacher, user=self.request.user)
-        form = forms.TeacherGroupsForm(request.POST)
-        if form.is_valid():
-            group = form.cleaned_data['group']
-            if group in self.teacher.groups.all():
-                self.teacher.groups.remove(group)
-            else:
-                self.teacher.groups.add(group)
-            self.teacher.save()
-
-        return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : self.teacher.pk }))
-
 
 # Views related to Blink
 

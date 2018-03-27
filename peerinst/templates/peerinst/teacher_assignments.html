@@ -4,20 +4,30 @@
 {% block body %}
 
 <style>
-  input[type="submit"] {
+  input[class="icon"] {
     font-family: 'Material Icons';
     font-size: 10pt;
     padding:1pt;
     margin-left:3pt;
-
+  }
+  .helptext {
+    font-size:9pt;
+    opacity:0.8;
+    padding-left: 20pt;
   }
 </style>
 
 <h1>My Assignments</h1>
 <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher' teacher.id %}">Back to My Account</a></div>
 
-<h2>Create new</h2>
-<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'assignment-create' %}">Create a new assignment</a></div>
+<h2>Create a new assignment</h2>
+{{form.errors}}
+<form action="" method="post">
+    {% csrf_token %}
+    {{form.identifier.label_tag}} {{ form.identifier }} <span class="helptext">{{ form.identifier.help_text }}</span><br>
+    {{form.title.label_tag}} {{ form.title }}<br>
+    <input type="submit" value="Save" />
+</form>
 
 <h2>Current</h2>
 Note: You can edit any assignment as long as it is only current for you.  Otherwise, you should clone it with a new name.
@@ -30,7 +40,7 @@ You do not have any assignments.  You can select and modify an existing assignme
     <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-        {{g}}  <input type="submit" value="clear" /> Edit if not current for anyone else
+        {{g}}  <input class="icon" type="submit" value="clear" /> Edit if not current for anyone else
     </form>
   </li>
 {% endfor %}
@@ -45,7 +55,7 @@ You do not have any assignments.  You can select and modify an existing assignme
     <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-        {{g}}  <input type="submit" value="add" />
+        {{g}}  <input class="icon" type="submit" value="add" />
     </form>
   </li>
   {% endif %}

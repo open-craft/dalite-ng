@@ -79,14 +79,21 @@ class SequentialReviewForm(forms.Form):
         return cleaned_data
 
 
-class TeacherGroupsForm(forms.Form):
-    """Simple form to help update teacher groups"""
-    group = forms.ModelChoiceField(queryset=StudentGroup.objects.all())
+class AssignmentCreateForm(forms.ModelForm):
+    """Simple form to create a new Assignment"""
+    class Meta:
+        model = Assignment
+        fields = ['identifier','title']
 
 
 class TeacherAssignmentsForm(forms.Form):
     """Simple form to help update teacher assignments"""
     assignment = forms.ModelChoiceField(queryset=Assignment.objects.all())
+
+
+class TeacherGroupsForm(forms.Form):
+    """Simple form to help update teacher groups"""
+    group = forms.ModelChoiceField(queryset=StudentGroup.objects.all())
 
 
 class TeacherBlinksForm(forms.Form):
