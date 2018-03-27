@@ -10,11 +10,6 @@
     padding:1pt;
     margin-left:3pt;
   }
-  .helptext {
-    font-size:9pt;
-    opacity:0.8;
-    padding-left: 20pt;
-  }
 </style>
 
 <h1>My Assignments</h1>
@@ -40,7 +35,7 @@ You do not have any assignments.  You can select and modify an existing assignme
     <form action="" method="post">
         {% csrf_token %}
         <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-        {{g}}  <input class="icon" type="submit" value="clear" /> <span class="admin-link" ><a href="">Edit</a></span></li>
+        {{g}}  <input class="icon" type="submit" value="clear" /> <span class="admin-link" ><a href="{% url 'assignment-update' g.pk %}">Edit</a></span></li>
     </form>
   </li>
 {% endfor %}

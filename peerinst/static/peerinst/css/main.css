@@ -187,6 +187,11 @@ header {
   font-size:9pt;
   opacity:0.8;
 }
+.helptext {
+  font-size:9pt;
+  opacity:0.8;
+  padding-left: 15pt;
+}
 #logo {
   width: 40px;
   vertical-align: middle;
