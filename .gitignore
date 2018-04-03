@@ -8,3 +8,4 @@
 logo.png
 src
 locust*
+/sent_emails

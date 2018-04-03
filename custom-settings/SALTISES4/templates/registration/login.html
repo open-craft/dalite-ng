@@ -22,6 +22,9 @@
 
 </form>
 
+<br>
+<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'password_reset' %}">Forgot your password?</a></div>
+
 {% if form.errors %}
   <p>Your username and password didn't match. Please try again.</p>
 {% endif %}

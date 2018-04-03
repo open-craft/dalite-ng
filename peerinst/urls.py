@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.conf.urls import include, url
-from django.contrib.auth.views import login
+from django.contrib.auth.views import login,password_reset,password_reset_done,password_reset_confirm,password_reset_complete
 
 #testing
 from django.views.decorators.clickjacking import xframe_options_sameorigin
@@ -53,6 +53,10 @@ urlpatterns = [
     # Auth
     url(r'^landing_page/$', views.landing_page, name='landing_page'),
     url(r'^login/$', login, name='login'),
+    url(r'^password_reset/$', password_reset, name='password_reset'),
+    url(r'^password_reset_done/$', password_reset_done, name='password_reset_done'),
+    url(r'^password_reset_confirm/$', password_reset_confirm, name='password_reset_confirm'),
+    url(r'^password_reset_complete/$', password_reset_complete, name='password_reset_complete'),
     url(r'^welcome/$', views.welcome, name='welcome'),
     url(r'^logout/$', views.logout_view, name='logout'),
     url(r'^access_denied/$', views.access_denied, name='access_denied'),
