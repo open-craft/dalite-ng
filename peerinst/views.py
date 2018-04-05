@@ -63,7 +63,7 @@ def logout_view(request):
 
 def welcome(request):
     try:
-        teacher = Teacher.objects.get(user=request.user)
+        teacher = Teacher.objects.get(user__username=request.user.username)
         return HttpResponseRedirect(reverse('teacher', kwargs={ 'pk' : teacher.pk }))
     except ObjectDoesNotExist:
         return HttpResponseRedirect(reverse('assignment-list'))
@@ -108,7 +108,7 @@ class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
 
 
 class AssignmentUpdateView(NoStudentsMixin,LoginRequiredMixin,UpdateView):
-    """ view for updating assignment """
+    """View for updating assignment."""
     model = models.Assignment
     fields = ['questions']
     template_name_suffix = '_update_form'

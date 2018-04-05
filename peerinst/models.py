@@ -119,6 +119,8 @@ class Question(models.Model):
     )
     category = models.ManyToManyField(Category, blank=True)
     discipline = models.ForeignKey(Discipline, blank=True, null=True)
+    ### for when we tie questions to teachers
+    # teacher = models.ManyToManyField(Teacher,null=True)
     fake_attributions = models.BooleanField(
         _('Add fake attributions'), default=False, help_text=_(
             'Add random fake attributions consisting of username and country to rationales.  You '
@@ -277,7 +279,7 @@ class Assignment(models.Model):
     title = models.CharField(_('Title'), max_length=200)
     questions = models.ManyToManyField(Question, verbose_name=_('Questions'))
     ### for when we tie assignments to teachers
-    # teacher = ForeignKey(Teacher,blank=True)
+    # teacher = models.ManyToManyField(Teacher,null=True)
 
     def __unicode__(self):
         return self.identifier
