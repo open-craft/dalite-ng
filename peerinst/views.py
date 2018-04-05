@@ -514,6 +514,7 @@ class QuestionReviewView(QuestionReviewBaseView):
             second_answer_choice=self.second_answer_choice,
             chosen_rationale=chosen_rationale,
             user_token=self.user_token,
+            time=datetime.datetime.now().isoformat()
         )
         self.answer.save()
         if chosen_rationale is not None:
