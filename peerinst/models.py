@@ -310,6 +310,7 @@ class Answer(models.Model):
         _('Expert rationale?'), default=False,
         help_text=_('Whether this answer is a pre-seeded expert rationale.')
     )
+    time = models.DateTimeField(blank=True,null=True)
     upvotes = models.PositiveIntegerField(default=0)
     downvotes = models.PositiveIntegerField(default=0)
 
