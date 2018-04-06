@@ -199,7 +199,7 @@ def load_timestamps_from_logs(log_filename_list):
     records_parsed = 0
     for a in answer_qs:
         for log in logs:
-            if (log['username']==a.user_token) and (log['event']['assignment_id']==a.assignment_id):
+            if (log['username']==a.user_token) and (log['event']['assignment_id']==a.assignment_id) and (log['event']['question_id']==a.question_id):
                 timestamp = timezone.make_aware(dateparse.parse_datetime(log['time']))
                 a.time = timestamp
                 a.save()
@@ -208,7 +208,7 @@ def load_timestamps_from_logs(log_filename_list):
             records_not_in_logs += 1
         records_parsed +=1
         if records_parsed % 1000==0:
-            print('{} records parsed'.format(records_parsed))
+            print('{} db records parsed'.format(records_parsed))
             print('{} db records updated'.format(records_updated))
             print('time: {}'.format(timezone.now()))
 
