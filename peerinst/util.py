@@ -158,3 +158,58 @@ def load_log_archive(json_log_archive):
     print('{} new groups loaded into db'.format(new_groups))
 
     return 
+
+
+def load_timestamps_from_logs(log_filename_list):
+    """
+    function to parse log files and add timestamps to previous records in Answer model with newly added time field
+    argument: list of filenames in log directory
+    return: none
+
+    usage from shell: 
+    In [1]: from peerinst.util import load_timestamps_from_logs  
+    In [2]: load_timestamps_from_logs(['student.log','student2.log'])    
+
+    """
+    import os,json
+    from django.utils import dateparse,timezone
+    from peerinst.models import Answer
+    from django.conf import settings
+
+
+    # load logs
+    logs = []
+    for name in log_filename_list:
+        fname = os.path.join(settings.BASE_DIR,'log',name)
+        for line in open(fname,'r'):
+            logs.append(json.loads(line))
+
+    # get records that don't have a timestamp
+    answer_qs = Answer.objects.filter(time__isnull=True)
+
+    records_updated = 0
+    records_not_in_logs = 0
+
+    # iterate through each record, find its log entry, and save the timestamp
+    print('{} records to parse'.format(len(answer_qs)))
+    print('start time: {}'.format(timezone.now()))
+    records_parsed = 0
+    for a in answer_qs:
+        for log in logs:
+            if (log['username']==a.user_token) and (log['event']['assignment_id']==a.assignment_id) and (log['event']['question_id']==a.question_id) and (log['event_type']=='save_problem_success'):
+                timestamp = timezone.make_aware(dateparse.parse_datetime(log['time']))
+                a.time = timestamp
+                a.save()
+                records_updated += 1
+        if a.time is None:
+            records_not_in_logs += 1
+        records_parsed +=1
+        if records_parsed % 1000==0:
+            print('{} records parsed'.format(records_parsed))
+            print('{} db records updated')
+            print('time: {}'.format(timezone.now()))
+
+    print('End time: {}'.format(timezone.now()))
+    print('{} total answer table records in db updated with time field from logs'.format(records_updated))
+    print('{} total answer table records in db not found in logs; likely seed rationales from teacher backend'.format(records_updated))
+    return
