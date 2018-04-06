@@ -182,7 +182,10 @@ def load_timestamps_from_logs(log_filename_list):
     for name in log_filename_list:
         fname = os.path.join(settings.BASE_DIR,'log',name)
         for line in open(fname,'r'):
-            logs.append(json.loads(line))
+            log_event = json.loads(line)
+            if log_event['event_type']=='save_problem_success':
+                logs.append(log_event)
+    print('{} save_problem_success log events'.format(len(logs)))
 
     # get records that don't have a timestamp
     answer_qs = Answer.objects.filter(time__isnull=True)
@@ -196,7 +199,7 @@ def load_timestamps_from_logs(log_filename_list):
     records_parsed = 0
     for a in answer_qs:
         for log in logs:
-            if (log['username']==a.user_token) and (log['event']['assignment_id']==a.assignment_id) and (log['event']['question_id']==a.question_id) and (log['event_type']=='save_problem_success'):
+            if (log['username']==a.user_token) and (log['event']['assignment_id']==a.assignment_id):
                 timestamp = timezone.make_aware(dateparse.parse_datetime(log['time']))
                 a.time = timestamp
                 a.save()
