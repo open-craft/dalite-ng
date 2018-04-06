@@ -206,7 +206,7 @@ def load_timestamps_from_logs(log_filename_list):
         records_parsed +=1
         if records_parsed % 1000==0:
             print('{} records parsed'.format(records_parsed))
-            print('{} db records updated')
+            print('{} db records updated'.format(records_updated))
             print('time: {}'.format(timezone.now()))
 
     print('End time: {}'.format(timezone.now()))
