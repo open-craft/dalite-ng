@@ -6,7 +6,7 @@
 <h1>My account</h1>
 <div>
   <h2>Identity</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-update' teacher.id %}">Edit identity</a></div>
+  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-update' teacher.id %}">Edit identity</a> | <a href="{% url 'password_change' %}">Change password</a></div>
   <div style="margin-left:20pt;">
     <span style="float:left; margin-right:6pt;">Username: </span><div>{{ object.user.username }}</div>
     <span style="float:left; margin-right:6pt;">Discipline(s): </span>
