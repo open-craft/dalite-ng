@@ -249,7 +249,7 @@ function plot(matrix,freq,id){
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:20px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showAnalytics({{ obj.id }})">assessment</i><span id="rating-{{obj.id}}"></span>
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(3px);opacity:0.6;" onclick="showAssignments({{ obj.id }})">description</i>{{ obj.assignment_set.all.count }}
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
-      <i><a href="{% url 'assignment_timeline_data' assignment_id=assignment.pk question_id=obj.pk %}"></i>"Timeline Data"
+      <i><a href="{% url 'assignment_timeline_data' assignment_id=assignment.pk question_id=obj.pk %}"></i>"Timeline Data"</a>
     </span>
     <div class="question-text">
       {{ obj.text|safe|striptags }}
