@@ -46,6 +46,10 @@ from django.utils import timezone
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.sessions.models import Session
 
+#reports
+from django.db.models.expressions import Func
+from django.db.models import Count
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -1367,3 +1371,15 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
                         return HttpResponse("error")
         else:
             return HttpResponse("error3")
+
+class DateExtractFunc(Func):
+    function = "DATE"
+
+def assignment_timeline_data(request,assignment_id,question_id):
+    qs=models.Answer.objects.filter(assignment_id=assignment_id).filter(question_id=question_id)\
+    .annotate(date=DateExtractFunc("time"))\
+    .values('date')\
+    .annotate(N=Count('id'))
+
+    return JsonResponse(list(qs),safe=False)
+

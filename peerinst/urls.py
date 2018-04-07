@@ -70,4 +70,7 @@ urlpatterns = [
     url(r'^blinkAssignment/create/$', views.BlinkAssignmentCreate.as_view(), name='blinkAssignment-create'),
     url(r'^blinkAssignment/(?P<pk>[0-9]+)/start/$', views.blink_assignment_start, name='blinkAssignment-start'),
     url(r'^blinkAssignment/(?P<pk>[0-9]+)/update/$', views.BlinkAssignmentUpdate.as_view(), name='blinkAssignment-update'),
+
+    # Reports
+    url(r'^assignment/(?P<assignment_id>[^/]+)/(?P<question_id>[0-9]+)/timeline_data/$',views.assignment_timeline_data,name='assignment_timeline_data'),
 ]
