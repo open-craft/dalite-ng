@@ -1383,3 +1383,28 @@ def assignment_timeline_data(request,assignment_id,question_id):
 
     return JsonResponse(list(qs),safe=False)
 
+def network_data(request,assignment_id):
+    qs = models.Answer.objects.filter(assignment_id=assignment_id)
+    
+    links={}
+
+    for answer in qs:
+        if answer.user_token not in links:
+            links[answer.user_token]={}
+            if answer.chosen_rationale:
+                if answer.chosen_rationale.user_token in links[answer.user_token]:
+                    links[answer.user_token][answer.chosen_rationale.user_token] += 1
+                else:
+                    links[answer.user_token][answer.chosen_rationale.user_token] = 1
+
+    # serialize
+    links_array = []
+    for source,targets in links.items():
+        d={}
+        for t in targets.keys():
+            d['source']=source
+            d['target']=t
+            d['value']=targets[t]
+            links_array.append(d)
+
+    return JsonResponse(links_array,safe=False)

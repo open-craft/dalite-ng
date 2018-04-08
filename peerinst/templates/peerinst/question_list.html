@@ -3,6 +3,7 @@
 
 {% block body %}
 <h1>Assignment: {{assignment.title}}</h1>
+<div class="admin-link"><a href="{% url 'assignment_network_data' assignment_id=assignment.identifier%}">Vote Network</a></div>
 <h2>{% trans 'Questions' %}</h2>
 {% if user.is_staff %}
   <div class="admin-link"><a href="{% url 'assignment-update' assignment_id=assignment.identifier%}">Click here to change which questions are part of this assignment</a></div>

@@ -73,4 +73,5 @@ urlpatterns = [
 
     # Reports
     url(r'^assignment/(?P<assignment_id>[^/]+)/(?P<question_id>[0-9]+)/timeline_data/$',views.assignment_timeline_data,name='assignment_timeline_data'),
+    url(r'^assignment/(?P<assignment_id>[^/]+)/network_data/$',views.network_data,name='assignment_network_data'),
 ]
