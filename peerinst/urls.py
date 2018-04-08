@@ -55,6 +55,7 @@ urlpatterns = [
     url(r'^welcome/$', views.welcome, name='welcome'),
     url(r'^access_denied/$', views.access_denied, name='access_denied'),
     url('^', include('django.contrib.auth.urls')),
+    url(r'^signup/$', views.sign_up, name='sign_up'),
 
     # Blink
     url(r'^blink/(?P<pk>[0-9]+)/$', views.BlinkQuestionFormView.as_view(), name='blink-question'),

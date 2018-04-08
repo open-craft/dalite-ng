@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from .models import StudentGroup, Assignment, BlinkAssignmentQuestion, Question
-
+from django.contrib.auth.models import User
 
 #testing
 from django.forms import ModelForm
@@ -139,3 +139,10 @@ class AddBlinkForm(forms.Form):
     """Form to add a blinkquestion to a blinkassignment."""
     # Might be better to set the queryset to limit to teacher's blinks
     blink = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())
+
+
+class SignUpForm(ModelForm):
+    """Form to register a new user (teacher)."""
+    class Meta:
+        model = User
+        fields = ['email','username']

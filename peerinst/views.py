@@ -59,6 +59,14 @@ def landing_page(request):
     return TemplateResponse(request, 'registration/landing_page.html')
 
 
+def sign_up(request):
+    template = "registration/sign_up.html"
+    context = {}
+    context['form'] = forms.SignUpForm()
+
+    return render(request,template,context)
+
+
 def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
@@ -1385,7 +1393,7 @@ def assignment_timeline_data(request,assignment_id,question_id):
 
 def network_data(request,assignment_id):
     qs = models.Answer.objects.filter(assignment_id=assignment_id)
-    
+
     links={}
 
     for answer in qs:

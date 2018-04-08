@@ -4,6 +4,8 @@
 
 <h1>Login</h1>
 
+<div class="admin-link"><a href="{% url 'password_reset' %}">Forgot password</a> | <a href="{% url 'sign_up' %}">Sign up</a></div>
+
 <form method="post" action="{% url 'login' %}">
 {% csrf_token %}
 
@@ -21,9 +23,6 @@
 </div>
 
 </form>
-
-<br>
-<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'password_reset' %}">Forgot your password?</a></div>
 
 {% if form.errors %}
   <p>Your username and password didn't match. Please try again.</p>

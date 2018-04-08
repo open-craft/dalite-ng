@@ -1,0 +1,19 @@
+{% extends 'peerinst/base.html' %}
+
+{% block body %}
+
+<div>
+    <h1>Sign up</h1>
+
+    <p>You can automatically register for teacher access to myDALITE if you have an e-mail address from a recognized institution.</p>
+
+    <p>If your e-mail address is not recognized, a site administrator will contact you for more information.</p>
+
+    <form method="post" id="sign_up">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Register">
+    </form>
+</div>
+
+{% endblock %}
