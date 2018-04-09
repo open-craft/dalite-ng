@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
+from django.core.mail import mail_admins
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
 from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator
@@ -67,7 +68,20 @@ def sign_up(request):
         form = forms.SignUpForm(request.POST)
         if form.is_valid():
             try:
+                # Set new users as inactive until verified by Administrator
+                form.instance.is_active = False
                 form.save()
+                # Notify administrators
+                try:
+                    mail_admins(
+                        'New user request on dalite-ng',
+                        'A new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url']),
+                        fail_silently=False,
+                    )
+                except:
+                    pass
+
+                return HttpResponseRedirect(reverse('login'))
             except:
                 pass
 
@@ -88,9 +102,14 @@ def sign_up(request):
             context['form'] = form
     else:
         context['form'] = forms.SignUpForm()
-        print(context['form'])
 
     return render(request,template,context)
+
+
+def terms_teacher(request):
+
+    return render(request,'registration/terms.html')
+
 
 
 def logout_view(request):

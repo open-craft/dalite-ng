@@ -5,16 +5,23 @@
 <div>
     <h1>Sign up</h1>
 
-    <p> To create an account, provide a unique username, an e-mail address, and a password </p>
+    <p> To create an account, provide a unique username, an e-mail address, and a password. </p>
 
+    <p> After the sign-up form is submitted, a site administrator will contact you to finalize the registration process. </p>
+
+    <p> Before filling out the form, please review the <a href="{% url 'terms_teacher' %}">Terms of Service</a>. </p>
+    <br>
+    
+    <!--
     <p> If you have a faculty e-mail address (i.e. from a recognized server reserved exclusively for teachers or faculty), you will be sent a confirmation e-mail through which you can activate a teacher account.  Otherwise, a site administrator will contact you.</p>
+    -->
 
     <form method="post" id="sign_up">
         {% csrf_token %}
         {{ form.as_p }}
+        By clicking on 'Register' you agree to the <a href="{% url 'terms_teacher' %}">Terms of Service</a>.<br>
         <input type="submit" value="Register">
     </form>
-
 
 </div>
 

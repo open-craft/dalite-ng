@@ -149,6 +149,12 @@ class SignUpForm(UserCreationForm):
 
     The clean method is overridden to add basic password validation."""
 
+    url = forms.URLField(
+        label=_('Website'),
+        max_length=200,
+        help_text=_('Please provide an institutional url listing yourself as a faculty member and showing your e-mail address.')
+    )
+
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()
         pwd = cleaned_data['password1']
