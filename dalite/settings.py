@@ -26,6 +26,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = (
     'peerinst',
     'grappelli',
+    'password_validation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -87,6 +88,25 @@ CACHES = {
         'LOCATION': '127.0.0.1:11211',
     }
 }
+
+# Password validators through django-password-validation (backport from 1.9)
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'password_validation.NumericPasswordValidator',
+    },
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

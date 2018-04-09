@@ -7,6 +7,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from .models import StudentGroup, Assignment, BlinkAssignmentQuestion, Question
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+
+import password_validation
 
 #testing
 from django.forms import ModelForm
@@ -141,8 +144,18 @@ class AddBlinkForm(forms.Form):
     blink = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())
 
 
-class SignUpForm(ModelForm):
-    """Form to register a new user (teacher)."""
+class SignUpForm(UserCreationForm):
+    """Form to register a new user (teacher) with e-mail address.
+
+    The clean method is overridden to add basic password validation."""
+
+    def clean(self):
+        cleaned_data = super(SignUpForm, self).clean()
+        pwd = cleaned_data['password1']
+        password_validation.validate_password(pwd)
+
+        return cleaned_data
+
     class Meta:
         model = User
         fields = ['email','username']

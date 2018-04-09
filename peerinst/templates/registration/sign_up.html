@@ -5,15 +5,17 @@
 <div>
     <h1>Sign up</h1>
 
-    <p>You can automatically register for teacher access to myDALITE if you have an e-mail address from a recognized institution.</p>
+    <p> To create an account, provide a unique username, an e-mail address, and a password </p>
 
-    <p>If your e-mail address is not recognized, a site administrator will contact you for more information.</p>
+    <p> If you have a faculty e-mail address (i.e. from a recognized server reserved exclusively for teachers or faculty), you will be sent a confirmation e-mail through which you can activate a teacher account.  Otherwise, a site administrator will contact you.</p>
 
     <form method="post" id="sign_up">
         {% csrf_token %}
         {{ form.as_p }}
         <input type="submit" value="Register">
     </form>
+
+
 </div>
 
 {% endblock %}

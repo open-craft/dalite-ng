@@ -417,9 +417,7 @@ class Student(models.Model):
 
 
 class Institution(models.Model):
-    name = models.CharField(max_length=100, unique=True, help_text=_(
-        'Name of school.'
-    ))
+    name = models.CharField(max_length=100, unique=True, help_text=_('Name of school.'))
 
     def __unicode__(self):
         return self.name
@@ -427,6 +425,17 @@ class Institution(models.Model):
     class Meta:
         verbose_name = _('institution')
         verbose_name_plural = _('institutions')
+
+
+class VerifiedDomain(models.Model):
+    domain = models.CharField(max_length=100, help_text=_('Teacher-only email domain, if available.  Email addresses with these domains will be treated as verified.'))
+    institution = models.ForeignKey(Institution)
+
+    def __unicode__(self):
+        return self.domain
+
+    class Meta:
+        verbose_name = _('verified email domain name')
 
 
 class Teacher(models.Model):

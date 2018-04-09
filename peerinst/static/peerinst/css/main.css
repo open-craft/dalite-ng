@@ -260,7 +260,12 @@ form[action*="login"] {
   width:-moz-fit-content;
   font-size: 10pt;
 }
-#id_username, #id_password, #id_old_password, #id_new_password1, #id_new_password2 {
+#sign_up {
+  width:fit-content;
+  width:-moz-fit-content;
+  font-size: 10pt;
+}
+#id_email, #id_username, #id_password, #id_old_password, #id_new_password1, #id_password1, #id_password2, #id_new_password2 {
   padding: 1px;
   margin: 0px;
   border-width: thin;

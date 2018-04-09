@@ -36,7 +36,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question
+from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question, VerifiedDomain
 from django.contrib.auth.models import User
 
 #blink
@@ -62,7 +62,33 @@ def landing_page(request):
 def sign_up(request):
     template = "registration/sign_up.html"
     context = {}
-    context['form'] = forms.SignUpForm()
+
+    if request.method == "POST":
+        form = forms.SignUpForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+            except:
+                pass
+
+            # domain = new_user.email.split("@")[1]
+            # print(domain)
+            # if VerifiedDomain.objects.filter(domain=domain).exists():
+            #     print("verified domain")
+            #     try:
+            #         new_teacher = Teacher(
+            #             user = new_user,
+            #         )
+            #         new_teacher.save()
+            #         print("new teacher created")
+            #         return HttpResponseRedirect(reverse('teacher', kwargs={ 'pk' : new_teacher.pk } ))
+            #     except:
+            #         pass
+        else:
+            context['form'] = form
+    else:
+        context['form'] = forms.SignUpForm()
+        print(context['form'])
 
     return render(request,template,context)
 
