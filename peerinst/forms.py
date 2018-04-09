@@ -159,3 +159,7 @@ class SignUpForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['email','username']
+
+
+class AddRemoveQuestionForm(forms.Form):
+    q = forms.ModelChoiceField(queryset=Question.objects.all())

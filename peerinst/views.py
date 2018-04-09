@@ -145,14 +145,44 @@ class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     model = models.Assignment
 
 
-class AssignmentUpdateView(NoStudentsMixin,LoginRequiredMixin,UpdateView):
+class AssignmentUpdateView(NoStudentsMixin,LoginRequiredMixin,DetailView):
     """View for updating assignment."""
-    model = models.Assignment
-    fields = ['questions']
-    template_name_suffix = '_update_form'
+
+    model = Assignment
+
+    def get_context_data(self, **kwargs):
+        context = super(AssignmentUpdateView, self).get_context_data(**kwargs)
+        context['teacher'] = Teacher.objects.get(user=self.request.user)
+
+        teacher_discipline_questions=Question.objects.filter(discipline__in=context['teacher'].disciplines.all())
+
+        # Send as context questions not already in this assignment
+        context['suggested_questions']=[q for q in teacher_discipline_questions if q not in self.get_object().questions.all()]
+
+        return context
 
     def get_object(self):
         return get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.user.is_authenticated():
+            form = forms.AddRemoveQuestionForm(request.POST)
+            print(form)
+            if form.is_valid():
+                question = form.cleaned_data['q']
+                if not question in self.object.questions.all():
+                    self.object.questions.add(question)
+                else:
+                    self.object.questions.remove(question)
+                self.object.save()
+
+                return HttpResponseRedirect(reverse("assignment-update", kwargs={'assignment_id': self.object.pk}))
+            else:
+                return HttpResponse("error")
+        else:
+            return HttpResponse("error3")
+
 
 
 class QuestionListView(NoStudentsMixin, LoginRequiredMixin, ListView):
