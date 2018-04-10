@@ -13,7 +13,7 @@ from . import views
 urlpatterns = [
     # DALITE
     # Assignment table of contents - Enforce sameorigin to prevent access from LMS
-    url(r'^$', xframe_options_sameorigin(views.AssignmentListView.as_view()), name='assignment-list'),
+    url(r'^assignment-list/$', xframe_options_sameorigin(views.AssignmentListView.as_view()), name='assignment-list'),
     url(r'^assignment/(?P<assignment_id>[^/]+)/', include([\
         # Question table of contents for assignment - Enforce sameorigin to prevent access from LMS
         url(r'^$', xframe_options_sameorigin(views.QuestionListView.as_view()), name='question-list'),\
@@ -51,7 +51,7 @@ urlpatterns = [
     url(r'^teacher/(?P<pk>[0-9]+)/groups/$', views.TeacherGroups.as_view(), name='teacher-groups'),
 
     # Auth
-    url(r'^landing_page/$', views.landing_page, name='landing_page'),
+    url(r'^$', views.landing_page, name='landing_page'),
     url(r'^logout/$', views.logout_view, name='logout'),
     url(r'^welcome/$', views.welcome, name='welcome'),
     url(r'^access_denied/$', views.access_denied, name='access_denied'),

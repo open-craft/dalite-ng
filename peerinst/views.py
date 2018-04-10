@@ -85,13 +85,13 @@ def sign_up(request):
                 try:
                     mail_admins(
                         'New user request on dalite-ng',
-                        'A new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.\n\n{}\n\nCheers,\nThe myDalite Team'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url'],request.get_host()+reverse('dashboard')),
+                        'A new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.\n\n{}\n\nCheers,\nThe myDalite Team'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url'],'https://'+request.get_host()+reverse('dashboard')),
                         fail_silently=False,
                     )
                 except:
                     pass
 
-                return HttpResponseRedirect(reverse('login'))
+                return TemplateResponse(request,'registration/sign_up_done.html')
             except:
                 pass
 
