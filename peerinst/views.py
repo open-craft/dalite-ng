@@ -56,6 +56,16 @@ LOGGER = logging.getLogger(__name__)
 
 # Views related to Auth
 
+def admin_check(user):
+    return user.is_superuser
+
+@login_required
+@user_passes_test(admin_check,login_url='/welcome/',redirect_field_name=None)
+def dashboard(request):
+
+    return HttpResponse('dashboard')
+
+
 def landing_page(request):
     return TemplateResponse(request, 'registration/landing_page.html')
 
@@ -75,7 +85,7 @@ def sign_up(request):
                 try:
                     mail_admins(
                         'New user request on dalite-ng',
-                        'A new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url']),
+                        'A new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.\n\n{}\n\nCheers,\nThe myDalite Team'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url'],request.get_host()+reverse('dashboard')),
                         fail_silently=False,
                     )
                 except:
@@ -107,9 +117,7 @@ def sign_up(request):
 
 
 def terms_teacher(request):
-
-    return render(request,'registration/terms.html')
-
+    return TemplateResponse(request, 'registration/terms.html')
 
 
 def logout_view(request):

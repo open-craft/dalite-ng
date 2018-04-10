@@ -135,7 +135,7 @@ STATICFILES_DIRS = (
 )
 
 # LOGIN_URL = 'login'
-LOGIN_URL = 'landing_page'
+LOGIN_URL = 'login'
 
 LOGIN_REDIRECT_URL = 'welcome'
 

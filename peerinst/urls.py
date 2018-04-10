@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^heartbeat/$', views.HeartBeatUrl.as_view(), name='heartbeat'),
 
     # Admin
+    url(r'^dashboard/$', views.dashboard, name='dashboard'),
     url(r'^admin/$', admin_views.AdminIndexView.as_view(), name='admin-index'),
     url(r'^admin/peerinst/', include([
         url(r'^assignment_results/(?P<assignment_id>[^/]+)/', include([

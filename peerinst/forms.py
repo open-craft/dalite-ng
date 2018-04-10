@@ -5,15 +5,13 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from .models import StudentGroup, Assignment, BlinkAssignmentQuestion, Question
+from .models import StudentGroup, Assignment, BlinkAssignmentQuestion, BlinkQuestion, Question
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.forms import ModelForm
 
 import password_validation
 
-#testing
-from django.forms import ModelForm
-from .models import BlinkQuestion
 
 class FirstAnswerForm(forms.Form):
     """Form to select one of the answer choices and enter a rationale."""
