@@ -1016,7 +1016,7 @@ class TeacherBlinks(TeacherBase,ListView):
                     blink = BlinkQuestion(
                         question=form.cleaned_data['new_blink'],
                         teacher=self.teacher,
-                        time_limit=30,
+                        time_limit=60,
                         key=key,
                     )
                     blink.save()
@@ -1125,7 +1125,7 @@ class BlinkQuestionDetailView(DetailView):
                 # Set _this_ question to active in order to accept responses
                 self.object.active = True
                 if not self.object.time_limit:
-                    self.object.time_limit = 30
+                    self.object.time_limit = 60
 
                 time_left = self.object.time_limit
                 self.object.save()
@@ -1220,12 +1220,13 @@ def blink_get_next(request,pk):
                 rank = q.rank
                 break
         # Redirect to next, if exists
-        if rank < blinkassignment.blinkassignmentquestion_set.count()-1:
+        if rank < blinkassignment.blinkassignmentquestion_set.count() - 1:
 
             try:
                 # Teacher to new summary page
                 # Check existence of teacher (exception thrown otherwise)
                 user_role = Teacher.objects.get(user__username=request.user)
+                print(blinkassignment.blinkassignmentquestion_set.all())
                 return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
             except:
                 # Others to new question page
@@ -1436,7 +1437,7 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
                             relationship = BlinkAssignmentQuestion(
                                 blinkassignment=self.object,
                                 blinkquestion=blinkquestion,
-                                rank=self.object.blinkquestions.count()+1,
+                                rank=self.object.blinkquestions.count(),
                             )
                         relationship.save()
                     except:
@@ -1451,7 +1452,7 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
                             relationship = BlinkAssignmentQuestion(
                                 blinkassignment=self.object,
                                 blinkquestion=blinkquestion,
-                                rank=self.object.blinkquestions.count()+1,
+                                rank=self.object.blinkquestions.count(),
                             )
                             relationship.save()
                         else:
