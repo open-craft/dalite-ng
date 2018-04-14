@@ -6,9 +6,9 @@
 
 <h1>Login</h1>
 
-<div class="admin-link">
-  <a href="{% url 'password_reset' %}">Forgot password</a> | <a href="{% url 'sign_up' %}">Sign up</a>
-</div>
+  <div class="admin-link">
+    <a href="{% url 'password_reset' %}">Forgot password</a> | <a href="{% url 'sign_up' %}">Sign up</a>
+  </div>
 
 {% if form.errors %}
   <p>
@@ -27,7 +27,7 @@
 {% endif %}
 
 <form method="post">
-{% csrf_token %}
+  {% csrf_token %}
 
   <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
     {{ form.username|add_class:"mdc-text-field__input" }}
@@ -52,7 +52,7 @@
 
   <div>
     <input type="hidden" name="next" value="{{ next }}" />
-    <input class="mdc-button mdc-button--raised" type="submit" value="Submit" data-mdc-auto-init="MDCRipple" />
+    <input class="mdc-button mdc-button--raised mdc-ripple-surface" type="submit" value="Submit" data-mdc-auto-init="MDCRipple"/>
   </div>
 </form>
 

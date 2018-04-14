@@ -149,6 +149,7 @@ class SignUpForm(UserCreationForm):
 
     url = forms.URLField(
         label=_('Website'),
+        initial='http://',
         max_length=200,
         help_text=_('Please provide an institutional url listing yourself as a faculty member and showing your e-mail address.')
     )
