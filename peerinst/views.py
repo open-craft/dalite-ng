@@ -128,7 +128,7 @@ def logout_view(request):
 
 def welcome(request):
     try:
-        teacher = Teacher.objects.get(user__username=request.user.username)
+        teacher = Teacher.objects.get(user=request.user)
         return HttpResponseRedirect(reverse('teacher', kwargs={ 'pk' : teacher.pk }))
     except ObjectDoesNotExist:
         return HttpResponseRedirect(reverse('assignment-list'))
