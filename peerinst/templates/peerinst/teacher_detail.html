@@ -1,4 +1,5 @@
 {% extends 'peerinst/base.html' %}
+
 {% load i18n %}
 
 {% block body %}
@@ -6,23 +7,43 @@
 <h1>My account</h1>
 <div>
   <h2>Identity</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-update' teacher.id %}">Edit identity</a> | <a href="{% url 'password_change' %}">Change password</a></div>
-  <div style="margin-left:20pt;">
-    <span style="float:left; margin-right:6pt;">Username: </span><div>{{ object.user.username }}</div>
-    <span style="float:left; margin-right:6pt;">Discipline(s): </span>
-    <div>
-      {% for d in object.disciplines.all %}
-        {{ d.title }}{% if not forloop.last %}, {% endif %}
-      {% endfor %}
-    </div>
-    <span style="float:left; margin-right:6pt;">Institution(s): </span>
-    <div>
-      {% for i in object.institutions.all %}
-        {{ i.name }}{% if not forloop.last %}, {% endif %}
-      {% endfor %}
-    </div>
-  </div>
-  <div style="clear:both;"></div>
+
+  <ul class="mdc-list mdc-list--two-line">
+    <li class="mdc-list-item" onclick="edit_user()">
+      <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">account_circle</i></span>
+      <span class="mdc-list-item__text">
+        {{ object.user.username }}
+        <span class="mdc-list-item__secondary-text">
+          {% trans "Email: " %} {{ user.email }}
+        </span>
+        <span class="mdc-list-item__secondary-text">
+          {% trans "Member since: " %} {{ user.date_joined|date:"M d Y"  }}
+        </span>
+      </span>
+    </li>
+    <li class="mdc-list-item" onclick="edit_identity()">
+      <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">book</i></span>
+      <span class="mdc-list-item__text">
+        {% for d in object.disciplines.all %}
+          {{ d.title }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        <span class="mdc-list-item__secondary-text">
+          {% trans "Discipline" %}
+        </span>
+      </span>
+    </li>
+    <li class="mdc-list-item" onclick="edit_identity()">
+      <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">school</i></span>
+      <span class="mdc-list-item__text">
+        {% for i in object.institutions.all %}
+          {{ i.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        <span class="mdc-list-item__secondary-text">
+          {% trans "Institution" %}
+        </span>
+      </span>
+    </li>
+  </ul>
 </div>
 
 <div>
@@ -88,4 +109,13 @@
   {% endfor %}
   </ol>
 </div>
+
+<script>
+function edit_user() {
+  location="{% url 'password_change' %}";
+}
+function edit_identity() {
+  location="{% url 'teacher-update' teacher.id %}";
+}
+</script>
 {% endblock %}
