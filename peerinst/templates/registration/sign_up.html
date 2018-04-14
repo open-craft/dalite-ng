@@ -19,66 +19,22 @@
 
   <form method="post">
     {% csrf_token %}
-    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
-      {{ form.email|add_class:"mdc-text-field__input" }}
-      {{ form.email.label_tag|add_class:"mdc-floating-label"|cut:":" }}
-      <div class="mdc-notched-outline">
-        <svg>
-          <path class="mdc-notched-outline__path"/>
-        </svg>
+    {% for field in form %}
+      <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+        {{ field|add_class:"mdc-text-field__input" }}
+        {{ field.label_tag|add_class:"mdc-floating-label"|cut:":" }}
+        <div class="mdc-notched-outline">
+          <svg>
+            <path class="mdc-notched-outline__path"/>
+          </svg>
+        </div>
+        <div class="mdc-notched-outline__idle"></div>
       </div>
-      <div class="mdc-notched-outline__idle"></div>
-    </div>
-    {{ form.errors.email }}
-    <br>
-    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
-      {{ form.username|add_class:"mdc-text-field__input" }}
-      {{ form.username.label_tag|add_class:"mdc-floating-label"|cut:":" }}
-      <div class="mdc-notched-outline">
-        <svg>
-          <path class="mdc-notched-outline__path"/>
-        </svg>
-      </div>
-      <div class="mdc-notched-outline__idle"></div>
-    </div>
-    {{ form.errors.username }}
-    <br>
-    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
-      {{ form.password1|add_class:"mdc-text-field__input" }}<br>
-      {{ form.password1.label_tag|add_class:"mdc-floating-label"|cut:":" }}
-      <div class="mdc-notched-outline">
-        <svg>
-          <path class="mdc-notched-outline__path"/>
-        </svg>
-      </div>
-      <div class="mdc-notched-outline__idle"></div>
-    </div>
-    {{ form.errors.password1 }}
-    <br>
-    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
-      {{ form.password2|add_class:"mdc-text-field__input" }}<br>
-      {{ form.password2.label_tag|add_class:"mdc-floating-label"|cut:":" }}
-      <div class="mdc-notched-outline">
-        <svg>
-          <path class="mdc-notched-outline__path"/>
-        </svg>
-      </div>
-      <div class="mdc-notched-outline__idle"></div>
-    </div>
-    {{ form.errors.password2 }}
-    <br>
-    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
-      {{ form.url|add_class:"mdc-text-field__input" }}<br>
-      {{ form.url.label_tag|add_class:"mdc-floating-label"|cut:":" }}
-      <div class="mdc-notched-outline">
-        <svg>
-          <path class="mdc-notched-outline__path"/>
-        </svg>
-      </div>
-      <div class="mdc-notched-outline__idle"></div>
-    </div>
-    {{ form.errors.website }}
-    <br>
+      <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+        {{ field.help_text|safe }}
+      </p>
+      {{ form.errors.field }}
+    {% endfor %}
     <br>
     By clicking on 'Register' you agree to the <a href="{% url 'terms_teacher' %}">Terms of Service</a>.
     <br>
