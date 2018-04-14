@@ -10,25 +10,6 @@
   <a href="{% url 'password_reset' %}">Forgot password</a> | <a href="{% url 'sign_up' %}">Sign up</a>
 </div>
 
-<form method="post">
-{% csrf_token %}
-
-  <div class="mdc-text-field">
-    {{ form.username|add_class:"mdc-text-field__input" }}
-    {{ form.username.label_tag|add_class:"mdc-floating-label mdc-floating-label--float-above" }}
-  </div>
-
-  <div class="mdc-text-field">
-    {{ form.password.label_tag }}<br>
-    {{ form.password }}
-  </div>
-
-  <div>
-    <input type="hidden" name="next" value="{{ next }}" />
-    <input class="mdc-button mdc-button--raised" type="submit" value="Login"  data-mdc-auto-init="MDCRipple" />
-  </div>
-</form>
-
 {% if form.errors %}
   <p>
     Your username and password didn't match or your account has not yet been activated. Please try again.
@@ -44,5 +25,35 @@
     <p>Please login to access this page.</p>
   {% endif %}
 {% endif %}
+
+<form method="post">
+{% csrf_token %}
+
+  <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
+    {{ form.username|add_class:"mdc-text-field__input" }}
+    {{ form.username.label_tag|add_class:"mdc-floating-label"|cut:":" }}
+    <div class="mdc-notched-outline">
+      <svg>
+        <path class="mdc-notched-outline__path"/>
+      </svg>
+    </div>
+    <div class="mdc-notched-outline__idle"></div>
+  </div>
+  <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
+    {{ form.password|add_class:"mdc-text-field__input" }}<br>
+    {{ form.password.label_tag|add_class:"mdc-floating-label"|cut:":" }}
+    <div class="mdc-notched-outline">
+      <svg>
+        <path class="mdc-notched-outline__path"/>
+      </svg>
+    </div>
+    <div class="mdc-notched-outline__idle"></div>
+  </div>
+
+  <div>
+    <input type="hidden" name="next" value="{{ next }}" />
+    <input class="mdc-button mdc-button--raised" type="submit" value="Login"  data-mdc-auto-init="MDCRipple" />
+  </div>
+</form>
 
 {% endblock %}

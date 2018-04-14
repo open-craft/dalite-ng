@@ -1,6 +1,5 @@
 body {
     color: #3C3C3C;
-    font: 1em/1.6em "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
     margin: 0pt;
 }
 p {
@@ -31,19 +30,6 @@ div.action {
     font-weight: 600;
 }
 
-input[type='text'], textarea {
-    background: none repeat scroll 0 0 #FFF;
-    border: 1px solid #C8C8C8;
-    border-radius: 0;
-    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6), 0px 0px 3px 0px rgba(0, 0, 0, 0.1) inset;
-    box-sizing: border-box;
-    font: 1em "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
-    padding: 5px 12px;
-    vertical-align: top;
-    margin-left: 1em;
-    margin-bottom: .5em;
-}
-
 ul {
     list-style: none;
 }
@@ -53,13 +39,6 @@ ul#id_first_answer_choice {
     margin-bottom: 2em;
 }
 
-input[type='text'] {
-    height: 35px;
-}
-
-input[type='text']:focus, .form-field:focus {
-    background-color: #FAFAFA;
-}
 
 .rationales {
     display: table;
@@ -221,10 +200,6 @@ a {
 .note {
   font-size: 10pt;
 }
-
-
-
-
 
 @media (max-width: 450px) {
   ul {
