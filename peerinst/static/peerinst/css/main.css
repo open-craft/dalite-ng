@@ -223,31 +223,6 @@ a {
 }
 
 
-/* login and password change */
-form[id*="password"] {
-  width:fit-content;
-  width:-moz-fit-content;
-  font-size: 10pt;
-}
-form[action*="login"] {
-  width:fit-content;
-  width:-moz-fit-content;
-  font-size: 10pt;
-}
-#sign_up {
-  width:fit-content;
-  width:-moz-fit-content;
-  font-size: 10pt;
-}
-#id_url, #id_email, #id_username, #id_password, #id_old_password, #id_new_password1, #id_password1, #id_password2, #id_new_password2 {
-  padding: 1px;
-  margin: 0px;
-  border-width: thin;
-  height: 25px;
-  width: 200px;
-  box-sizing: border-box;
-  margin-bottom: 5px;
-}
 
 
 

@@ -19,7 +19,7 @@ def add_class(html, css_class, autoescape=True):
     class CustomTagParser(HTMLParser):
         new_tag = ''
 
-        def handle_starttag(self, tag, attrs):
+        def add_class(self, tag, attrs):
             class_added = False
             self.new_tag = self.new_tag + '<' + tag
             for key, value in attrs:
@@ -32,12 +32,19 @@ def add_class(html, css_class, autoescape=True):
             if not class_added:
                 self.new_tag = self.new_tag + 'class=\"' + css_class + '\" '
 
+            return
+
+        def handle_starttag(self, tag, attrs):
+            self.add_class(tag, attrs)
+
             self.new_tag = self.new_tag + '>'
 
             return
 
         def handle_startendtag(self, tag, attrs):
-            self.new_tag = self.new_tag.rstrip('>') + tag
+            self.add_class(tag, attrs)
+
+            self.new_tag = self.new_tag + '/>'
 
             return
 
@@ -50,10 +57,6 @@ def add_class(html, css_class, autoescape=True):
             self.new_tag = self.new_tag + '</' + tag + '>'
 
             return
-
-        def processed_tag(self):
-
-            return new_tag
 
     parser = CustomTagParser()
     parser.feed(html)

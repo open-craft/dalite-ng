@@ -10,12 +10,12 @@
   <a href="{% url 'password_reset' %}">Forgot password</a> | <a href="{% url 'sign_up' %}">Sign up</a>
 </div>
 
-<form method="post" action="{% url 'login' %}">
+<form method="post">
 {% csrf_token %}
 
   <div class="mdc-text-field">
-    {{ form.username.label_tag|add_class:"mdc-floating-label" }}
-    {{ form.username }}
+    {{ form.username|add_class:"mdc-text-field__input" }}
+    {{ form.username.label_tag|add_class:"mdc-floating-label mdc-floating-label--float-above" }}
   </div>
 
   <div class="mdc-text-field">
