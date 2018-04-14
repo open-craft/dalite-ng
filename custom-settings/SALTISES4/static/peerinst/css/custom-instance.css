@@ -1,3 +1,8 @@
+:root {
+    --mdc-theme-primary: #54c0db;
+    --mdc-theme-secondary: #fff946;
+    --mdc-theme-background: #f4f4f4;
+}
 body {
     background-color: #f4f4f4;
     font-family: 'Montserrat', sans-serif;

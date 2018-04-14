@@ -1,50 +1,48 @@
 {% extends "peerinst/base.html" %}
 
+{% load add_class %}
+
 {% block body %}
 
 <h1>Login</h1>
 
-<div class="admin-link"><a href="{% url 'password_reset' %}">Forgot password</a> | <a href="{% url 'sign_up' %}">Sign up</a></div>
+<div class="admin-link">
+  <a href="{% url 'password_reset' %}">Forgot password</a> | <a href="{% url 'sign_up' %}">Sign up</a>
+</div>
 
 <form method="post" action="{% url 'login' %}">
 {% csrf_token %}
 
-<div>
-  {{ form.username.label_tag }}<br>
-  {{ form.username }}
-</div>
-<div>
-  {{ form.password.label_tag }}<br>
-  {{ form.password }}
-</div>
-<div>
-  <input type="submit" value="Login" />
-  <input type="hidden" name="next" value="{{ next }}" />
-</div>
+  <div class="mdc-text-field">
+    {{ form.username.label_tag|add_class:"mdc-floating-label" }}
+    {{ form.username }}
+  </div>
 
+  <div class="mdc-text-field">
+    {{ form.password.label_tag }}<br>
+    {{ form.password }}
+  </div>
+
+  <div>
+    <input type="hidden" name="next" value="{{ next }}" />
+    <input class="mdc-button mdc-button--raised" type="submit" value="Login"  data-mdc-auto-init="MDCRipple" />
+  </div>
 </form>
 
-<i class="mdc-icon-toggle material-icons" role="button" aria-pressed="false"
-   aria-label="Add to favorites" tabindex="0"
-   data-toggle-on='{"label": "Remove from favorites", "content": "favorite"}'
-   data-toggle-off='{"label": "Add to favorites", "content": "favorite_border"}'
-   data-mdc-auto-init="MDCIconToggle">
-  favorite_border
-</i>
-
 {% if form.errors %}
-  <p>Your username and password didn't match or your account has not yet been activated. Please try again.</p>
+  <p>
+    Your username and password didn't match or your account has not yet been activated. Please try again.
+  </p>
 {% endif %}
 
 {% if next %}
   {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-  please login with an account that has access.</p>
+    <p>
+      Your account doesn't have access to this page. To proceed, please login with an account that has access.
+    </p>
   {% else %}
-    <p>Please login to see this page.</p>
+    <p>Please login to access this page.</p>
   {% endif %}
 {% endif %}
-
-
 
 {% endblock %}
