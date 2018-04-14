@@ -156,9 +156,10 @@ class SignUpForm(UserCreationForm):
 
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()
-        pwd = cleaned_data['password1']
-        password_validation.validate_password(pwd)
-
+        pwd = cleaned_data.get('password1')
+        if pwd:
+            password_validation.validate_password(pwd)
+            
         return cleaned_data
 
     class Meta:

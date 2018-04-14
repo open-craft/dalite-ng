@@ -33,7 +33,7 @@
       <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
         {{ field.help_text|safe }}
       </p>
-      {{ form.errors.field }}
+      {{ field.errors }}
     {% endfor %}
     <br>
     By clicking on 'Register' you agree to the <a href="{% url 'terms_teacher' %}">Terms of Service</a>.
