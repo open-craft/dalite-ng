@@ -103,8 +103,11 @@ yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
 var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/20));
 
 function f(v,x,t,a) {
-  return Math.min(Math.max(10*flexibleExpansionRatio,2),4)*a*Math.sin(x-0.5*v*t);
+  return Math.min(Math.max(10*flexibleExpansionRatio,2),4)*a*Math.sin(x-0.5*v*(t-dt));
 }
+
+var dt = 0;
+var t = d3.now();
 
 var a1 = 0.5;
 var a2 = 0.3;
@@ -162,12 +165,15 @@ g.append("path")
   .duration(50)
   .on("start", function repeat() {
         if (flexibleExpansionRatio>0.01) {
+          t = d3.now();
           d3.active(this)
               .attr("d",intersection1)
             .transition()
               .on("start", repeat);
         }
         else {
+          dt += d3.now() - t;
+          t = d3.now();
           d3.active(this)
           .transition()
             .on("start", repeat);
