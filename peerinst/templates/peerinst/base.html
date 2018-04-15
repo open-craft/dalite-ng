@@ -82,10 +82,10 @@
       console.info(window.parent.document.body.style.backgroundColor);
     </script>
 
-    {% block scripts %}{% endblock %}
-
     <script src="{% static 'peerinst/js/vendor/material-components-web.min.js'  %}"></script>
     <script>mdc.autoInit()</script>
+
+    {% block scripts %}{% endblock %}
 
   </body>
 </html>

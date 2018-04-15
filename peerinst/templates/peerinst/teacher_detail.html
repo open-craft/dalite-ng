@@ -5,6 +5,7 @@
 {% block body %}
 
 <h1>My account</h1>
+
 <div>
   <h2>Identity</h2>
 
@@ -20,6 +21,7 @@
           {% trans "Member since: " %} {{ user.date_joined|date:"M d Y"  }}
         </span>
       </span>
+      <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
     </li>
     <li class="mdc-list-item" onclick="edit_identity()">
       <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">book</i></span>
@@ -31,6 +33,7 @@
           {% trans "Discipline" %}
         </span>
       </span>
+      <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
     </li>
     <li class="mdc-list-item" onclick="edit_identity()">
       <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">school</i></span>
@@ -42,6 +45,7 @@
           {% trans "Institution" %}
         </span>
       </span>
+      <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
     </li>
   </ul>
 </div>
@@ -103,12 +107,16 @@
       <span class="admin-link" ><a href="{% url 'blinkAssignment-update' a.pk %}">Edit</a></span>
       <br>
       {% if a.blinkassignmentquestion_set.all|length > 0 %}
-        <a href="{% url 'blinkAssignment-start' a.key %}"><input type="button" value="START"></a>
+        <a href="{% url 'blinkAssignment-start' a.key %}">
+            <input class="mdc-button mdc-button--raised mdc-ripple-surface" type="button" value="Start" data-mdc-auto-init="MDCRipple"/>
+        </a>
       {% endif %}
     </li>
   {% endfor %}
   </ol>
 </div>
+
+
 
 <script>
 function edit_user() {

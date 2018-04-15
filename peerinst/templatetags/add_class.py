@@ -8,7 +8,7 @@ register = Library()
 @register.filter(needs_autoescape=True)
 @stringfilter
 def add_class(html, css_class, autoescape=True):
-    """Appends given css class to html tag"""
+    """Appends given css class to first passed html tag"""
 
     from HTMLParser import HTMLParser
 
@@ -18,19 +18,21 @@ def add_class(html, css_class, autoescape=True):
 
     class CustomTagParser(HTMLParser):
         new_tag = ''
+        class_added = False
 
         def add_class(self, tag, attrs):
-            class_added = False
+
             self.new_tag = self.new_tag + '<' + tag
             for key, value in attrs:
-                if key == 'class':
+                if key == 'class' and not self.class_added:
                     self.new_tag = self.new_tag + ' ' + key + '=\"' + value + ' ' + css_class + '\" '
-                    class_added = True
+                    self.class_added = True
                 else:
                     self.new_tag = self.new_tag + ' ' + key + '=\"' + value + '\" '
 
-            if not class_added:
+            if not self.class_added:
                 self.new_tag = self.new_tag + 'class=\"' + css_class + '\" '
+                self.class_added = True
 
             return
 
