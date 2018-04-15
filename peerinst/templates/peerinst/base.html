@@ -52,6 +52,7 @@
     </header>
 
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="{% static 'peerinst/js/vendor/material-components-web.min.js'  %}"></script>
     <div class="site-content">
       {% block body %}{% endblock %}
     </div>
@@ -82,7 +83,6 @@
       console.info(window.parent.document.body.style.backgroundColor);
     </script>
 
-    <script src="{% static 'peerinst/js/vendor/material-components-web.min.js'  %}"></script>
     <script>mdc.autoInit()</script>
 
     {% block scripts %}{% endblock %}

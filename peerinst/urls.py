@@ -55,6 +55,7 @@ urlpatterns = [
     url(r'^teacher/(?P<pk>[0-9]+)/groups/$', views.TeacherGroups.as_view(), name='teacher-groups'),
 
     # Auth
+    url(r'^test/$', views.test, name='test'),
     url(r'^$', views.landing_page, name='landing_page'),
     url(r'^signup/$', views.sign_up, name='sign_up'),
     url(r'^login/$', auth_views.login, name='login'),

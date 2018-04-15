@@ -56,6 +56,10 @@ LOGGER = logging.getLogger(__name__)
 
 # Views related to Auth
 
+def test(request):
+    return TemplateResponse(request, 'registration/test.html')
+    
+
 def admin_check(user):
     return user.is_superuser
 

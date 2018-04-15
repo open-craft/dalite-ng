@@ -1,0 +1,253 @@
+{% extends "peerinst/base.html" %}
+
+{% block stylesheets %}
+<style>
+.mdc-toolbar--flexible {
+  --mdc-toolbar-ratio-to-extend-flexible: 10;
+}
+.mdc-toolbar {
+  padding-left: 0pt;
+}
+#animation {
+  display: block;
+  margin:auto;
+  overflow:visible;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<header class="mdc-toolbar mdc-toolbar--fixed mdc-toolbar--flexible mdc-toolbar--waterfall">
+  <div class="mdc-toolbar__row">
+    <svg id="animation" width=800 height=80></svg>
+  </div>
+</header>
+
+<main class="mdc-toolbar-fixed-adjust">
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+  <p class="demo-paragraph">
+    {% lorem %}
+  </p>
+</main>
+
+<script>
+  var toolbar = mdc.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
+  toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
+
+  var flexibleExpansionRatio = 1.0;
+  toolbar.listen('MDCToolbar:change', function(evt) {
+    flexibleExpansionRatio = evt.detail.flexibleExpansionRatio;
+  });
+</script>
+
+<script>
+function logo(){
+var svg = d3.select("#animation");
+svg.attr("width",document.body.offsetWidth);
+
+var width = +svg.attr("width"),
+height = +svg.attr("height"),
+margin = {top:1,bottom:1,left:1,right:1};
+
+var innerWidth = width-margin.left-margin.right,
+innerHeight = height-margin.top-margin.bottom;
+
+svg.selectAll("g").remove();
+
+var g = svg.append("g").attr("transform","translate("+margin.left+","+(margin.top+innerHeight/2)+")");
+
+var x = d3.scaleLinear().domain([0,2*Math.PI]).range([0,innerWidth]),
+y = d3.scaleLinear().domain([-1,1]).range([-innerHeight/2,innerHeight/2]);
+
+var xAxis = g.append("g").style("opacity",0).call(d3.axisBottom(x)),
+yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
+
+var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/20));
+
+function f(v,x,t,a) {
+  return Math.min(Math.max(10*flexibleExpansionRatio,2),4)*a*Math.sin(x-0.5*v*t);
+}
+
+var a1 = 0.5;
+var a2 = 0.3;
+var a3 = 0.4;
+
+var v1 = 0.001;
+var v2 = 0.0018;
+var v3 = -0.001;
+
+var y1 = 0;
+var y2 = -0.1;
+var y3 = +0.05;
+
+var line1 = d3.line()
+    .x(function(d) { return x(d); })
+    .y(function(d) { return y(f(v1,d,d3.now(),a1)+y1); })
+    .curve(d3.curveNatural);
+
+var line2 = d3.line()
+    .x(function(d) { return x(d); })
+    .y(function(d) { return y(f(v2,d,d3.now(),a2)+y2); })
+    .curve(d3.curveNatural);
+
+var line3 = d3.line()
+    .x(function(d) { return x(d); })
+    .y(function(d) { return y(f(v3,d,d3.now(),a3)+y3); })
+    .curve(d3.curveNatural);
+
+var intersection1 = d3.area()
+    .x(line1.x())
+    .y0(y(0))
+    .y1(line1.y())
+    .curve(d3.curveNatural);
+
+var intersection2 = d3.area()
+    .x0(line1.x())
+    .y0(line1.y())
+    .x1(line2.x())
+    .y1(line2.y())
+    .curve(d3.curveNatural);
+
+var intersection3 = d3.area()
+    .x0(line1.x())
+    .y0(line1.y())
+    .x1(line3.x())
+    .y1(line3.y())
+    .curve(d3.curveNatural);
+
+g.append("path")
+  .datum(xPoints)
+  .attr("class","intersection")
+  .attr("fill",d3.rgb(244,244,244,0.2))
+  .attr("d",intersection1)
+  .transition()
+  .duration(50)
+  .on("start", function repeat() {
+        d3.active(this)
+            .attr("d",intersection1)
+          .transition()
+            .on("start", repeat);
+      });
+
+g.append("path")
+  .datum(xPoints)
+  .attr("class","intersection")
+  .attr("fill",d3.rgb(244,244,244,0.4))
+  .attr("d",intersection2)
+  .transition()
+  .duration(50)
+  .on("start", function repeat() {
+        d3.active(this)
+            .attr("d",intersection2)
+          .transition()
+            .on("start", repeat);
+      });
+
+g.append("path")
+  .datum(xPoints)
+  .attr("class","intersection")
+  .attr("fill",d3.rgb(0,66,102,0.4))
+  .attr("d",intersection3)
+  .transition()
+  .duration(50)
+  .on("start", function repeat() {
+        d3.active(this)
+            .attr("d",intersection3)
+          .transition()
+            .on("start", repeat);
+      });
+
+g.append("text")
+.attr("x",margin.left+innerWidth/2)
+.attr("dx","25pt")
+.attr("y",y(0))
+.attr("fill","white")
+.attr("text-anchor","middle")
+.style("font-size","40pt")
+.style("cursor","pointer")
+.text("DALITE")
+.on("click",function(){
+  window.location="{% url 'login' %}"
+});
+
+g.append("text")
+.attr("x",margin.left+innerWidth/2)
+.attr("dx","-70pt")
+.attr("y",y(0))
+.attr("fill","white")
+.attr("text-anchor","middle")
+.style("font-family","Cardo, serif")
+.style("font-style",'italic')
+.style("font-size","40pt")
+.style("cursor","pointer")
+.text("my")
+.on("click",function(){
+  window.location="{% url 'login' %}"
+});
+
+g.append("text")
+.attr("x",margin.left+innerWidth/2+175)
+.attr("y",y(0))
+.attr("dx",-110)
+.attr("dy","16pt")
+.attr("fill","white")
+.attr("text-anchor","end")
+.style("font-family","Cardo, serif")
+.style("font-style",'italic')
+.style("font-size","14pt")
+.text("by")
+
+g.append("text")
+.attr("x",margin.left+innerWidth/2+145)
+.attr("y",y(0))
+.attr("dx","20pt")
+.attr("dy","16pt")
+.attr("fill","white")
+.attr("text-anchor","end")
+.style("font-size","14pt")
+.text("SALTISE/S4");
+
+}
+logo();
+window.addEventListener("resize",logo);
+
+</script>
+{% endblock %}
