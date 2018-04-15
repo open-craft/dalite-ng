@@ -161,10 +161,17 @@ g.append("path")
   .transition()
   .duration(50)
   .on("start", function repeat() {
-        d3.active(this)
-            .attr("d",intersection1)
+        if (flexibleExpansionRatio>0.01) {
+          d3.active(this)
+              .attr("d",intersection1)
+            .transition()
+              .on("start", repeat);
+        }
+        else {
+          d3.active(this)
           .transition()
             .on("start", repeat);
+        }
       });
 
 g.append("path")
@@ -175,10 +182,17 @@ g.append("path")
   .transition()
   .duration(50)
   .on("start", function repeat() {
-        d3.active(this)
-            .attr("d",intersection2)
+        if (flexibleExpansionRatio>0.01) {
+          d3.active(this)
+              .attr("d",intersection2)
+            .transition()
+              .on("start", repeat);
+        }
+        else {
+          d3.active(this)
           .transition()
             .on("start", repeat);
+        }
       });
 
 g.append("path")
@@ -189,10 +203,17 @@ g.append("path")
   .transition()
   .duration(50)
   .on("start", function repeat() {
-        d3.active(this)
-            .attr("d",intersection3)
+        if (flexibleExpansionRatio>0.01) {
+          d3.active(this)
+              .attr("d",intersection3)
+            .transition()
+              .on("start", repeat);
+        }
+        else {
+          d3.active(this)
           .transition()
             .on("start", repeat);
+        }
       });
 
 g.append("text")
