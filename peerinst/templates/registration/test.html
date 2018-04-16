@@ -8,6 +8,13 @@
 .mdc-toolbar {
   padding-left: 0pt;
 }
+.embedded-video {
+  display: block;
+  margin:auto;
+}
+.white {
+  background-color: white;
+}
 #animation {
   display: block;
   margin:auto;
@@ -24,48 +31,77 @@
 </header>
 
 <main class="mdc-toolbar-fixed-adjust">
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
-  <p class="demo-paragraph">
-    {% lorem %}
-  </p>
+  <section>
+    <h1 class="mdc-typography--display3">Introduction</h1>
+    <h2 class="mdc-typography--headline">Paragraph title</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+    <h2 class="mdc-typography--headline">Paragraph title</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3">Features</h1>
+    <h2 class="mdc-typography--headline">Paragraph title</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+    <div class="mdc-layout-grid">
+      <div class="mdc-layout-grid__inner">
+        <div class="mdc-layout-grid__cell--span-3">
+          <svg width=100 height=100></svg>
+          <div class="mdc-typography--caption">Number of questions</div>
+        </div>
+        <div class="mdc-layout-grid__cell--span-3">
+          <svg width=100 height=100></svg>
+          <div class="mdc-typography--caption">Number of rationales</div>
+        </div>
+        <div class="mdc-layout-grid__cell--span-3">
+          <svg width=100 height=100></svg>
+          <div class="mdc-typography--caption">Number of teachers</div>
+        </div>
+        <div class="mdc-layout-grid__cell--span-3">
+          <svg width=100 height=100></svg>
+          <div class="mdc-typography--caption">Number of students</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3">Take a guided tour</h1>
+    <div>
+      <iframe class="embedded-video" width="560" height="315" src="https://www.youtube.com/embed/uW2r0jGNp8I?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3">SALTISE/S4</h1>
+    <h2 class="mdc-typography--headline">Vision</h2>
+    <p class="mdc-typography--body1">
+      SALTISE is a learning community that fosters the development and research of tools and resources for pedagogical innovations as well as bringing together educators (researchers and practitioners) and professional development personnel across the province of Quebec, as well as welcoming national and international partnerships.
+    </p>
+    <h2 class="mdc-typography--headline">The S4 project</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3">Partners</h1>
+    <h2 class="mdc-typography--headline">Paragraph title</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+    <ul class="mdc-image-list mdc-image-list--masonry partner-list">
+      <li class="mdc-image-list__item">
+        <img class="mdc-image-list__image" src="...">
+      </li>
+    </ul>
+  </section>
 </main>
 
 <script>
