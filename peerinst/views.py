@@ -1404,7 +1404,7 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
         if request.user.is_authenticated():
             form = forms.RankBlinkForm(request.POST)
             if form.is_valid():
-                relationship = form.cleaned_data['q']
+                relationship = form.cleaned_data['q'].get(blinkassignment=self.object)
                 operation = form.cleaned_data['rank']
                 if operation == "down":
                     relationship.move_down_rank()
