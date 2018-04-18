@@ -37,7 +37,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question, VerifiedDomain
+from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question, Answer, Discipline, VerifiedDomain
 from django.contrib.auth.models import User
 
 #blink
@@ -57,7 +57,30 @@ LOGGER = logging.getLogger(__name__)
 # Views related to Auth
 
 def test(request):
-    return TemplateResponse(request, 'registration/test.html')
+    top_disciplines = Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]
+
+    disciplines = {}
+    for d in top_disciplines.all():
+        disciplines[d.title] = {}
+        disciplines[d.title]['questions'] = Question.objects.filter(discipline=d).count()
+        disciplines[d.title]['rationales'] = Answer.objects.filter(question__discipline=d).count()
+        #disciplines[d.title]['students'] = Student.objects.filter(discipline=d).count()
+        #disciplines[d.title]['teachers'] = Teacher.objects.filter(disciplines__contains=d).count()
+
+    disciplines['All'] = {}
+    disciplines['All']['questions'] = Question.objects.count()
+    disciplines['All']['rationales'] = Answer.objects.count()
+    disciplines['All']['students'] = Student.objects.count()
+    disciplines['All']['teachers'] = Teacher.objects.count()
+
+    print(disciplines)
+
+    return TemplateResponse(
+        request,
+        'registration/test.html',
+        context={
+            'disciplines': disciplines,
+        })
 
 
 def admin_check(user):
@@ -1408,6 +1431,8 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
         if request.user.is_authenticated():
             form = forms.RankBlinkForm(request.POST)
             if form.is_valid():
+                # Questions can appear in multiple assignments, but only once in each.
+                # Get Q for _this_ assignment.
                 relationship = form.cleaned_data['q'].get(blinkassignment=self.object)
                 operation = form.cleaned_data['rank']
                 if operation == "down":

@@ -2,21 +2,32 @@
 
 {% block stylesheets %}
 <style>
+.stats {
+  display:block;
+  margin:auto;
+}
 .mdc-toolbar--flexible {
-  --mdc-toolbar-ratio-to-extend-flexible: 10;
+  --mdc-toolbar-ratio-to-extend-flexible:10;
 }
 .mdc-toolbar {
-  padding-left: 0pt;
+  padding-left:0pt;
+}
+.mdc-typography--caption {
+   text-align:center;
+}
+.mdc-typography--display3 {
+  /*position:sticky;
+  top:80px;*/
 }
 .embedded-video {
-  display: block;
+  display:block;
   margin:auto;
 }
 .white {
   background-color: white;
 }
 #animation {
-  display: block;
+  display:block;
   margin:auto;
   overflow:visible;
 }
@@ -32,7 +43,7 @@
 
 <main class="mdc-toolbar-fixed-adjust">
   <section>
-    <h1 class="mdc-typography--display3">Introduction</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Introduction</h1>
     <h2 class="mdc-typography--headline">Paragraph title</h2>
     <p class="mdc-typography--body1">
       {% lorem %}
@@ -44,42 +55,48 @@
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3">Features</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Features</h1>
     <h2 class="mdc-typography--headline">Paragraph title</h2>
     <p class="mdc-typography--body1">
       {% lorem %}
     </p>
+    <h2 class="mdc-typography--headline">Most active disciplines</h2>
+    <div class="mdc-chip-set mdc-chip-set--filter">
+      {% for d in disciplines %}
+      <div class="mdc-chip">
+        <div class="mdc-chip__checkmark" >
+          <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
+            <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
+                  d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+          </svg>
+        </div>
+        <div class="mdc-chip__text">{{ d }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
     <div class="mdc-layout-grid">
       <div class="mdc-layout-grid__inner">
-        <div class="mdc-layout-grid__cell--span-3">
-          <svg width=100 height=100></svg>
-          <div class="mdc-typography--caption">Number of questions</div>
-        </div>
-        <div class="mdc-layout-grid__cell--span-3">
-          <svg width=100 height=100></svg>
-          <div class="mdc-typography--caption">Number of rationales</div>
-        </div>
-        <div class="mdc-layout-grid__cell--span-3">
-          <svg width=100 height=100></svg>
-          <div class="mdc-typography--caption">Number of teachers</div>
-        </div>
-        <div class="mdc-layout-grid__cell--span-3">
-          <svg width=100 height=100></svg>
-          <div class="mdc-typography--caption">Number of students</div>
-        </div>
+        {% for l in disciplines.All %}
+          <div class="mdc-layout-grid__cell--span-3">
+            <svg class="stats" id="{{ l }}" width=100 height=100></svg>
+            <div class="mdc-typography--caption">{{ l|capfirst }}</div>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3">Take a guided tour</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Take a guided tour</h1>
+    <!-- Faster load time??: https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player -->
     <div>
       <iframe class="embedded-video" width="560" height="315" src="https://www.youtube.com/embed/uW2r0jGNp8I?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3">SALTISE/S4</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4</h1>
     <h2 class="mdc-typography--headline">Vision</h2>
     <p class="mdc-typography--body1">
       SALTISE is a learning community that fosters the development and research of tools and resources for pedagogical innovations as well as bringing together educators (researchers and practitioners) and professional development personnel across the province of Quebec, as well as welcoming national and international partnerships.
@@ -91,7 +108,7 @@
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3">Partners</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Partners</h1>
     <h2 class="mdc-typography--headline">Paragraph title</h2>
     <p class="mdc-typography--body1">
       {% lorem %}
@@ -105,6 +122,8 @@
 </main>
 
 <script>
+  var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
+
   var toolbar = mdc.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
   toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
 
@@ -311,6 +330,33 @@ g.append("text")
 }
 logo();
 window.addEventListener("resize",logo);
+
+</script>
+
+
+<script>
+data = {{ disciplines|safe }};
+labels = d3.keys(data);
+svg = [];
+width = [];
+height = [];
+for (var i in labels){
+  svg[i] =  d3.select("#"+labels[i]);
+  width[i] = +svg[i].attr('width');
+  height[i] = +svg[i].attr('height');
+
+  var g = svg[i].append("g")
+    .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
+
+  g.append("text")
+    .attr("class","count")
+    .attr("x",0)
+    .attr("y",0)
+    .attr("dy",20)
+    .style("font-size","40pt")
+    .attr("text-anchor","middle")
+    .text();
+}
 
 </script>
 {% endblock %}
