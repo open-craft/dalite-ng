@@ -56,6 +56,8 @@ LOGGER = logging.getLogger(__name__)
 
 # Views related to Auth
 
+
+
 def test(request):
     top_disciplines = Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]
 
@@ -81,8 +83,10 @@ def test(request):
     disciplines['All']['students'] = Student.objects.count()
     disciplines['All']['teachers'] = Teacher.objects.count()
 
-    print(disciplines)
-
+    
+    disciplines_json = json.dumps(disciplines)
+    print(json.dumps(disciplines,indent=4, separators=(',', ': ')))
+    
     return TemplateResponse(
         request,
         'registration/test.html',
