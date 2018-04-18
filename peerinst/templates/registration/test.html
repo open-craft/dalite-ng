@@ -7,7 +7,7 @@
   margin:auto;
 }
 .mdc-toolbar--flexible {
-  --mdc-toolbar-ratio-to-extend-flexible:10;
+  --mdc-toolbar-ratio-to-extend-flexible:15;
 }
 .mdc-toolbar {
   padding-left:0pt;
@@ -16,8 +16,8 @@
    text-align:center;
 }
 .mdc-typography--display3 {
-  /*position:sticky;
-  top:80px;*/
+  position:sticky;
+  top:80px;
 }
 .embedded-video {
   display:block;
@@ -44,24 +44,24 @@
 <main class="mdc-toolbar-fixed-adjust">
   <section>
     <h1 class="mdc-typography--display3 mdc-theme--background">Introduction</h1>
-    <h2 class="mdc-typography--headline">Paragraph title</h2>
+    <h2 class="mdc-typography--headline">History</h2>
     <p class="mdc-typography--body1">
-      {% lorem %}
+      Peer Instruction, popularized by Eric Mazur of Harvard University, is one of the most prevalent classroom activities today. Something fascinating happens during these peer discussions, whereby students can convince each other of the correct thinking. But what about instances when the class size is too small for diversity of answers, or the teacher wants to have students prepare for class using a similar approach? This is where DALITE was born!
     </p>
-    <h2 class="mdc-typography--headline">Paragraph title</h2>
+    <h2 class="mdc-typography--headline">myDALITE – the Next Generation</h2>
     <p class="mdc-typography--body1">
-      {% lorem %}
+      HarvardX, a founding member of the edX consortium, financed the development of DALITE into an open source, LTI compliant tool, making it available through most major Learning Management Systems, including Moodle, OpenEdx and Canvas. Since 2015, the SALTISE/S4 instance of DALITE, known as myDALITE.org, has been used in several Massive Open Online Classroom (MOOCs) on the edX platform, including Physics, Exercise Science, and Ethics and Morality. 
     </p>
   </section>
 
   <section>
     <h1 class="mdc-typography--display3 mdc-theme--background">Features</h1>
-    <h2 class="mdc-typography--headline">Paragraph title</h2>
+    <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
     <p class="mdc-typography--body1">
-      {% lorem %}
+      Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time. 
     </p>
     <h2 class="mdc-typography--headline">Most active disciplines</h2>
-    <div class="mdc-chip-set mdc-chip-set--filter">
+    <div class="mdc-chip-set mdc-chip-set--choice">
       {% for d in disciplines %}
       {% if d == "All" %}
         <div id="{{ d }}" class="mdc-chip mdc-chip--selected">
