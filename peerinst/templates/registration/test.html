@@ -63,15 +63,19 @@
     <h2 class="mdc-typography--headline">Most active disciplines</h2>
     <div class="mdc-chip-set mdc-chip-set--filter">
       {% for d in disciplines %}
-      <div class="mdc-chip">
-        <div class="mdc-chip__checkmark" >
-          <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
-            <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
-                  d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
-          </svg>
+      {% if d == "All" %}
+        <div id="{{ d }}" class="mdc-chip mdc-chip--selected">
+      {% else %}
+        <div id="{{ d }}" class="mdc-chip">
+      {% endif %}
+          <div class="mdc-chip__checkmark" >
+            <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
+              <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
+                    d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+            </svg>
+          </div>
+          <div class="mdc-chip__text">{{ d }}</div>
         </div>
-        <div class="mdc-chip__text">{{ d }}</div>
-      </div>
       {% endfor %}
     </div>
 
@@ -79,7 +83,7 @@
       <div class="mdc-layout-grid__inner">
         {% for l in disciplines.All %}
           <div class="mdc-layout-grid__cell--span-3">
-            <svg class="stats" id="{{ l }}" width=100 height=100></svg>
+            <svg class="stats" id="{{ l }}" width=150 height=100></svg>
             <div class="mdc-typography--caption">{{ l|capfirst }}</div>
           </div>
         {% endfor %}
@@ -336,7 +340,7 @@ window.addEventListener("resize",logo);
 
 <script>
 data = {{ json|safe }};
-labels = d3.keys(data);
+labels = d3.keys(data['All']);
 svg = [];
 width = [];
 height = [];
@@ -354,8 +358,9 @@ for (var i in labels){
     .attr("y",0)
     .attr("dy",20)
     .style("font-size","40pt")
+    .style("fill","var(--mdc-theme-primary)")
     .attr("text-anchor","middle")
-    .text();
+    .text(data['All'][labels[i]]);
 }
 
 </script>
