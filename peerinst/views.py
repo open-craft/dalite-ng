@@ -63,35 +63,36 @@ def test(request):
 
     disciplines = {}
     for d in top_disciplines.all():
-        disciplines[d.title] = {}
-        disciplines[d.title]['questions'] = Question.objects.filter(discipline=d).count()
-        disciplines[d.title]['rationales'] = Answer.objects.filter(question__discipline=d).count()
-        
+        disciplines[str(d.title)] = {}
+        disciplines[str(d.title)][str('questions')] = Question.objects.filter(discipline=d).count()
+        disciplines[str(d.title)][str('rationales')] = Answer.objects.filter(question__discipline=d).count()
+
         question_list=d.question_set.values_list('id',flat=True)
-        disciplines[d.title]['students'] = \
+        disciplines[str(d.title)][str('students')] = \
         len(\
             set(\
                 Answer.objects.filter(question_id__in=question_list)\
                 .exclude(user_token='')\
                 .values_list('user_token',flat=True)))
-        
-        disciplines[d.title]['teachers'] = d.teacher_set.count()
 
-    disciplines['All'] = {}
-    disciplines['All']['questions'] = Question.objects.count()
-    disciplines['All']['rationales'] = Answer.objects.count()
-    disciplines['All']['students'] = Student.objects.count()
-    disciplines['All']['teachers'] = Teacher.objects.count()
+        disciplines[str(d.title)]['teachers'] = d.teacher_set.count()
 
-    
+    disciplines[str('All')] = {}
+    disciplines[str('All')][str('questions')] = Question.objects.count()
+    disciplines[str('All')][str('rationales')] = Answer.objects.count()
+    disciplines[str('All')][str('students')] = Student.objects.count()
+    disciplines[str('All')][str('teachers')] = Teacher.objects.count()
+
     disciplines_json = json.dumps(disciplines)
+
     print(json.dumps(disciplines,indent=4, separators=(',', ': ')))
-    
+
     return TemplateResponse(
         request,
         'registration/test.html',
         context={
             'disciplines': disciplines,
+            'json': disciplines_json,
         })
 
 
