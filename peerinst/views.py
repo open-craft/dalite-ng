@@ -64,8 +64,16 @@ def test(request):
         disciplines[d.title] = {}
         disciplines[d.title]['questions'] = Question.objects.filter(discipline=d).count()
         disciplines[d.title]['rationales'] = Answer.objects.filter(question__discipline=d).count()
-        #disciplines[d.title]['students'] = Student.objects.filter(discipline=d).count()
-        #disciplines[d.title]['teachers'] = Teacher.objects.filter(disciplines__contains=d).count()
+        
+        question_list=d.question_set.values_list('id',flat=True)
+        disciplines[d.title]['students'] = \
+        len(\
+            set(\
+                Answer.objects.filter(question_id__in=question_list)\
+                .exclude(user_token='')\
+                .values_list('user_token',flat=True)))
+        
+        disciplines[d.title]['teachers'] = d.teacher_set.count()
 
     disciplines['All'] = {}
     disciplines['All']['questions'] = Question.objects.count()
