@@ -72,7 +72,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
     <h2 class="mdc-typography--headline">Most active disciplines</h2>
     <div class="mdc-chip-set mdc-chip-set--choice">
       {% for d in disciplines %}
-        <div id="{{ d }}" class="mdc-chip" onclick="update(this,event)" tabindex="0">
+        <div id="{{ d }}" class="mdc-chip" onclick="update(this,event)" tabindex="0" data-mdc-auto-init="MDCChip">
           <div class="mdc-chip__checkmark">
             <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
               <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
@@ -352,35 +352,67 @@ window.addEventListener("resize",logo);
 
 </script>
 
-
 <script>
 data = {{ json|safe }};
 labels = d3.keys(data['All']);
 svg = [];
 width = [];
 height = [];
+
+var g = [];
+var text = [];
+for (var i in labels){
+  svg[i] =  d3.select("#"+labels[i]);
+  width[i] = +svg[i].attr('width');
+  height[i] = +svg[i].attr('height');
+
+  g[i] = svg[i].append("g")
+    .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
+
+  text[i] = g[i].append("text")
+    .attr("class","count")
+    .attr("c",data['All'][labels[i]])
+    .attr("x",0)
+    .attr("y",0)
+    .attr("dy",20)
+    .style("font-size","40pt")
+    .style("fill","var(--mdc-theme-primary)")
+    .attr("text-anchor","middle")
+    .text(data['All'][labels[i]]);
+}
+
 function counts(dataset) {
 
-  d3.selectAll(".count").remove();
+  d3.selectAll(".count").interrupt();
 
-  for (var i in labels){
-    svg[i] =  d3.select("#"+labels[i]);
-    width[i] = +svg[i].attr('width');
-    height[i] = +svg[i].attr('height');
+  var delta = [];
+  var set = [];
 
-    var g = svg[i].append("g")
-      .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
+  for (let i in labels){
+    set[i] = false;
 
-    g.append("text")
-      .attr("class","count")
-      .attr("x",0)
-      .attr("y",0)
-      .attr("dy",20)
-      .style("font-size","40pt")
-      .style("fill","var(--mdc-theme-primary)")
-      .attr("text-anchor","middle")
-      .text(dataset[labels[i]]);
-  }
+    text[i].transition()
+    .duration(10)
+    .on("start", function repeat() {
+      if (set[i] == false) {
+        delta[i] = 0.01*((+this.getAttribute("c")) - (+dataset[labels[i]]));
+        set[i] = true;
+      }
+      if (Math.abs((+this.getAttribute("c")) - (+dataset[labels[i]])) >= Math.abs(0.9*delta[i])){
+        this.setAttribute("c",(+this.getAttribute("c")) - delta[i]);
+        if (+this.getAttribute("c") < 0) {
+          this.setAttribute("c",Math.abs(+this.getAttribute("c")));
+        }
+        d3.active(this)
+          .text((+this.getAttribute("c")).toFixed(0))
+          .transition()
+          .on("start", repeat);
+      }
+      else {
+        d3.interrupt(this);
+      }
+      });
+    }
 }
 
 function update(t,e) {
@@ -388,9 +420,6 @@ function update(t,e) {
   return;
 }
 
-counts(data['All']);
-
 </script>
-
 
 {% endblock %}
