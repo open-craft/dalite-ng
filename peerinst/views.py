@@ -61,6 +61,8 @@ LOGGER = logging.getLogger(__name__)
 def test(request):
     top_disciplines = Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]
 
+    print(top_disciplines)
+
     disciplines = {}
     for d in top_disciplines.all():
         disciplines[str(d.title)] = {}
@@ -85,6 +87,7 @@ def test(request):
 
     disciplines_json = json.dumps(disciplines)
 
+    print(disciplines)
     print(json.dumps(disciplines,indent=4, separators=(',', ': ')))
 
     return TemplateResponse(

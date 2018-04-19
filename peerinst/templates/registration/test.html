@@ -6,9 +6,6 @@
   display:block;
   margin:auto;
 }
-.mdc-toolbar--flexible {
-  --mdc-toolbar-ratio-to-extend-flexible:15;
-}
 .mdc-toolbar {
   padding-left:0pt;
 }
@@ -16,8 +13,11 @@
    text-align:center;
 }
 .mdc-typography--display3 {
+  padding-top:20px;
+  padding-bottom:10px;
   position:sticky;
-  top:80px;
+  top:70px;
+  z-index: 2;
 }
 .embedded-video {
   display:block;
@@ -25,6 +25,10 @@
 }
 .white {
   background-color: white;
+}
+main {
+  max-width:800px;
+  margin:auto;
 }
 #animation {
   display:block;
@@ -35,6 +39,11 @@
 {% endblock %}
 
 {% block body %}
+<script>
+// Override default size of header to fill page based on window size
+document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-flexible:"+window.innerHeight/65+" !important;}");
+</script>
+
 <header class="mdc-toolbar mdc-toolbar--fixed mdc-toolbar--flexible mdc-toolbar--waterfall">
   <div class="mdc-toolbar__row">
     <svg id="animation" width=800 height=80></svg>
@@ -48,9 +57,9 @@
     <p class="mdc-typography--body1">
       Peer Instruction, popularized by Eric Mazur of Harvard University, is one of the most prevalent classroom activities today. Something fascinating happens during these peer discussions, whereby students can convince each other of the correct thinking. But what about instances when the class size is too small for diversity of answers, or the teacher wants to have students prepare for class using a similar approach? This is where DALITE was born!
     </p>
-    <h2 class="mdc-typography--headline">myDALITE – the Next Generation</h2>
+    <h2 class="mdc-typography--headline">The Next Generation</h2>
     <p class="mdc-typography--body1">
-      HarvardX, a founding member of the edX consortium, financed the development of DALITE into an open source, LTI compliant tool, making it available through most major Learning Management Systems, including Moodle, OpenEdx and Canvas. Since 2015, the SALTISE/S4 instance of DALITE, known as myDALITE.org, has been used in several Massive Open Online Classroom (MOOCs) on the edX platform, including Physics, Exercise Science, and Ethics and Morality. 
+      HarvardX, a founding member of the edX consortium, financed the development of DALITE into an open source, LTI compliant tool, making it available through most major Learning Management Systems, including Moodle, OpenEdx and Canvas. Since 2015, the SALTISE/S4 instance of DALITE, known as myDALITE.org, has been used in several Massive Open Online Classroom (MOOCs) on the edX platform, including Physics, Exercise Science, and Ethics and Morality.
     </p>
   </section>
 
@@ -58,17 +67,13 @@
     <h1 class="mdc-typography--display3 mdc-theme--background">Features</h1>
     <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
     <p class="mdc-typography--body1">
-      Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time. 
+      Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
     </p>
     <h2 class="mdc-typography--headline">Most active disciplines</h2>
     <div class="mdc-chip-set mdc-chip-set--choice">
       {% for d in disciplines %}
-      {% if d == "All" %}
-        <div id="{{ d }}" class="mdc-chip mdc-chip--selected">
-      {% else %}
-        <div id="{{ d }}" class="mdc-chip">
-      {% endif %}
-          <div class="mdc-chip__checkmark" >
+        <div id="{{ d }}" class="mdc-chip" onclick="update(this,event)" tabindex="0">
+          <div class="mdc-chip__checkmark">
             <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
               <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
                     d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
@@ -127,6 +132,16 @@
 
 <script>
   var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
+
+  var chips = {}
+  /*var c = document.querySelectorAll('.mdc-chip');
+  c.forEach(function(d){
+    const chip = new mdc.chips.MDCChip(d);
+    chips[d.id] = chip;
+    if (d.id == "All"){
+      chip.toggleSelected();
+    }
+  });*/
 
   var toolbar = mdc.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
   toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
@@ -344,24 +359,38 @@ labels = d3.keys(data['All']);
 svg = [];
 width = [];
 height = [];
-for (var i in labels){
-  svg[i] =  d3.select("#"+labels[i]);
-  width[i] = +svg[i].attr('width');
-  height[i] = +svg[i].attr('height');
+function counts(dataset) {
 
-  var g = svg[i].append("g")
-    .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
+  d3.selectAll(".count").remove();
 
-  g.append("text")
-    .attr("class","count")
-    .attr("x",0)
-    .attr("y",0)
-    .attr("dy",20)
-    .style("font-size","40pt")
-    .style("fill","var(--mdc-theme-primary)")
-    .attr("text-anchor","middle")
-    .text(data['All'][labels[i]]);
+  for (var i in labels){
+    svg[i] =  d3.select("#"+labels[i]);
+    width[i] = +svg[i].attr('width');
+    height[i] = +svg[i].attr('height');
+
+    var g = svg[i].append("g")
+      .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
+
+    g.append("text")
+      .attr("class","count")
+      .attr("x",0)
+      .attr("y",0)
+      .attr("dy",20)
+      .style("font-size","40pt")
+      .style("fill","var(--mdc-theme-primary)")
+      .attr("text-anchor","middle")
+      .text(dataset[labels[i]]);
+  }
 }
 
+function update(t,e) {
+  counts(data[t.id]);
+  return;
+}
+
+counts(data['All']);
+
 </script>
+
+
 {% endblock %}
