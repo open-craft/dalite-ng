@@ -2,6 +2,9 @@
 
 {% block stylesheets %}
 <style>
+.icon {
+  font-size:24pt;
+}
 .stats {
   display:block;
   margin:auto;
@@ -15,9 +18,11 @@
 .mdc-typography--display3 {
   padding-top:20px;
   padding-bottom:10px;
+  /*margin-bottom: 0px;*/
   position:sticky;
   top:70px;
   z-index: 2;
+  background-image: /*linear-gradient(var(--mdc-theme-background),60%,var(--mdc-theme-background),transparent);*/
 }
 .embedded-video {
   display:block;
@@ -29,6 +34,25 @@
 main {
   max-width:800px;
   margin:auto;
+}
+footer {
+  color: white;
+  padding-top: 5px;
+  padding-bottom:5px;
+}
+footer a {
+  color: white;
+  padding-left:10px;
+}
+.footer_content {
+  margin-top:10px;
+  margin-left:20px;
+  margin-right:20px;
+}
+#scrollprompt {
+  position:absolute;
+  bottom:10px;
+  right:20px;
 }
 #animation {
   display:block;
@@ -47,12 +71,15 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
 <header class="mdc-toolbar mdc-toolbar--fixed mdc-toolbar--flexible mdc-toolbar--waterfall">
   <div class="mdc-toolbar__row">
     <svg id="animation" width=800 height=80></svg>
+    <i id="scrollprompt" class="icon ion-arrow-down-b"></i>
   </div>
 </header>
 
 <main class="mdc-toolbar-fixed-adjust">
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background mdc-elevation--z2">Introduction</h1>
+    Login Signup EN/FR
+
+    <h1 class="mdc-typography--display3  mdc-theme--background">Introduction</h1>
     <h2 class="mdc-typography--headline">History</h2>
     <p class="mdc-typography--body1">
       Peer Instruction, popularized by Eric Mazur of Harvard University, is one of the most prevalent classroom activities today. Something fascinating happens during these peer discussions, whereby students can convince each other of the correct thinking. But what about instances when the class size is too small for diversity of answers, or the teacher wants to have students prepare for class using a similar approach? This is where DALITE was born!
@@ -64,7 +91,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background mdc-elevation--z2">Features</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Features</h1>
     <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
     <p class="mdc-typography--body1">
       Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
@@ -89,7 +116,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
         {% for l in disciplines.All %}
           <div class="mdc-layout-grid__cell--span-3">
             <svg class="stats" id="{{ l }}" width=150 height=100></svg>
-            <div class="mdc-typography--caption">{{ l|capfirst }}</div>
+            <div class="mdc-typography--caption mdc-theme--secondary">{{ l|capfirst }}</div>
           </div>
         {% endfor %}
       </div>
@@ -97,7 +124,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background mdc-elevation--z2">Take a guided tour</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Take a guided tour</h1>
     <!-- Faster load time??: https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player -->
     <div>
       <iframe class="embedded-video" width="560" height="315" src="https://www.youtube.com/embed/uW2r0jGNp8I?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
@@ -105,7 +132,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background mdc-elevation--z2">SALTISE/S4</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4</h1>
     <h2 class="mdc-typography--headline">Vision</h2>
     <p class="mdc-typography--body1">
       SALTISE is a learning community that fosters the development and research of tools and resources for pedagogical innovations as well as bringing together educators (researchers and practitioners) and professional development personnel across the province of Quebec, as well as welcoming national and international partnerships.
@@ -117,7 +144,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background mdc-elevation--z2">Partners</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Partners</h1>
     <h2 class="mdc-typography--headline">Paragraph title</h2>
     <p class="mdc-typography--body1">
       {% lorem %}
@@ -130,6 +157,26 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
   </section>
 </main>
 
+{% endblock %}
+
+{% block footer %}
+<footer>
+  <div class="wrapper">
+    <div class="footer_content">
+      &copy 2018 SALTISE/S4
+    </div>
+    <div class="footer_content" style="text-align:right;">
+      <a href="mailto:info@saltise.ca"><i class="icon ion-ios-email"></i></a>
+      <a href="https://www.saltise.ca"><i class="icon ion-earth"></i></a>
+      <a href="https://www.facebook.com/SALTISE/"><i class="icon ion-social-facebook"></i></a>
+      <a href="https://twitter.com/saltise"><i class="icon ion-social-twitter"></i></a>
+      <a href="https://github.com/SALTISES4/dalite-ng"><i class="icon ion-social-github"></i></a>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
 <script>
   var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
 
@@ -146,9 +193,11 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
   var toolbar = mdc.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
   toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
 
+  const arrow = document.getElementById('scrollprompt');
   var flexibleExpansionRatio = 1.0;
   toolbar.listen('MDCToolbar:change', function(evt) {
     flexibleExpansionRatio = evt.detail.flexibleExpansionRatio;
+    arrow.style.opacity = flexibleExpansionRatio;
   });
 </script>
 

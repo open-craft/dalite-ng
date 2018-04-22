@@ -1,6 +1,6 @@
 :root {
     --mdc-theme-primary: #54c0db;
-    --mdc-theme-secondary: #fff946;
+    --mdc-theme-secondary: #004266;
     --mdc-theme-background: #f4f4f4;
 }
 body {
@@ -11,6 +11,9 @@ body {
 }
 header {
   background-color: #54c0db;
+}
+footer {
+  background-image: linear-gradient(0deg,var(--mdc-theme-secondary) 0%, var(--mdc-theme-secondary) 90%, var(--mdc-theme-primary) 90%);
 }
 h1 {
   color: #54c0db;
