@@ -1,13 +1,32 @@
 {% extends "peerinst/base.html" %}
 
+{% load staticfiles %}
+
 {% block stylesheets %}
 <style>
+.underline {
+  overflow:visible;
+  position: absolute;
+  left:0px;
+  bottom:-5px;
+}
+.site-content {
+  margin-bottom: 80pt;
+}
+.image-list {
+  margin-top: 20pt;
+}
 .icon {
   font-size:24pt;
 }
 .stats {
   display:block;
   margin:auto;
+}
+.mdc-chip-set {
+  width: fit-content;
+  margin-right:0pt;
+  margin-left: auto;
 }
 .mdc-toolbar {
   padding:0pt;
@@ -18,6 +37,8 @@
 }
 .mdc-typography--caption {
   text-align:center;
+  font-size: 14pt;
+  font-weight: 700;
 }
 .mdc-typography--display3 {
   padding-top:70px;
@@ -34,8 +55,12 @@
   background-color: white;
 }
 main {
-  max-width:800px;
+  max-width:900px;
   margin:auto;
+}
+section {
+  padding-left:5px;
+  padding-right:20px;
 }
 header {
   padding-right: 0px;
@@ -86,6 +111,9 @@ footer a {
   margin:auto;
   overflow:visible;
 }
+.count {
+  font-size: 40pt;
+}
 </style>
 {% endblock %}
 
@@ -111,12 +139,29 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
 
 <main class="mdc-toolbar-fixed-adjust">
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background">Features</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Features
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
     <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
     <p class="mdc-typography--body1">
       Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
     </p>
     <h2 class="mdc-typography--headline">Most active disciplines</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+    <br>
+    <div class="mdc-layout-grid">
+      <div class="mdc-layout-grid__inner">
+        {% for l in disciplines.All %}
+        <div class="mdc-layout-grid__cell--span-3">
+          <svg class="stats" id="{{ l }}" width=200 height=200></svg>
+          <div class="mdc-typography--caption mdc-theme--primary">{{ l|capfirst }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <br>
     <div class="mdc-chip-set mdc-chip-set--choice">
       {% for d in disciplines %}
       <div id="{{ d }}" class="mdc-chip" onclick="update(this,event)" tabindex="0" data-mdc-auto-init="MDCChip">
@@ -130,26 +175,19 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
       </div>
       {% endfor %}
     </div>
-
-    <div class="mdc-layout-grid">
-      <div class="mdc-layout-grid__inner">
-        {% for l in disciplines.All %}
-        <div class="mdc-layout-grid__cell--span-3">
-          <svg class="stats" id="{{ l }}" width=150 height=100></svg>
-          <div class="mdc-typography--caption mdc-theme--secondary">{{ l|capfirst }}</div>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background">Take a guided tour</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">{{ 'A guided tour'|title }}
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
     <div id="player" class="embedded-video"></div>
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3  mdc-theme--background">Development</h1>
+    <h1 class="mdc-typography--display3  mdc-theme--background">Development
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
     <h2 class="mdc-typography--headline">History</h2>
     <p class="mdc-typography--body1">
       Peer Instruction, popularized by Eric Mazur of Harvard University, is one of the most prevalent classroom activities today. Something fascinating happens during these peer discussions, whereby students can convince each other of the correct thinking. But what about instances when the class size is too small for diversity of answers, or the teacher wants to have students prepare for class using a similar approach? This is where DALITE was born!
@@ -162,7 +200,9 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
 
 
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
     <h2 class="mdc-typography--headline">Vision</h2>
     <p class="mdc-typography--body1">
       SALTISE is a learning community that fosters the development and research of tools and resources for pedagogical innovations as well as bringing together educators (researchers and practitioners) and professional development personnel across the province of Quebec, as well as welcoming national and international partnerships.
@@ -174,19 +214,22 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background">Partners</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Partners
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
     <h2 class="mdc-typography--headline">Paragraph title</h2>
     <p class="mdc-typography--body1">
       {% lorem %}
     </p>
-    <ul class="mdc-image-list mdc-image-list--masonry partner-list">
-      <li class="mdc-image-list__item">
-        <img class="mdc-image-list__image" src="...">
-      </li>
-    </ul>
+    <div class="image-list">
+      <ul class="mdc-image-list mdc-image-list--masonry partner-list">
+        <li class="mdc-image-list__item">
+          <img class="mdc-image-list__image" style="width:200px" src="{% static 'peerinst/img/dawson_logo.png' %}">
+        </li>
+      </ul>
+    </div>
   </section>
 </main>
-
 {% endblock %}
 
 {% block footer %}
@@ -232,8 +275,68 @@ toolbar.listen('MDCToolbar:change', function(evt) {
 </script>
 
 <script>
+function underlines() {
+  'use strict';
+
+  // Decorate h1 headers
+  let lines = d3.selectAll(".underline");
+  lines.selectAll("g").remove();
+  let w = document.querySelector("main").offsetWidth;
+
+  let gradientX = lines.append("linearGradient")
+  .attr("id",'underlineGradientX')
+  .attr('x1',0)
+  .attr('x2',1)
+  .attr('y1',0)
+  .attr('y2',0);
+
+  gradientX.append("stop")
+  .attr("offset",'0%')
+  .attr('stop-color','var(--mdc-theme-primary)');
+
+  gradientX.append("stop")
+  .attr("offset",'100%')
+  .attr('stop-color','var(--mdc-theme-secondary)');
+
+  let gradientY = lines.append("linearGradient")
+  .attr("id",'underlineGradientY')
+  .attr('x1',0)
+  .attr('x2',0)
+  .attr('y1',0)
+  .attr('y2',1);
+
+  gradientY.append("stop")
+  .attr("offset",'0%')
+  .attr('stop-color','var(--mdc-theme-secondary)');
+
+  gradientY.append("stop")
+  .attr("offset",'100%')
+  .attr('stop-color','var(--mdc-theme-primary)');
+
+  let g = lines.append("g");
+  g.append("rect")
+  .attr("x",-10)
+  .attr("y",0)
+  .attr("width",w+10)
+  .attr("height",1)
+  .attr("fill",'url(#underlineGradientX)');
+
+  g.append("rect")
+  .attr("x",w)
+  .attr("y",0)
+  .attr("width",1)
+  .attr("height",150)
+  .attr("fill",'url(#underlineGradientY)');
+}
+
+underlines();
+</script>
+
+<script>
 function logo(){
   'use strict';
+
+  // Animate waves
   var svg = d3.select("#animation");
   svg.attr("width",document.body.offsetWidth);
 
@@ -496,21 +599,67 @@ for (var i in labels){
   g[i] = svg[i].append("g")
   .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
 
+  /*let gradientR = g[i].append("radialGradient")
+  .attr("id",'radialGradient')
+  .attr('x1',0)
+  .attr('x2',1)
+  .attr('y1',0)
+  .attr('y2',0);
+
+  gradientR.append("stop")
+  .attr("offset",'0%')
+  .attr('stop-color','rgba(255,255,255,0.1)');
+
+  gradientR.append("stop")
+  .attr("offset",'100%')
+  .attr('stop-color','var(--mdc-theme-primary)');*/
+
+  g[i].append("circle")
+  .attr("class","count-background")
+  .attr("cx",0)
+  .attr("cy",0)
+  .attr("r",80)
+  .attr("fill","white");
+
+  g[i].append("circle")
+  .attr("class","count-background")
+  .attr("cx",0)
+  .attr("cy",0)
+  .attr("r",80)
+  .attr("opacity",0.2)
+  .attr("fill","var(--mdc-theme-primary)");
+
+  g[i].append("circle")
+  .attr("class","count-background")
+  .attr("cx",0)
+  .attr("cy",0)
+  .attr("r",80)
+  .attr("stroke","var(--mdc-theme-primary)")
+  .attr("stroke-width",1.5)
+  .attr("fill",'none');
+
+  /*g[i].append("circle")
+  .attr("class","count-background")
+  .attr("cx",0)
+  .attr("cy",0)
+  .attr("r",80)
+  .attr("fill","url(#radialGradient)");*/
+
   text[i] = g[i].append("text")
   .attr("class","count")
   .attr("c",data['All'][labels[i]])
   .attr("x",0)
   .attr("y",0)
   .attr("dy",20)
-  .style("font-size","40pt")
-  .style("fill","var(--mdc-theme-primary)")
   .attr("text-anchor","middle")
+  .attr("fill","var(--mdc-theme-primary)")
   .text(data['All'][labels[i]]);
 }
 
 function counts(dataset) {
   'use strict';
 
+  // Update counts for new discipline
   d3.selectAll(".count").interrupt();
 
   var delta = [];

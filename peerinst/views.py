@@ -59,12 +59,15 @@ LOGGER = logging.getLogger(__name__)
 
 
 def test(request):
-    top_disciplines = Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]
-
-    print(top_disciplines)
-
     disciplines = {}
-    for d in top_disciplines.all():
+
+    disciplines[str('All')] = {}
+    disciplines[str('All')][str('questions')] = Question.objects.count()
+    disciplines[str('All')][str('rationales')] = Answer.objects.count()
+    disciplines[str('All')][str('students')] = Student.objects.count()
+    disciplines[str('All')][str('teachers')] = Teacher.objects.count()
+
+    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]:
         disciplines[str(d.title)] = {}
         disciplines[str(d.title)][str('questions')] = Question.objects.filter(discipline=d).count()
         disciplines[str(d.title)][str('rationales')] = Answer.objects.filter(question__discipline=d).count()
@@ -78,12 +81,6 @@ def test(request):
                 .values_list('user_token',flat=True)))
 
         disciplines[str(d.title)]['teachers'] = d.teacher_set.count()
-
-    disciplines[str('All')] = {}
-    disciplines[str('All')][str('questions')] = Question.objects.count()
-    disciplines[str('All')][str('rationales')] = Answer.objects.count()
-    disciplines[str('All')][str('students')] = Student.objects.count()
-    disciplines[str('All')][str('teachers')] = Teacher.objects.count()
 
     disciplines_json = json.dumps(disciplines)
 
