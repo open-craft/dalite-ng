@@ -1,3 +1,7 @@
-{% load staticfiles %}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cardo:400,400i|Montserrat:300,700">
-    <link rel="stylesheet" href="{% static 'peerinst/css/custom-instance.css' %}">
+{% load staticfiles compress %}
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cardo:400,400i|Montserrat:300,700">
+
+{% compress css %}
+<link rel="stylesheet" href="{% static 'peerinst/css/custom-instance.css' %}">
+{% endcompress %}

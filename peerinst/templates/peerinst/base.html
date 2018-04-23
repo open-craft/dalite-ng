@@ -1,6 +1,4 @@
-{% load staticfiles %}
-
-{% load admin_urls %}
+{% load staticfiles compress admin_urls %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,10 +9,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="DALITE NG">
   <link rel="icon" href="{% static 'peerinst/img/logo.png' %}">
+  {% compress css %}
   <link rel="stylesheet" href="{% static 'peerinst/css/vendor/material-components-web.min.css' %}">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
   <link rel="stylesheet" href="{% static 'peerinst/css/vendor/ionicons.css' %}">
   <link rel="stylesheet" href="{% static 'peerinst/css/main.css' %}">
+  {% endcompress %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
 
   <!-- Custom settings for local instance of dalite-ng -->
   {% include 'peerinst/custom-instance-head.html' %}
@@ -49,8 +49,11 @@
     </div>
   </header>
 
-  <script src="https://d3js.org/d3.v4.min.js"></script>
+  {% compress js %}
+  <script src="{% static 'peerinst/js/vendor/d3.v4.min.js'  %}"></script>
   <script src="{% static 'peerinst/js/vendor/material-components-web.min.js'  %}"></script>
+  {% endcompress %}
+  
   <div class="site-content">
     {% block body %}{% endblock %}
   </div>

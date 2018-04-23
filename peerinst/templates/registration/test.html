@@ -1,8 +1,9 @@
 {% extends "peerinst/base.html" %}
 
-{% load staticfiles %}
+{% load staticfiles compress %}
 
 {% block stylesheets %}
+{% compress css %}
 <style>
 body {
   color: var(--mdc-theme-secondary);
@@ -118,6 +119,7 @@ footer a {
   font-size: 40pt;
 }
 </style>
+{% endcompress %}
 {% endblock %}
 
 {% block body %}
@@ -201,7 +203,6 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
     </p>
   </section>
 
-
   <section>
     <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4
       <svg class="underline" width=150 height=4></svg>
@@ -253,6 +254,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
 {% endblock %}
 
 {% block scripts %}
+{% compress js %}
 <script>
 var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
 
@@ -717,5 +719,6 @@ function onYouTubeIframeAPIReady() {
   });
 }
 </script>
+{% endcompress %}
 
 {% endblock %}
