@@ -114,21 +114,18 @@ def landing_page(request):
                 .exclude(user_token='')\
                 .values_list('user_token',flat=True)))
 
-        d2['teachers'] = d.teacher_set.count()
+        d2[str('teachers')] = d.teacher_set.count()
 
         disciplines_array.append(d2)
 
-
-    disciplines_array_json = json.dumps(disciplines_array)    
-
+    print(disciplines_array)
 
     return TemplateResponse(
         request,
         'registration/landing_page.html',
         context={
-            'disciplines': disciplines,
+            'disciplines': disciplines_array,
             'json': disciplines_json,
-            'json_disciplines_array':disciplines_array_json
         })
 
 

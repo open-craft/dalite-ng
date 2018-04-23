@@ -29,6 +29,7 @@ body {
 }
 .mdc-chip-set {
   width: fit-content;
+  width: -moz-fit-content;
   margin-right:0pt;
   margin-left: auto;
 }
@@ -158,25 +159,27 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
     <br>
     <div class="mdc-layout-grid">
       <div class="mdc-layout-grid__inner">
-        {% for l in disciplines.All %}
+        {% for l in disciplines|first %}
+        {% if l != "name" %}
         <div class="mdc-layout-grid__cell--span-3">
           <svg class="stats" id="{{ l }}" width=200 height=200></svg>
           <div class="mdc-typography--caption mdc-theme--primary">{{ l|capfirst }}</div>
         </div>
+        {% endif %}
         {% endfor %}
       </div>
     </div>
     <br>
     <div class="mdc-chip-set mdc-chip-set--choice">
       {% for d in disciplines %}
-      <div id="{{ d }}" class="mdc-chip" onclick="update(this,event)" tabindex="0" data-mdc-auto-init="MDCChip">
+      <div id="{{ d.name }}" class="mdc-chip" onclick="update(this,event)" tabindex="0" data-mdc-auto-init="MDCChip">
         <div class="mdc-chip__checkmark">
           <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
             <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
             d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
           </svg>
         </div>
-        <div class="mdc-chip__text">{{ d }}</div>
+        <div class="mdc-chip__text">{{ d.name }}</div>
       </div>
       {% endfor %}
     </div>
@@ -589,7 +592,6 @@ window.addEventListener("resize",logo);
 
 <script>
 data = {{ json|safe }};
-data_new = {{ json_disciplines_array|safe }}
 labels = d3.keys(data['All']);
 svg = [];
 width = [];
