@@ -45,6 +45,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    # Minify html
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'dalite.urls'
@@ -135,12 +138,15 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'custom-settings/'+CUSTOM_SETTINGS+'/static'),
 )
 
-COMPRESS_ENABLED = True
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 )
+
+COMPRESS_ENABLED = True
+KEEP_COMMENTS_ON_MINIFYING = True
+HTML_MINIFY = True
 
 # LOGIN_URL = 'login'
 LOGIN_URL = 'login'
