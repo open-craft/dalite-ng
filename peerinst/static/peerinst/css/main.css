@@ -137,6 +137,17 @@ header {
   padding:4pt;
   font-size: 18pt;
 }
+header a {
+  color: white;
+}
+.bold {
+   font-weight:bold;
+}
+.header-right {
+   text-align:right;
+   font-size:10pt;
+   line-height:1.2;
+}
 .site-content {
   margin: 20pt;
 }
