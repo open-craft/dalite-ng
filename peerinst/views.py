@@ -58,7 +58,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 
-def test(request):
+def landing_page(request):
     disciplines = {}
 
     disciplines[str('All')] = {}
@@ -89,7 +89,7 @@ def test(request):
 
     return TemplateResponse(
         request,
-        'registration/test.html',
+        'registration/landing_page.html',
         context={
             'disciplines': disciplines,
             'json': disciplines_json,
@@ -106,8 +106,6 @@ def dashboard(request):
     return HttpResponse('dashboard')
 
 
-def landing_page(request):
-    return TemplateResponse(request, 'registration/landing_page.html')
 
 
 def sign_up(request):
