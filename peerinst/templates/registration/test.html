@@ -10,10 +10,11 @@
   margin:auto;
 }
 .mdc-toolbar {
-  padding-left:0pt;
+  padding:0pt;
 }
 .mdc-toolbar__row {
   min-height: 100px;
+  background-image:radial-gradient(500px 500px,rgba(255,255,255,0.4),var(--mdc-theme-primary));
 }
 .mdc-typography--caption {
   text-align:center;
@@ -91,7 +92,7 @@ footer a {
 {% block body %}
 <script>
 // Override default size of header to fill page based on window size
-document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-flexible:"+window.innerHeight/65+" !important;}");
+document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-flexible:"+window.innerHeight/64+" !important;}");
 </script>
 
 <header class="mdc-toolbar mdc-toolbar--fixed mdc-toolbar--flexible mdc-toolbar--waterfall">
@@ -319,7 +320,7 @@ function logo(){
     g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
-    .attr("fill",d3.rgb(244,244,244,0.2))
+    .attr("fill",d3.rgb(244,244,244,0.3))
     .attr("opacity",0)
     .attr("d",intersection1)
     .transition()
@@ -350,7 +351,7 @@ function logo(){
     g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
-    .attr("fill",d3.rgb(244,244,244,0.4))
+    .attr("fill",d3.rgb(244,244,244,0.5))
     .attr("opacity",0)
     .attr("d",intersection2)
     .transition()
@@ -378,7 +379,7 @@ function logo(){
     g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
-    .attr("fill",d3.rgb(0,66,102,0.4))
+    .attr("fill",d3.rgb(0,66,102,0.5))
     .attr("opacity",0)
     .attr("d",intersection3)
     .transition()
@@ -509,7 +510,7 @@ for (var i in labels){
 
 function counts(dataset) {
   'use strict';
-  
+
   d3.selectAll(".count").interrupt();
 
   var delta = [];
