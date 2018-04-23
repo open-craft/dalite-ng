@@ -16,16 +16,14 @@
   min-height: 100px;
 }
 .mdc-typography--caption {
-   text-align:center;
+  text-align:center;
 }
 .mdc-typography--display3 {
   padding-top:70px;
   padding-bottom:10px;
-  /*margin-bottom: 0px;*/
   position:sticky;
   top:70px;
   z-index: 2;
-  /*background-image: linear-gradient(var(--mdc-theme-background),60%,var(--mdc-theme-background),transparent);*/
 }
 .embedded-video {
   display:block;
@@ -38,6 +36,9 @@ main {
   max-width:800px;
   margin:auto;
 }
+header {
+  padding-right: 0px;
+}
 footer {
   color: white;
   padding-top: 5px;
@@ -48,6 +49,7 @@ footer a {
   padding-left:10px;
 }
 .footer_content {
+  font-size:11pt;
   margin-top:10px;
   margin-left:20px;
   margin-right:20px;
@@ -55,17 +57,28 @@ footer a {
 #scrollprompt {
   position:absolute;
   bottom:0px;
-  right:20px;
+  left:50%;
 }
-#nav {
-  font-size:10pt;
+.navleft {
   position:absolute;
-  bottom:0px;
-  left:10px;
+  font-size:11pt;
+  bottom:4px;
+  left:20px;
 }
-#nav a {
-  color: white;
+.navleft a {
   padding-right:20px;
+  color: white;
+}
+.navright {
+  position:absolute;
+  font-size:11pt;
+  bottom:4px;
+  right:20px;
+  text-align: right;
+}
+.navright a {
+  padding-left:20px;
+  color: white;
 }
 #animation {
   display:block;
@@ -85,15 +98,57 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
   <div class="mdc-toolbar__row">
     <svg id="animation" width=800 height=80></svg>
     <i id="scrollprompt" class="icon ion-arrow-down-b"></i>
-    <span id="nav"><a href="{% url 'login' %}">Login</a>
+    <span class="navleft">
+      <a href="{% url 'login' %}">Login</a>
       <a href="{% url 'sign_up' %}">Signup</a>
-      <a href="">EN</a></span>
+    </span>
+    <span class="navright">
+      <a href="">EN</a>
+    </span>
   </div>
 </header>
 
 <main class="mdc-toolbar-fixed-adjust">
   <section>
-    <h1 class="mdc-typography--display3  mdc-theme--background">Introduction</h1>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Features</h1>
+    <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
+    <p class="mdc-typography--body1">
+      Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
+    </p>
+    <h2 class="mdc-typography--headline">Most active disciplines</h2>
+    <div class="mdc-chip-set mdc-chip-set--choice">
+      {% for d in disciplines %}
+      <div id="{{ d }}" class="mdc-chip" onclick="update(this,event)" tabindex="0" data-mdc-auto-init="MDCChip">
+        <div class="mdc-chip__checkmark">
+          <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
+            <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
+            d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+          </svg>
+        </div>
+        <div class="mdc-chip__text">{{ d }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="mdc-layout-grid">
+      <div class="mdc-layout-grid__inner">
+        {% for l in disciplines.All %}
+        <div class="mdc-layout-grid__cell--span-3">
+          <svg class="stats" id="{{ l }}" width=150 height=100></svg>
+          <div class="mdc-typography--caption mdc-theme--secondary">{{ l|capfirst }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Take a guided tour</h1>
+    <div id="player" class="embedded-video"></div>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3  mdc-theme--background">Development</h1>
     <h2 class="mdc-typography--headline">History</h2>
     <p class="mdc-typography--body1">
       Peer Instruction, popularized by Eric Mazur of Harvard University, is one of the most prevalent classroom activities today. Something fascinating happens during these peer discussions, whereby students can convince each other of the correct thinking. But what about instances when the class size is too small for diversity of answers, or the teacher wants to have students prepare for class using a similar approach? This is where DALITE was born!
@@ -104,46 +159,6 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
     </p>
   </section>
 
-  <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background">Features</h1>
-    <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
-    <p class="mdc-typography--body1">
-      Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
-    </p>
-    <h2 class="mdc-typography--headline">Most active disciplines</h2>
-    <div class="mdc-chip-set mdc-chip-set--choice">
-      {% for d in disciplines %}
-        <div id="{{ d }}" class="mdc-chip" onclick="update(this,event)" tabindex="0" data-mdc-auto-init="MDCChip">
-          <div class="mdc-chip__checkmark">
-            <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
-              <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
-                    d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
-            </svg>
-          </div>
-          <div class="mdc-chip__text">{{ d }}</div>
-        </div>
-      {% endfor %}
-    </div>
-
-    <div class="mdc-layout-grid">
-      <div class="mdc-layout-grid__inner">
-        {% for l in disciplines.All %}
-          <div class="mdc-layout-grid__cell--span-3">
-            <svg class="stats" id="{{ l }}" width=150 height=100></svg>
-            <div class="mdc-typography--caption mdc-theme--secondary">{{ l|capfirst }}</div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background">Take a guided tour</h1>
-    <!-- Faster load time??: https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player -->
-    <div>
-      <iframe class="embedded-video" width="560" height="315" src="https://www.youtube.com/embed/uW2r0jGNp8I?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-    </div>
-  </section>
 
   <section>
     <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4</h1>
@@ -192,227 +207,275 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
 
 {% block scripts %}
 <script>
-  var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
+var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
 
-  var chips = {}
-  /*var c = document.querySelectorAll('.mdc-chip');
-  c.forEach(function(d){
-    const chip = new mdc.chips.MDCChip(d);
-    chips[d.id] = chip;
-    if (d.id == "All"){
-      chip.toggleSelected();
-    }
-  });*/
+var chips = {}
+/*var c = document.querySelectorAll('.mdc-chip');
+c.forEach(function(d){
+const chip = new mdc.chips.MDCChip(d);
+chips[d.id] = chip;
+if (d.id == "All"){
+chip.toggleSelected();
+}
+});*/
 
-  var toolbar = mdc.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
-  toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
+var toolbar = mdc.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
+toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
 
-  const arrow = document.getElementById('scrollprompt');
-  var flexibleExpansionRatio = 1.0;
-  toolbar.listen('MDCToolbar:change', function(evt) {
-    flexibleExpansionRatio = evt.detail.flexibleExpansionRatio;
-    arrow.style.opacity = flexibleExpansionRatio;
-  });
+const arrow = document.getElementById('scrollprompt');
+var flexibleExpansionRatio = 1.0;
+toolbar.listen('MDCToolbar:change', function(evt) {
+  flexibleExpansionRatio = evt.detail.flexibleExpansionRatio;
+  arrow.style.opacity = flexibleExpansionRatio;
+});
 </script>
 
 <script>
 function logo(){
-var svg = d3.select("#animation");
-svg.attr("width",document.body.offsetWidth);
+  'use strict';
+  var svg = d3.select("#animation");
+  svg.attr("width",document.body.offsetWidth);
 
-var width = +svg.attr("width"),
-height = +svg.attr("height"),
-margin = {top:1,bottom:1,left:1,right:1};
+  var width = +svg.attr("width"),
+  height = +svg.attr("height"),
+  margin = {top:1,bottom:1,left:1,right:1};
 
-var innerWidth = width-margin.left-margin.right,
-innerHeight = height-margin.top-margin.bottom;
+  var innerWidth = width-margin.left-margin.right,
+  innerHeight = height-margin.top-margin.bottom;
 
-svg.selectAll("g").remove();
+  svg.selectAll("g").remove();
 
-var g = svg.append("g").attr("transform","translate("+margin.left+","+(margin.top+innerHeight/2)+")");
+  var g = svg.append("g").attr("transform","translate("+margin.left+","+(margin.top+innerHeight/2)+")");
 
-var x = d3.scaleLinear().domain([0,2*Math.PI]).range([0,innerWidth]),
-y = d3.scaleLinear().domain([-1,1]).range([-innerHeight/2,innerHeight/2]);
+  var x = d3.scaleLinear().domain([0,2*Math.PI]).range([0,innerWidth]),
+  y = d3.scaleLinear().domain([-1,1]).range([-innerHeight/2,innerHeight/2]);
 
-var xAxis = g.append("g").style("opacity",0).call(d3.axisBottom(x)),
-yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
+  var xAxis = g.append("g").style("opacity",0).call(d3.axisBottom(x)),
+  yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
 
-var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/20));
+  var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/5));
 
-function f(v,x,t,a) {
-  return Math.min(Math.max(10*flexibleExpansionRatio,2),4)*a*Math.sin(x-0.5*v*(t-dt));
-}
+  function f(v,x,t,a) {
+    return Math.min(Math.max(10*flexibleExpansionRatio,2),4)*a*Math.sin(x-0.5*v*t);
+  }
 
-var dt = 0;
-var t = d3.now();
+  function animation() {
+    'use strict';
 
-var a1 = 0.5;
-var a2 = 0.3;
-var a3 = 0.4;
+    var dt = 0;
+    var offset1 = null;
+    var offset2 = null;
+    var offset3 = null;
+    var t0 = d3.now();
+    var t = t0;
 
-var v1 = 0.001;
-var v2 = 0.0018;
-var v3 = -0.001;
+    var a1 = 0.5;
+    var a2 = 0.3;
+    var a3 = 0.4;
 
-var y1 = 0;
-var y2 = -0.1;
-var y3 = +0.05;
+    var v1 = 0.001;
+    var v2 = 0.0018;
+    var v3 = -0.001;
 
-var line1 = d3.line()
+    var y1 = 0;
+    var y2 = -0.1;
+    var y3 = +0.05;
+
+    var line1 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(v1,d,d3.now(),a1)+y1); })
+    .y(function(d) { return y(f(v1,d,t-dt-offset1,a1)+y1); })
     .curve(d3.curveNatural);
 
-var line2 = d3.line()
+    var line2 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(v2,d,d3.now(),a2)+y2); })
+    .y(function(d) { return y(f(v2,d,t-dt-offset2,a2)+y2); })
     .curve(d3.curveNatural);
 
-var line3 = d3.line()
+    var line3 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(v3,d,d3.now(),a3)+y3); })
+    .y(function(d) { return y(f(v3,d,t-dt-offset3,a3)+y3); })
     .curve(d3.curveNatural);
 
-var intersection1 = d3.area()
+    var intersection1 = d3.area()
     .x(line1.x())
     .y0(y(0))
     .y1(line1.y())
     .curve(d3.curveNatural);
 
-var intersection2 = d3.area()
+    var intersection2 = d3.area()
     .x0(line1.x())
     .y0(line1.y())
     .x1(line2.x())
     .y1(line2.y())
     .curve(d3.curveNatural);
 
-var intersection3 = d3.area()
+    var intersection3 = d3.area()
     .x0(line1.x())
     .y0(line1.y())
     .x1(line3.x())
     .y1(line3.y())
     .curve(d3.curveNatural);
 
-g.append("path")
-  .datum(xPoints)
-  .attr("class","intersection")
-  .attr("fill",d3.rgb(244,244,244,0.2))
-  .attr("d",intersection1)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
-        if (flexibleExpansionRatio>0.01) {
-          t = d3.now();
-          d3.active(this)
-              .attr("d",intersection1)
-            .transition()
-              .on("start", repeat);
-        }
-        else {
-          dt += d3.now() - t;
-          t = d3.now();
-          d3.active(this)
-          .transition()
-            .on("start", repeat);
-        }
-      });
+    g.append("path")
+    .datum(xPoints)
+    .attr("class","intersection")
+    .attr("fill",d3.rgb(244,244,244,0.2))
+    .attr("opacity",0)
+    .attr("d",intersection1)
+    .transition()
+    .duration(1000)
+    .attr("opacity",1)
+    .transition()
+    .duration(50)
+    .on("start", function repeat() {
+      if (offset1 == null) {
+        offset1 = d3.now()-t0;
+      }
+      if (flexibleExpansionRatio>0.01) {
+        t = d3.now();
+        d3.active(this)
+        .attr("d",intersection1)
+        .transition()
+        .on("start", repeat);
+      }
+      else {
+        dt += d3.now() - t;
+        t = d3.now();
+        d3.active(this)
+        .transition()
+        .on("start", repeat);
+      }
+    });
 
-g.append("path")
-  .datum(xPoints)
-  .attr("class","intersection")
-  .attr("fill",d3.rgb(244,244,244,0.4))
-  .attr("d",intersection2)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
-        if (flexibleExpansionRatio>0.01) {
-          d3.active(this)
-              .attr("d",intersection2)
-            .transition()
-              .on("start", repeat);
-        }
-        else {
-          d3.active(this)
-          .transition()
-            .on("start", repeat);
-        }
-      });
+    g.append("path")
+    .datum(xPoints)
+    .attr("class","intersection")
+    .attr("fill",d3.rgb(244,244,244,0.4))
+    .attr("opacity",0)
+    .attr("d",intersection2)
+    .transition()
+    .duration(1000)
+    .attr("opacity",1)
+    .transition()
+    .duration(50)
+    .on("start", function repeat() {
+      if (offset2 == null) {
+        offset2 = d3.now()-t0;
+      }
+      if (flexibleExpansionRatio>0.01) {
+        d3.active(this)
+        .attr("d",intersection2)
+        .transition()
+        .on("start", repeat);
+      }
+      else {
+        d3.active(this)
+        .transition()
+        .on("start", repeat);
+      }
+    });
 
-g.append("path")
-  .datum(xPoints)
-  .attr("class","intersection")
-  .attr("fill",d3.rgb(0,66,102,0.4))
-  .attr("d",intersection3)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
-        if (flexibleExpansionRatio>0.01) {
-          d3.active(this)
-              .attr("d",intersection3)
-            .transition()
-              .on("start", repeat);
-        }
-        else {
-          d3.active(this)
-          .transition()
-            .on("start", repeat);
-        }
-      });
+    g.append("path")
+    .datum(xPoints)
+    .attr("class","intersection")
+    .attr("fill",d3.rgb(0,66,102,0.4))
+    .attr("opacity",0)
+    .attr("d",intersection3)
+    .transition()
+    .duration(1000)
+    .attr("opacity",1)
+    .transition()
+    .duration(50)
+    .on("start", function repeat() {
+      if (offset3 == null) {
+        offset3 = d3.now()-t0;
+      }
+      if (flexibleExpansionRatio>0.01) {
+        d3.active(this)
+        .attr("d",intersection3)
+        .transition()
+        .on("start", repeat);
+      }
+      else {
+        d3.active(this)
+        .transition()
+        .on("start", repeat);
+      }
+    });
 
-g.append("text")
-.attr("x",margin.left+innerWidth/2)
-.attr("dx","25pt")
-.attr("y",y(0))
-.attr("fill","white")
-.attr("text-anchor","middle")
-.style("font-size","40pt")
-.style("cursor","pointer")
-.text("DALITE")
-.on("click",function(){
-  window.location="{% url 'login' %}"
-});
+    title();
+  }
 
-g.append("text")
-.attr("x",margin.left+innerWidth/2)
-.attr("dx","-70pt")
-.attr("y",y(0))
-.attr("fill","white")
-.attr("text-anchor","middle")
-.style("font-family","Cardo, serif")
-.style("font-style",'italic')
-.style("font-size","40pt")
-.style("cursor","pointer")
-.text("my")
-.on("click",function(){
-  window.location="{% url 'login' %}"
-});
+  function title(){
+    'use strict';
 
-g.append("text")
-.attr("x",margin.left+innerWidth/2+175)
-.attr("y",y(0))
-.attr("dx",-110)
-.attr("dy","16pt")
-.attr("fill","white")
-.attr("text-anchor","end")
-.style("font-family","Cardo, serif")
-.style("font-style",'italic')
-.style("font-size","14pt")
-.text("by")
+    d3.selectAll(".title").remove();
 
-g.append("text")
-.attr("x",margin.left+innerWidth/2+145)
-.attr("y",y(0))
-.attr("dx","20pt")
-.attr("dy","16pt")
-.attr("fill","white")
-.attr("text-anchor","end")
-.style("font-size","14pt")
-.text("SALTISE/S4");
+    g.append("text")
+    .attr("class","title")
+    .attr("x",margin.left+innerWidth/2)
+    .attr("dx","25pt")
+    .attr("y",y(0))
+    .attr("fill","white")
+    .attr("text-anchor","middle")
+    .style("font-size","40pt")
+    .style("cursor","pointer")
+    .text("DALITE")
+    .on("click",function(){
+      window.location="{% url 'login' %}"
+    });
 
+    g.append("text")
+    .attr("class","title")
+    .attr("x",margin.left+innerWidth/2)
+    .attr("dx","-70pt")
+    .attr("y",y(0))
+    .attr("fill","white")
+    .attr("text-anchor","middle")
+    .style("font-family","Cardo, serif")
+    .style("font-style",'italic')
+    .style("font-size","40pt")
+    .style("cursor","pointer")
+    .text("my")
+    .on("click",function(){
+      window.location="{% url 'login' %}"
+    });
+
+    g.append("text")
+    .attr("class","title")
+    .attr("x",margin.left+innerWidth/2+175)
+    .attr("y",y(0))
+    .attr("dx",-110)
+    .attr("dy","16pt")
+    .attr("fill","white")
+    .attr("text-anchor","end")
+    .style("font-family","Cardo, serif")
+    .style("font-style",'italic')
+    .style("font-size","14pt")
+    .text("by")
+
+    g.append("text")
+    .attr("class","title")
+    .attr("x",margin.left+innerWidth/2+145)
+    .attr("y",y(0))
+    .attr("dx","20pt")
+    .attr("dy","16pt")
+    .attr("fill","white")
+    .attr("text-anchor","end")
+    .style("font-size","14pt")
+    .text("SALTISE/S4");
+  }
+
+  title();
+  if (document.readyState === 'complete') {
+    animation();
+  }
+  else {
+    window.onload = animation;
+  }
 }
 logo();
 window.addEventListener("resize",logo);
-
 </script>
 
 <script>
@@ -430,22 +493,23 @@ for (var i in labels){
   height[i] = +svg[i].attr('height');
 
   g[i] = svg[i].append("g")
-    .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
+  .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
 
   text[i] = g[i].append("text")
-    .attr("class","count")
-    .attr("c",data['All'][labels[i]])
-    .attr("x",0)
-    .attr("y",0)
-    .attr("dy",20)
-    .style("font-size","40pt")
-    .style("fill","var(--mdc-theme-primary)")
-    .attr("text-anchor","middle")
-    .text(data['All'][labels[i]]);
+  .attr("class","count")
+  .attr("c",data['All'][labels[i]])
+  .attr("x",0)
+  .attr("y",0)
+  .attr("dy",20)
+  .style("font-size","40pt")
+  .style("fill","var(--mdc-theme-primary)")
+  .attr("text-anchor","middle")
+  .text(data['All'][labels[i]]);
 }
 
 function counts(dataset) {
-
+  'use strict';
+  
   d3.selectAll(".count").interrupt();
 
   var delta = [];
@@ -467,22 +531,38 @@ function counts(dataset) {
           this.setAttribute("c",Math.abs(+this.getAttribute("c")));
         }
         d3.active(this)
-          .text((+this.getAttribute("c")).toFixed(0))
-          .transition()
-          .on("start", repeat);
+        .text((+this.getAttribute("c")).toFixed(0))
+        .transition()
+        .on("start", repeat);
       }
       else {
         d3.interrupt(this);
       }
-      });
-    }
+    });
+  }
 }
 
 function update(t,e) {
   counts(data[t.id]);
   return;
 }
+</script>
 
+<script>
+// Async load video as per API
+// https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+var player;
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('player', {
+    height: '315',
+    width: '560',
+    videoId: 'uW2r0jGNp8I',
+  });
+}
 </script>
 
 {% endblock %}
