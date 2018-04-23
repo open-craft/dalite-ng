@@ -589,6 +589,7 @@ window.addEventListener("resize",logo);
 
 <script>
 data = {{ json|safe }};
+data_new = {{ json_disciplines_array|safe }}
 labels = d3.keys(data['All']);
 svg = [];
 width = [];

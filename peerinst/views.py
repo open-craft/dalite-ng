@@ -87,12 +87,48 @@ def landing_page(request):
     print(disciplines)
     print(json.dumps(disciplines,indent=4, separators=(',', ': ')))
 
+
+    ### try again, with re-ordering
+    disciplines_array = []
+
+    d2 = {}
+    d2[str('name')] = str('All')
+    d2[str('questions')] = Question.objects.count()
+    d2[str('rationales')] = Answer.objects.count()
+    d2[str('students')] = Student.objects.count()
+    d2[str('teachers')] = Teacher.objects.count()
+
+    disciplines_array.append(d2)
+
+    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]:
+        d2 = {}
+        d2[str('name')] = str(d.title)
+        d2[str('questions')] = Question.objects.filter(discipline=d).count()
+        d2[str('rationales')] = Answer.objects.filter(question__discipline=d).count()
+
+        question_list=d.question_set.values_list('id',flat=True)
+        disciplines[str(d.title)][str('students')] = \
+        len(\
+            set(\
+                Answer.objects.filter(question_id__in=question_list)\
+                .exclude(user_token='')\
+                .values_list('user_token',flat=True)))
+
+        d2['teachers'] = d.teacher_set.count()
+
+        disciplines_array.append(d2)
+
+
+    disciplines_array_json = json.dumps(disciplines_array)    
+
+
     return TemplateResponse(
         request,
         'registration/landing_page.html',
         context={
             'disciplines': disciplines,
             'json': disciplines_json,
+            'json_disciplines_array':disciplines_array_json
         })
 
 
