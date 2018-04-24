@@ -205,13 +205,6 @@ PASSWORD_GENERATOR_NONCE = os.environ.get('PASSWORD_GENERATOR_NONCE', None)
 # Configureation file for the heartbeat view, should contain json file. See this url for file contents.
 HEARTBEAT_REQUIRED_FREE_SPACE_PERCENTAGE = 20
 
-EMAIL_SUBJECT_PREFIX = 'SALTISE/S4 @ Dawson College: '
-DEFAULT_FROM_EMAIL = 'no-reply-SALTISES4@dawsoncollege.qc.ca'
-HOST = 'localhost'
-PORT = 25
-EMAIL_USE_TLS = False
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR,'sent_emails')
 
 try:
     from .local_settings import *
