@@ -161,7 +161,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
       <div class="mdc-layout-grid__inner">
         {% for l in disciplines|first %}
         {% if l != "name" %}
-        <div class="mdc-layout-grid__cell--span-3">
+        <div class="mdc-layout-grid__cell--span-4-phone mdc-layout-grid__cell--span-4-tablet mdc-layout-grid__cell--span-3-desktop">
           <svg class="stats" id="{{ l }}" width=150 height=150></svg>
           <div class="mdc-typography--caption mdc-theme--primary">{{ l|capfirst }}</div>
         </div>
@@ -586,7 +586,14 @@ function logo(){
   }
 }
 logo();
-window.addEventListener("resize",logo);
+
+function handleResize(){
+  logo();
+  underlines();
+  return;
+}
+
+window.addEventListener("resize",handleResize);
 </script>
 
 <script>
