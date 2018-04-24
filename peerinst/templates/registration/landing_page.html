@@ -120,6 +120,12 @@ footer a {
 .count {
   font-size: 32pt;
 }
+
+@media (max-width: 450px) {
+  .mdc-typography--display3 {
+    font-size:30pt;
+  }
+}
 </style>
 {% endcompress %}
 {% endblock %}
@@ -720,10 +726,12 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
+let w = Math.min(560,document.querySelector("section").offsetWidth-25);
+let h = 315/560*w;
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
-    height: '315',
-    width: '560',
+    height: h,
+    width: w,
     videoId: 'uW2r0jGNp8I',
   });
 }
