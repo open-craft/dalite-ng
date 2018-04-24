@@ -37,7 +37,7 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
-from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question, VerifiedDomain
+from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question, Answer, Discipline, VerifiedDomain
 from django.contrib.auth.models import User
 
 #blink
@@ -56,6 +56,79 @@ LOGGER = logging.getLogger(__name__)
 
 # Views related to Auth
 
+
+
+def landing_page(request):
+    disciplines = {}
+
+    disciplines[str('All')] = {}
+    disciplines[str('All')][str('questions')] = Question.objects.count()
+    disciplines[str('All')][str('rationales')] = Answer.objects.count()
+    disciplines[str('All')][str('students')] = Student.objects.count()
+    disciplines[str('All')][str('teachers')] = Teacher.objects.count()
+
+    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]:
+        disciplines[str(d.title)] = {}
+        disciplines[str(d.title)][str('questions')] = Question.objects.filter(discipline=d).count()
+        disciplines[str(d.title)][str('rationales')] = Answer.objects.filter(question__discipline=d).count()
+
+        question_list=d.question_set.values_list('id',flat=True)
+        disciplines[str(d.title)][str('students')] = \
+        len(\
+            set(\
+                Answer.objects.filter(question_id__in=question_list)\
+                .exclude(user_token='')\
+                .values_list('user_token',flat=True)))
+
+        disciplines[str(d.title)]['teachers'] = d.teacher_set.count()
+
+    disciplines_json = json.dumps(disciplines)
+
+    print(disciplines)
+    print(json.dumps(disciplines,indent=4, separators=(',', ': ')))
+
+
+    ### try again, with re-ordering
+    disciplines_array = []
+
+    d2 = {}
+    d2[str('name')] = str('All')
+    d2[str('questions')] = Question.objects.count()
+    d2[str('rationales')] = Answer.objects.count()
+    d2[str('students')] = Student.objects.count()
+    d2[str('teachers')] = Teacher.objects.count()
+
+    disciplines_array.append(d2)
+
+    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]:
+        d2 = {}
+        d2[str('name')] = str(d.title)
+        d2[str('questions')] = Question.objects.filter(discipline=d).count()
+        d2[str('rationales')] = Answer.objects.filter(question__discipline=d).count()
+
+        question_list=d.question_set.values_list('id',flat=True)
+        disciplines[str(d.title)][str('students')] = \
+        len(\
+            set(\
+                Answer.objects.filter(question_id__in=question_list)\
+                .exclude(user_token='')\
+                .values_list('user_token',flat=True)))
+
+        d2[str('teachers')] = d.teacher_set.count()
+
+        disciplines_array.append(d2)
+
+    print(disciplines_array)
+
+    return TemplateResponse(
+        request,
+        'registration/landing_page.html',
+        context={
+            'disciplines': disciplines_array,
+            'json': disciplines_json,
+        })
+
+
 def admin_check(user):
     return user.is_superuser
 
@@ -66,8 +139,6 @@ def dashboard(request):
     return HttpResponse('dashboard')
 
 
-def landing_page(request):
-    return TemplateResponse(request, 'registration/landing_page.html')
 
 
 def sign_up(request):
@@ -128,7 +199,7 @@ def logout_view(request):
 
 def welcome(request):
     try:
-        teacher = Teacher.objects.get(user__username=request.user.username)
+        teacher = Teacher.objects.get(user=request.user)
         return HttpResponseRedirect(reverse('teacher', kwargs={ 'pk' : teacher.pk }))
     except ObjectDoesNotExist:
         return HttpResponseRedirect(reverse('assignment-list'))
@@ -1404,6 +1475,9 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
         if request.user.is_authenticated():
             form = forms.RankBlinkForm(request.POST)
             if form.is_valid():
+
+                # Questions can appear in multiple assignments, but only once in each.
+                # Get Q for _this_ assignment.
                 relationship = form.cleaned_data['q'].get(blinkassignment=self.object)
                 operation = form.cleaned_data['rank']
                 if operation == "down":

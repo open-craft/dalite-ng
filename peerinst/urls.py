@@ -6,6 +6,10 @@ from django.conf.urls import include, url
 #testing
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.cache import cache_page
+from django.contrib.auth import views as auth_views
+
+# Backport of django 1.9 password validation
+import password_validation.views as password_views
 
 from . import admin_views
 from . import views
@@ -52,12 +56,18 @@ urlpatterns = [
 
     # Auth
     url(r'^$', views.landing_page, name='landing_page'),
+    url(r'^signup/$', views.sign_up, name='sign_up'),
+    url(r'^login/$', auth_views.login, name='login'),
     url(r'^logout/$', views.logout_view, name='logout'),
     url(r'^welcome/$', views.welcome, name='welcome'),
-    url(r'^access_denied/$', views.access_denied, name='access_denied'),
-    url('^', include('django.contrib.auth.urls')),
-    url(r'^signup/$', views.sign_up, name='sign_up'),
+    url(r'^password_change/$', password_views.password_change, name='password_change'),
+    url(r'^password_change/done/$', auth_views.password_change_done, name='password_change_done'),
+    url(r'^password_reset/$', auth_views.password_reset, name='password_reset'),
+    url(r'^password_reset/done/$', auth_views.password_reset_done, name='password_reset_done'),
+    url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', password_views.password_reset_confirm, name='password_reset_confirm'),
+    url(r'^reset/done/$', auth_views.password_reset_complete, name='password_reset_complete'),
     url(r'^terms_of_service/teachers/$', views.terms_teacher, name='terms_teacher'),
+    url(r'^access_denied/$', views.access_denied, name='access_denied'),
 
     # Blink
     url(r'^blink/(?P<pk>[0-9]+)/$', views.BlinkQuestionFormView.as_view(), name='blink-question'),

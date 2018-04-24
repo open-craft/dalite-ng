@@ -1,85 +1,95 @@
-{% load staticfiles %}
-
-{% load admin_urls %}
+{% load staticfiles compress admin_urls %}
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>{% block title %}Dalite NG{% endblock %}</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Dalite NG">
-    <link rel="icon" href="{% static 'peerinst/img/logo.png' %}">
-    <link rel="stylesheet" href="{% static 'peerinst/css/main.css' %}">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<head>
+  <title>{% block title %}DALITE NG{% endblock %}</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DALITE NG">
+  <link rel="icon" href="{% static 'peerinst/img/logo.png' %}">
+  {% compress css %}
+  <link rel="stylesheet" href="{% static 'peerinst/css/vendor/material-components-web.min.css' %}">
+  <link rel="stylesheet" href="{% static 'peerinst/css/vendor/ionicons.css' %}">
+  <link rel="stylesheet" href="{% static 'peerinst/css/main.css' %}">
+  {% endcompress %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
 
-    <!-- Custom settings for local instance of dalite-ng -->
-    {% include 'peerinst/custom-instance-head.html' %}
+  <!-- Custom settings for local instance of dalite-ng -->
+  {% include 'peerinst/custom-instance-head.html' %}
+  {% block stylesheets %}{% endblock %}
+</head>
 
-    {% block stylesheets %}{% endblock %}
-  </head>
-
-  <body>
-
-    <!-- Custom header for local instance of dalite-ng -->
-    <header>
-      <div class="wrapper">
-        <div>
-          <a href="{% include 'peerinst/custom-instance-link.html' %}"><img src="{% static 'peerinst/img/logo.png' %}" alt="site-logo" id="logo"></a>
-          {% if not user.student %}
-            <a href="{% url 'assignment-list' %}" style="color:white;">{% include 'peerinst/custom-instance-header.html' %}</a>
-          {% else %}
-            {% include 'peerinst/custom-instance-header.html' %}
-          {% endif %}
-        </div>
-        <div style="text-align:right;font-size:10pt;line-height:1.2;">
-          {% if user.is_authenticated %}
-            {% if user.teacher %}
-              Teacher: <a href="{% url 'teacher' pk=user.teacher.pk %}" style="color:white;font-weight:bold;">{{ request.user.username }}</a>
-            {% else %}
-              User: {{ request.user.username }}
-            {% endif %}
-            <br>
-            {% if not user.student %}
-              <a href="{% url 'logout' %}" style="color:white;font-weight:bold;">Logout</a>
-            {% endif %}
-          {% endif %}
-        </div>
+<body>
+  <!-- Custom header for local instance of dalite-ng -->
+  <header>
+    <div class="wrapper">
+      <div>
+        <a href="{% include 'peerinst/custom-instance-link.html' %}"><img src="{% static 'peerinst/img/logo.png' %}" alt="site-logo" id="logo"></a>
+        {% if not user.student %}
+        <a href="{% url 'assignment-list' %}">{% include 'peerinst/custom-instance-header.html' %}</a>
+        {% else %}
+        {% include 'peerinst/custom-instance-header.html' %}
+        {% endif %}
       </div>
-    </header>
-
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <div class="site-content">
-      {% block body %}{% endblock %}
+      <div class="header-right">
+        {% if user.is_authenticated %}
+        {% if user.teacher %}
+        Teacher: <a class="bold" href="{% url 'teacher' pk=user.teacher.pk %}">{{ request.user.username }}</a>
+        {% else %}
+        User: {{ request.user.username }}
+        {% endif %}
+        <br>
+        {% if not user.student %}
+        <a class="bold" href="{% url 'logout' %}">Logout</a>
+        {% endif %}
+        {% endif %}
+      </div>
     </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script>
-        // Fix potential CSRF token conflicts when loading multiple iframes in parallel,
-        // if the user did not have a CSRF cookie set already.
-        // The CSRF token in the HTML may be out of date, but the cookie value should be
-        // accurate by the time we submit the form.
-        $(function() {
-            var getCookie = function(name) {
-                var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-                if (match) { return match[2]; }
-            };
-            $(document).on('submit','form', function(){
-                var csrf_token = getCookie('csrftoken');
-                if (csrf_token) {
-                    $('input[name=csrfmiddlewaretoken]').each(function() {
-                        $(this).val(csrf_token);
-                    });
-                }
-            });
+  </header>
+
+  {% compress js %}
+  <script src="{% static 'peerinst/js/vendor/d3.v4.min.js'  %}"></script>
+  <script src="{% static 'peerinst/js/vendor/material-components-web.min.js'  %}"></script>
+  {% endcompress %}
+  
+  <div class="site-content">
+    {% block body %}{% endblock %}
+  </div>
+
+  {% block footer %}{% endblock %}
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script>
+  // Fix potential CSRF token conflicts when loading multiple iframes in parallel,
+  // if the user did not have a CSRF cookie set already.
+  // The CSRF token in the HTML may be out of date, but the cookie value should be
+  // accurate by the time we submit the form.
+  $(function() {
+    var getCookie = function(name) {
+      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      if (match) { return match[2]; }
+    };
+    $(document).on('submit','form', function(){
+      var csrf_token = getCookie('csrftoken');
+      if (csrf_token) {
+        $('input[name=csrfmiddlewaretoken]').each(function() {
+          $(this).val(csrf_token);
         });
-    </script>
+      }
+    });
+  });
+  </script>
 
-    <script>
-      // Query window.parent and set background color of iframe to background color of parent
-      console.info(window.parent.document.body.style.backgroundColor);
-    </script>
+  <script>
+  // Query window.parent and set background color of iframe to background color of parent
+  //  console.info(window.parent.document.body.style.backgroundColor);
+  </script>
 
-    {% block scripts %}{% endblock %}
-  </body>
+  {% block scripts %}{% endblock %}
+
+  <script>mdc.autoInit()</script>
+
+</body>
 </html>

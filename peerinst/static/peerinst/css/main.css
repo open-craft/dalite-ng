@@ -1,6 +1,11 @@
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+.material-icons.md-96 { font-size: 96px; }
+
 body {
     color: #3C3C3C;
-    font: 1em/1.6em "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
     margin: 0pt;
 }
 p {
@@ -30,45 +35,6 @@ div.action {
     vertical-align: middle;
     font-weight: 600;
 }
-div.light-button, input[type="submit"], input[type="button"] {
-    border: 1px solid #CFC6C6;
-    border-radius: 3px;
-    box-shadow: 0 1px 0 0 #FFF inset;
-    color: #333;
-    display: inline-block;
-    font-weight: bold;
-    background-color: #EEE;
-    background-image: linear-gradient(#EEE, #D6CECE);
-    padding: 7px 18px;
-    text-decoration: none;
-    text-shadow: 0px 1px 0px #F9F8F8;
-    background-clip: padding-box;
-    font-size: 0.8125em;
-}
-
-div.light-button:hover, input[type="submit"]:hover, input[type="button"]:hover {
-    box-shadow: 0px 1px 0px 0px #FBFBFB inset;
-    cursor: pointer;
-    background-color: #E1E1E1;
-    background-image: linear-gradient(#E1E1E1, #CFC6C6);
-}
-div.light-button:active, input[type="submit"]:active, input[type="button"]:active {
-    border: 1px solid #CFC6C6;
-    box-shadow: 0px 0px 8px 4px #C7BEBE inset, 0px 0px 8px 4px #C7BEBE inset;
-}
-
-input[type='text'], textarea {
-    background: none repeat scroll 0 0 #FFF;
-    border: 1px solid #C8C8C8;
-    border-radius: 0;
-    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6), 0px 0px 3px 0px rgba(0, 0, 0, 0.1) inset;
-    box-sizing: border-box;
-    font: 1em "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
-    padding: 5px 12px;
-    vertical-align: top;
-    margin-left: 1em;
-    margin-bottom: .5em;
-}
 
 ul {
     list-style: none;
@@ -79,13 +45,6 @@ ul#id_first_answer_choice {
     margin-bottom: 2em;
 }
 
-input[type='text'] {
-    height: 35px;
-}
-
-input[type='text']:focus, .form-field:focus {
-    background-color: #FAFAFA;
-}
 
 .rationales {
     display: table;
@@ -178,6 +137,17 @@ header {
   padding:4pt;
   font-size: 18pt;
 }
+header a {
+  color: white;
+}
+.bold {
+   font-weight:bold;
+}
+.header-right {
+   text-align:right;
+   font-size:10pt;
+   line-height:1.2;
+}
 .site-content {
   margin: 20pt;
 }
@@ -247,35 +217,6 @@ a {
 .note {
   font-size: 10pt;
 }
-
-
-/* login and password change */
-form[id*="password"] {
-  width:fit-content;
-  width:-moz-fit-content;
-  font-size: 10pt;
-}
-form[action*="login"] {
-  width:fit-content;
-  width:-moz-fit-content;
-  font-size: 10pt;
-}
-#sign_up {
-  width:fit-content;
-  width:-moz-fit-content;
-  font-size: 10pt;
-}
-#id_url, #id_email, #id_username, #id_password, #id_old_password, #id_new_password1, #id_password1, #id_password2, #id_new_password2 {
-  padding: 1px;
-  margin: 0px;
-  border-width: thin;
-  height: 25px;
-  width: 200px;
-  box-sizing: border-box;
-  margin-bottom: 5px;
-}
-
-
 
 @media (max-width: 450px) {
   ul {

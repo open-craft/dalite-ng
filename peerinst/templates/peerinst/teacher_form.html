@@ -1,12 +1,12 @@
 {% extends 'peerinst/base.html' %}
+
 {% load i18n %}
 
 {% block body %}
 
 <style>
-
 form {
-  padding: 10px;
+  padding-top: 20px;
 }
 form option {
   font-family: 'Montserrat', sans-serif;
@@ -18,16 +18,19 @@ form label {
 .form_field_wrapper {
   padding-bottom: 10px;
 }
-
-
 </style>
 
-<h1>My account</h1>
-<h2>{{request.user}}</h2>
+<h1>Identity</h1>
 
+<h2>Edit discipline and institution</h2>
+
+<p>Select content disciplines and the institutions where you teach.  You can select multiple choices using the shift button.</p>
+
+{{ form.non_field_errors }}
+
+<div>
 <form action="{% url 'teacher-update' object.id %}" method="post">
     {% csrf_token %}
-    {{ form.non_field_errors }}
 
     <div class="form_field_wrapper">
       {{ form.institutions.errors }}
@@ -41,7 +44,8 @@ form label {
       {{ form.disciplines }}
     </div>
 
-    <input type="submit" value="Update" />
+    <input class="mdc-button mdc-button--raised mdc-ripple-surface" type="submit" value="Update" data-mdc-auto-init="MDCRipple"/>
 </form>
+</div>
 
 {% endblock %}

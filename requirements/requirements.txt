@@ -1,6 +1,8 @@
 django>=1.8.4,<1.9
+django-compressor==2.2
 django-password-validation==0.1.1
 django-grappelli>=2.7.1,<2.8
+django-htmlmin==0.10.0
 python-memcached==1.59
 mysql-python
 pillow

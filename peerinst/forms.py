@@ -149,14 +149,16 @@ class SignUpForm(UserCreationForm):
 
     url = forms.URLField(
         label=_('Website'),
+        initial='http://',
         max_length=200,
         help_text=_('Please provide an institutional url listing yourself as a faculty member and showing your e-mail address.')
     )
 
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()
-        pwd = cleaned_data['password1']
-        password_validation.validate_password(pwd)
+        pwd = cleaned_data.get('password1')
+        if pwd:
+            password_validation.validate_password(pwd)
 
         return cleaned_data
 

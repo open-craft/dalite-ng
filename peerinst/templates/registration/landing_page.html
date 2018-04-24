@@ -1,314 +1,733 @@
 {% extends "peerinst/base.html" %}
 
+{% load staticfiles compress %}
+
 {% block stylesheets %}
+{% compress css %}
 <style>
-  body {
-     background-color: #54c0db;
-  }
-  header {
-    display:none;
-  }
-  #welcome {
-    margin:auto;
-    overflow:visible;
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform: translate(-50%,-50%);
-  }
-  #animation {
-    display: block;
-    margin:auto;
-    overflow:visible;
-  }
+body {
+  color: var(--mdc-theme-secondary);
+}
+.underline {
+  overflow:visible;
+  position: absolute;
+  left:0px;
+  bottom:-5px;
+}
+.site-content {
+  margin-bottom: 80pt;
+}
+.image-list {
+  margin-top: 20pt;
+}
+.icon {
+  font-size:24pt;
+}
+.stats {
+  display:block;
+  margin:auto;
+}
+.mdc-chip-set {
+  width: fit-content;
+  width: -moz-fit-content;
+  margin-right:0pt;
+  margin-left: auto;
+}
+.mdc-toolbar {
+  padding:0pt;
+}
+.mdc-toolbar__row {
+  min-height: 100px;
+  background-image:radial-gradient(500px 500px,rgba(255,255,255,0.4),var(--mdc-theme-primary));
+}
+.mdc-typography--caption {
+  text-align:center;
+  margin-top:16px;
+  font-size: 12pt;
+  font-weight: 700;
+}
+.mdc-typography--display3 {
+  padding-top:70px;
+  padding-bottom:10px;
+  position:sticky;
+  top:70px;
+  z-index: 2;
+}
+.embedded-video {
+  display:block;
+  margin:auto;
+}
+.white {
+  background-color: white;
+}
+main {
+  max-width:900px;
+  margin:auto;
+}
+section {
+  padding-left:5px;
+  padding-right:20px;
+}
+header {
+  padding-right: 0px;
+}
+footer {
+  color: white;
+  padding-top: 5px;
+  padding-bottom:5px;
+}
+footer a {
+  color: white;
+  padding-left:10px;
+}
+.footer_content {
+  font-size:11pt;
+  margin-top:10px;
+  margin-left:20px;
+  margin-right:20px;
+}
+#scrollprompt {
+  position:absolute;
+  bottom:0px;
+  left:50%;
+}
+.navleft {
+  position:absolute;
+  font-size:11pt;
+  bottom:4px;
+  left:20px;
+}
+.navleft a {
+  padding-right:20px;
+  color: white;
+}
+.navright {
+  position:absolute;
+  font-size:11pt;
+  bottom:4px;
+  right:20px;
+  text-align: right;
+}
+.navright a {
+  padding-left:20px;
+  color: white;
+}
+#animation {
+  display:block;
+  margin:auto;
+  overflow:visible;
+}
+.count {
+  font-size: 32pt;
+}
 </style>
+{% endcompress %}
 {% endblock %}
 
-
 {% block body %}
+<script>
+// Override default size of header to fill page based on window size
+document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-flexible:"+window.innerHeight/64+" !important;}");
+</script>
 
+<header class="mdc-toolbar mdc-toolbar--fixed mdc-toolbar--flexible mdc-toolbar--waterfall">
+  <div class="mdc-toolbar__row">
+    <svg id="animation" width=800 height=80></svg>
+    <i id="scrollprompt" class="icon ion-arrow-down-b"></i>
+    <span class="navleft">
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'sign_up' %}">Signup</a>
+    </span>
+    <span class="navright">
+      <a href="">EN</a>
+    </span>
+  </div>
+</header>
 
-<div id="welcome">
-  <svg id="animation" width=800 height=400></svg>
-<div>
+<main class="mdc-toolbar-fixed-adjust">
+  <section>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Features
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
+    <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
+    <p class="mdc-typography--body1">
+      Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
+    </p>
+    <h2 class="mdc-typography--headline">Most active disciplines</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+    <div class="mdc-layout-grid">
+      <div class="mdc-layout-grid__inner">
+        {% for l in disciplines|first %}
+        {% if l != "name" %}
+        <div class="mdc-layout-grid__cell--span-4-phone mdc-layout-grid__cell--span-4-tablet mdc-layout-grid__cell--span-3-desktop">
+          <svg class="stats" id="{{ l }}" width=150 height=150></svg>
+          <div class="mdc-typography--caption mdc-theme--primary">{{ l|capfirst }}</div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    <div class="mdc-chip-set mdc-chip-set--choice">
+      {% for d in disciplines %}
+      <div id="{{ d.name }}" class="mdc-chip" onclick="update(this,event)" tabindex="0" data-mdc-auto-init="MDCChip">
+        <div class="mdc-chip__checkmark">
+          <svg class="mdc-chip__checkmark-svg" viewBox="-2 -3 30 30">
+            <path class="mdc-chip__checkmark-path" fill="none" stroke="black"
+            d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+          </svg>
+        </div>
+        <div class="mdc-chip__text">{{ d.name }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3 mdc-theme--background">{{ 'A guided tour'|title }}
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
+    <div id="player" class="embedded-video"></div>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3  mdc-theme--background">Development
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
+    <h2 class="mdc-typography--headline">History</h2>
+    <p class="mdc-typography--body1">
+      Peer Instruction, popularized by Eric Mazur of Harvard University, is one of the most prevalent classroom activities today. Something fascinating happens during these peer discussions, whereby students can convince each other of the correct thinking. But what about instances when the class size is too small for diversity of answers, or the teacher wants to have students prepare for class using a similar approach? This is where DALITE was born!
+    </p>
+    <h2 class="mdc-typography--headline">The Next Generation</h2>
+    <p class="mdc-typography--body1">
+      HarvardX, a founding member of the edX consortium, financed the development of DALITE into an open source, LTI compliant tool, making it available through most major Learning Management Systems, including Moodle, OpenEdx and Canvas. Since 2015, the SALTISE/S4 instance of DALITE, known as myDALITE.org, has been used in several Massive Open Online Classroom (MOOCs) on the edX platform, including Physics, Exercise Science, and Ethics and Morality.
+    </p>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
+    <h2 class="mdc-typography--headline">Vision</h2>
+    <p class="mdc-typography--body1">
+      SALTISE is a learning community that fosters the development and research of tools and resources for pedagogical innovations as well as bringing together educators (researchers and practitioners) and professional development personnel across the province of Quebec, as well as welcoming national and international partnerships.
+    </p>
+    <h2 class="mdc-typography--headline">The S4 project</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+  </section>
+
+  <section>
+    <h1 class="mdc-typography--display3 mdc-theme--background">Partners
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
+    <h2 class="mdc-typography--headline">Paragraph title</h2>
+    <p class="mdc-typography--body1">
+      {% lorem %}
+    </p>
+    <div class="image-list">
+      <ul class="mdc-image-list mdc-image-list--masonry partner-list">
+        <li class="mdc-image-list__item">
+          <img class="mdc-image-list__image" style="width:200px" src="{% static 'peerinst/img/dawson_logo.png' %}">
+        </li>
+      </ul>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block footer %}
+<footer>
+  <div class="wrapper">
+    <div class="footer_content">
+      &copy 2018 SALTISE/S4
+    </div>
+    <div class="footer_content" style="text-align:right;">
+      <a href="mailto:info@saltise.ca"><i class="icon ion-ios-email"></i></a>
+      <a href="https://www.saltise.ca"><i class="icon ion-earth"></i></a>
+      <a href="https://www.facebook.com/SALTISE/"><i class="icon ion-social-facebook"></i></a>
+      <a href="https://twitter.com/saltise"><i class="icon ion-social-twitter"></i></a>
+      <a href="https://github.com/SALTISES4/dalite-ng"><i class="icon ion-social-github"></i></a>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+{% compress js %}
+<script>
+var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
+
+var chips = {}
+/*var c = document.querySelectorAll('.mdc-chip');
+c.forEach(function(d){
+const chip = new mdc.chips.MDCChip(d);
+chips[d.id] = chip;
+if (d.id == "All"){
+chip.toggleSelected();
+}
+});*/
+
+var toolbar = mdc.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
+toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
+
+const arrow = document.getElementById('scrollprompt');
+var flexibleExpansionRatio = 1.0;
+toolbar.listen('MDCToolbar:change', function(evt) {
+  flexibleExpansionRatio = evt.detail.flexibleExpansionRatio;
+  arrow.style.opacity = flexibleExpansionRatio;
+});
+</script>
+
+<script>
+function underlines() {
+  'use strict';
+
+  // Decorate h1 headers
+  let lines = d3.selectAll(".underline");
+  lines.selectAll("g").remove();
+  let w = document.querySelector("main").offsetWidth;
+
+  let gradientX = lines.append("linearGradient")
+  .attr("id",'underlineGradientX')
+  .attr('x1',0)
+  .attr('x2',1)
+  .attr('y1',0)
+  .attr('y2',0);
+
+  gradientX.append("stop")
+  .attr("offset",'0%')
+  .attr('stop-color','var(--mdc-theme-primary)');
+
+  gradientX.append("stop")
+  .attr("offset",'100%')
+  .attr('stop-color','var(--mdc-theme-secondary)');
+
+  let gradientY = lines.append("linearGradient")
+  .attr("id",'underlineGradientY')
+  .attr('x1',0)
+  .attr('x2',0)
+  .attr('y1',0)
+  .attr('y2',1);
+
+  gradientY.append("stop")
+  .attr("offset",'0%')
+  .attr('stop-color','var(--mdc-theme-secondary)');
+
+  gradientY.append("stop")
+  .attr("offset",'100%')
+  .attr('stop-color','var(--mdc-theme-primary)');
+
+  let g = lines.append("g");
+  g.append("rect")
+  .attr("x",-10)
+  .attr("y",0)
+  .attr("width",w+10)
+  .attr("height",1)
+  .attr("fill",'url(#underlineGradientX)');
+
+  g.append("rect")
+  .attr("x",w)
+  .attr("y",0)
+  .attr("width",1)
+  .attr("height",120)
+  .attr("fill",'url(#underlineGradientY)');
+}
+
+underlines();
+</script>
 
 <script>
 function logo(){
-var svg = d3.select("#animation");
-svg.attr("width",document.body.offsetWidth);
+  'use strict';
 
-var width = +svg.attr("width"),
-height = +svg.attr("height"),
-margin = {top:1,bottom:1,left:1,right:1};
+  // Animate waves
+  var svg = d3.select("#animation");
+  svg.attr("width",document.body.offsetWidth);
 
-var innerWidth = width-margin.left-margin.right,
-innerHeight = height-margin.top-margin.bottom;
+  var width = +svg.attr("width"),
+  height = +svg.attr("height"),
+  margin = {top:1,bottom:1,left:1,right:1};
 
-svg.selectAll("g").remove();
+  var innerWidth = width-margin.left-margin.right,
+  innerHeight = height-margin.top-margin.bottom;
 
-var g = svg.append("g").attr("transform","translate("+margin.left+","+(margin.top+innerHeight/2)+")");
+  svg.selectAll("g").remove();
 
-var x = d3.scaleLinear().domain([0,2*Math.PI]).range([0,innerWidth]),
-y = d3.scaleLinear().domain([-1,1]).range([-innerHeight/2,innerHeight/2]);
+  var g = svg.append("g").attr("transform","translate("+margin.left+","+(margin.top+innerHeight/2)+")");
 
-var xAxis = g.append("g").style("opacity",0).call(d3.axisBottom(x)),
-yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
+  var x = d3.scaleLinear().domain([0,2*Math.PI]).range([0,innerWidth]),
+  y = d3.scaleLinear().domain([-1,1]).range([-innerHeight/2,innerHeight/2]);
 
-var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/20));
+  var xAxis = g.append("g").style("opacity",0).call(d3.axisBottom(x)),
+  yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
 
-function f(v,x,t,a) {
-  return a*Math.sin(x-0.5*v*t);
-}
+  var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/5));
 
-var a1 = 0.5;
-var a2 = 0.3;
-var a3 = 0.4;
+  function f(v,x,t,a) {
+    return Math.min(Math.max(10*flexibleExpansionRatio,2),4)*a*Math.sin(x-0.5*v*t);
+  }
 
-var v1 = 0.001;
-var v2 = 0.0018;
-var v3 = -0.001;
+  function animation() {
+    'use strict';
 
-var y1 = 0;
-var y2 = -0.1;
-var y3 = +0.05;
+    var dt = 0;
+    var offset1 = null;
+    var offset2 = null;
+    var offset3 = null;
+    var t0 = d3.now();
+    var t = t0;
 
-// Maybe run other wave backwards?
-// Add third wave?
-// Add different colours for overlap?
+    var a1 = 0.5;
+    var a2 = 0.3;
+    var a3 = 0.4;
 
-var line1 = d3.line()
+    var v1 = 0.001;
+    var v2 = 0.0018;
+    var v3 = -0.001;
+
+    var y1 = 0;
+    var y2 = -0.1;
+    var y3 = +0.05;
+
+    var line1 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(v1,d,d3.now(),a1)+y1); })
+    .y(function(d) { return y(f(v1,d,t-dt-offset1,a1)+y1); })
     .curve(d3.curveNatural);
 
-var line2 = d3.line()
+    var line2 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(v2,d,d3.now(),a2)+y2); })
+    .y(function(d) { return y(f(v2,d,t-dt-offset2,a2)+y2); })
     .curve(d3.curveNatural);
 
-var line3 = d3.line()
+    var line3 = d3.line()
     .x(function(d) { return x(d); })
-    .y(function(d) { return y(f(v3,d,d3.now(),a3)+y3); })
+    .y(function(d) { return y(f(v3,d,t-dt-offset3,a3)+y3); })
     .curve(d3.curveNatural);
 
-var intersection1 = d3.area()
+    var intersection1 = d3.area()
     .x(line1.x())
     .y0(y(0))
     .y1(line1.y())
     .curve(d3.curveNatural);
 
-var intersection2 = d3.area()
+    var intersection2 = d3.area()
     .x0(line1.x())
     .y0(line1.y())
     .x1(line2.x())
     .y1(line2.y())
     .curve(d3.curveNatural);
 
-var intersection3 = d3.area()
+    var intersection3 = d3.area()
     .x0(line1.x())
     .y0(line1.y())
     .x1(line3.x())
     .y1(line3.y())
     .curve(d3.curveNatural);
 
-/*var wave1 = g.append("g")
-  .selectAll(".a")
-  .data(xPoints)
-  .enter().append("circle")
-  .attr("class","a")
-  .attr("cx",function(d){return x(d)})
-  .attr("cy",function(d){return y(f(v1,d,d3.now(),a1)+y1)})
-  .attr("r",1)
-  .attr("fill","white")
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
+    g.append("path")
+    .datum(xPoints)
+    .attr("class","intersection")
+    .attr("fill",d3.rgb(244,244,244,0.3))
+    .attr("opacity",0)
+    .attr("d",intersection1)
+    .transition()
+    .duration(1000)
+    .attr("opacity",1)
+    .transition()
+    .duration(50)
+    .on("start", function repeat() {
+      if (offset1 == null) {
+        offset1 = d3.now()-t0;
+      }
+      if (flexibleExpansionRatio>0.01) {
+        t = d3.now();
         d3.active(this)
-            .attr("cy",function(d){return y(f(v1,d,d3.now(),a1)+y1)})
-          .transition()
-            .on("start", repeat);
-      });
-*/
-/*var wave2 = g.append("g")
-  .selectAll(".b")
-  .data(xPoints)
-  .enter().append("circle")
-  .attr("class","b")
-  .attr("cx",function(d){return x(d)})
-  .attr("cy",function(d){return y(f(v2,d,d3.now(),a2)+y2)})
-  .attr("r",1)
-  .attr("fill","white")
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
+        .attr("d",intersection1)
+        .transition()
+        .on("start", repeat);
+      }
+      else {
+        dt += d3.now() - t;
+        t = d3.now();
         d3.active(this)
-            .attr("cy",function(d){return y(f(v2,d,d3.now(),a2)+y2)})
-          .transition()
-            .on("start", repeat);
-      });
-*/
-/*var wave3 = g.append("g")
-  .selectAll(".b")
-  .data(xPoints)
-  .enter().append("circle")
-  .attr("class","b")
-  .attr("cx",function(d){return x(d)})
-  .attr("cy",function(d){return y(f(v3,d,d3.now(),a3)+y3)})
-  .attr("r",1)
-  .attr("fill","white")
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
+        .transition()
+        .on("start", repeat);
+      }
+    });
+
+    g.append("path")
+    .datum(xPoints)
+    .attr("class","intersection")
+    .attr("fill",d3.rgb(244,244,244,0.5))
+    .attr("opacity",0)
+    .attr("d",intersection2)
+    .transition()
+    .duration(1000)
+    .attr("opacity",1)
+    .transition()
+    .duration(50)
+    .on("start", function repeat() {
+      if (offset2 == null) {
+        offset2 = d3.now()-t0;
+      }
+      if (flexibleExpansionRatio>0.01) {
         d3.active(this)
-            .attr("cy",function(d){return y(f(v3,d,d3.now(),a3)+y3)})
-          .transition()
-            .on("start", repeat);
-      });
-*/
-g.append("path")
-  .datum(xPoints)
-  .attr("class","line")
-  .attr("stroke","white")
-  .attr("stroke-width",1)
-  .attr("fill","none")
-  .attr("d",line1)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
+        .attr("d",intersection2)
+        .transition()
+        .on("start", repeat);
+      }
+      else {
         d3.active(this)
-            .attr("d",line1)
-          .transition()
-            .on("start", repeat);
-      });
+        .transition()
+        .on("start", repeat);
+      }
+    });
 
-g.append("path")
-  .datum(xPoints)
-  .attr("class","line")
-  .attr("stroke","white")
-  .attr("stroke-width",1)
-  .attr("fill","none")
-  .attr("d",line2)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
+    g.append("path")
+    .datum(xPoints)
+    .attr("class","intersection")
+    .attr("fill",d3.rgb(0,66,102,0.5))
+    .attr("opacity",0)
+    .attr("d",intersection3)
+    .transition()
+    .duration(1000)
+    .attr("opacity",1)
+    .transition()
+    .duration(50)
+    .on("start", function repeat() {
+      if (offset3 == null) {
+        offset3 = d3.now()-t0;
+      }
+      if (flexibleExpansionRatio>0.01) {
         d3.active(this)
-            .attr("d",line2)
-          .transition()
-            .on("start", repeat);
-      });
-
-g.append("path")
-  .datum(xPoints)
-  .attr("class","line")
-  .attr("stroke","white")
-  .attr("stroke-width",1)
-  .attr("fill","none")
-  .attr("d",line3)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
+        .attr("d",intersection3)
+        .transition()
+        .on("start", repeat);
+      }
+      else {
         d3.active(this)
-            .attr("d",line3)
-          .transition()
-            .on("start", repeat);
-      });
+        .transition()
+        .on("start", repeat);
+      }
+    });
 
-g.append("path")
-  .datum(xPoints)
-  .attr("class","intersection")
-  .attr("fill",d3.rgb(244,244,244,0.2))
-  .attr("d",intersection1)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
-        d3.active(this)
-            .attr("d",intersection1)
-          .transition()
-            .on("start", repeat);
-      });
+    title();
+  }
 
-g.append("path")
-  .datum(xPoints)
-  .attr("class","intersection")
-  .attr("fill",d3.rgb(244,244,244,0.4))
-  .attr("d",intersection2)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
-        d3.active(this)
-            .attr("d",intersection2)
-          .transition()
-            .on("start", repeat);
-      });
+  function title(){
+    'use strict';
 
-g.append("path")
-  .datum(xPoints)
-  .attr("class","intersection")
-  .attr("fill",d3.rgb(0,66,102,0.4))
-  .attr("d",intersection3)
-  .transition()
-  .duration(50)
-  .on("start", function repeat() {
-        d3.active(this)
-            .attr("d",intersection3)
-          .transition()
-            .on("start", repeat);
-      });
+    d3.selectAll(".title").remove();
 
-g.append("text")
-.attr("x",margin.left+innerWidth/2)
-.attr("dx","25pt")
-.attr("y",y(0))
-.attr("fill","white")
-.attr("text-anchor","middle")
-.style("font-size","40pt")
-.style("cursor","pointer")
-.text("DALITE")
-.on("click",function(){
-  window.location="{% url 'login' %}"
-});
+    g.append("text")
+    .attr("class","title")
+    .attr("x",margin.left+innerWidth/2)
+    .attr("dx","25pt")
+    .attr("y",y(0))
+    .attr("fill","white")
+    .attr("text-anchor","middle")
+    .style("font-size","40pt")
+    .style("cursor","pointer")
+    .text("DALITE")
+    .on("click",function(){
+      window.location="{% url 'login' %}"
+    });
 
-g.append("text")
-.attr("x",margin.left+innerWidth/2)
-.attr("dx","-70pt")
-.attr("y",y(0))
-.attr("fill","white")
-.attr("text-anchor","middle")
-.style("font-family","Cardo, serif")
-.style("font-style",'italic')
-.style("font-size","40pt")
-.style("cursor","pointer")
-.text("my")
-.on("click",function(){
-  window.location="{% url 'login' %}"
-});
+    g.append("text")
+    .attr("class","title")
+    .attr("x",margin.left+innerWidth/2)
+    .attr("dx","-70pt")
+    .attr("y",y(0))
+    .attr("fill","white")
+    .attr("text-anchor","middle")
+    .style("font-family","Cardo, serif")
+    .style("font-style",'italic')
+    .style("font-size","40pt")
+    .style("cursor","pointer")
+    .text("my")
+    .on("click",function(){
+      window.location="{% url 'login' %}"
+    });
 
-g.append("text")
-.attr("x",margin.left+innerWidth/2+175)
-.attr("y",y(0))
-.attr("dx",-110)
-.attr("dy","16pt")
-.attr("fill","white")
-.attr("text-anchor","end")
-.style("font-family","Cardo, serif")
-.style("font-style",'italic')
-.style("font-size","14pt")
-.text("by")
+    g.append("text")
+    .attr("class","title")
+    .attr("x",margin.left+innerWidth/2+175)
+    .attr("y",y(0))
+    .attr("dx",-110)
+    .attr("dy","16pt")
+    .attr("fill","white")
+    .attr("text-anchor","end")
+    .style("font-family","Cardo, serif")
+    .style("font-style",'italic')
+    .style("font-size","14pt")
+    .text("by")
 
-g.append("text")
-.attr("x",margin.left+innerWidth/2+145)
-.attr("y",y(0))
-.attr("dx","20pt")
-.attr("dy","16pt")
-.attr("fill","white")
-.attr("text-anchor","end")
-.style("font-size","14pt")
-.text("SALTISE/S4");
+    g.append("text")
+    .attr("class","title")
+    .attr("x",margin.left+innerWidth/2+145)
+    .attr("y",y(0))
+    .attr("dx","20pt")
+    .attr("dy","16pt")
+    .attr("fill","white")
+    .attr("text-anchor","end")
+    .style("font-size","14pt")
+    .text("SALTISE/S4");
+  }
 
+  title();
+  if (document.readyState === 'complete') {
+    animation();
+  }
+  else {
+    window.onload = animation;
+  }
 }
 logo();
-window.addEventListener("resize",logo);
 
+function handleResize(){
+  logo();
+  underlines();
+  return;
+}
+
+window.addEventListener("resize",handleResize);
 </script>
+
+<script>
+data = {{ json|safe }};
+labels = d3.keys(data['All']);
+svg = [];
+width = [];
+height = [];
+
+var g = [];
+var text = [];
+for (var i in labels){
+  svg[i] =  d3.select("#"+labels[i]);
+  width[i] = +svg[i].attr('width');
+  height[i] = +svg[i].attr('height');
+
+  g[i] = svg[i].append("g")
+  .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
+
+  /*let gradientR = g[i].append("radialGradient")
+  .attr("id",'radialGradient')
+  .attr('x1',0)
+  .attr('x2',1)
+  .attr('y1',0)
+  .attr('y2',0);
+
+  gradientR.append("stop")
+  .attr("offset",'0%')
+  .attr('stop-color','rgba(255,255,255,0.1)');
+
+  gradientR.append("stop")
+  .attr("offset",'100%')
+  .attr('stop-color','var(--mdc-theme-primary)');*/
+
+  g[i].append("circle")
+  .attr("class","count-background")
+  .attr("cx",0)
+  .attr("cy",0)
+  .attr("r",70)
+  .attr("fill","white");
+
+  g[i].append("circle")
+  .attr("class","count-background")
+  .attr("cx",0)
+  .attr("cy",0)
+  .attr("r",70)
+  .attr("opacity",0.2)
+  .attr("fill","var(--mdc-theme-primary)");
+
+  g[i].append("circle")
+  .attr("class","count-background")
+  .attr("cx",0)
+  .attr("cy",0)
+  .attr("r",70)
+  .attr("stroke","var(--mdc-theme-primary)")
+  .attr("stroke-width",1.5)
+  .attr("fill",'none');
+
+  /*g[i].append("circle")
+  .attr("class","count-background")
+  .attr("cx",0)
+  .attr("cy",0)
+  .attr("r",80)
+  .attr("fill","url(#radialGradient)");*/
+
+  text[i] = g[i].append("text")
+  .attr("class","count")
+  .attr("c",data['All'][labels[i]])
+  .attr("x",0)
+  .attr("y",0)
+  .attr("dy",20)
+  .attr("text-anchor","middle")
+  .attr("fill","var(--mdc-theme-primary)")
+  .text(data['All'][labels[i]]);
+}
+
+function counts(dataset) {
+  'use strict';
+
+  // Update counts for new discipline
+  d3.selectAll(".count").interrupt();
+
+  var delta = [];
+  var set = [];
+
+  for (let i in labels){
+    set[i] = false;
+
+    text[i].transition()
+    .duration(10)
+    .on("start", function repeat() {
+      if (set[i] == false) {
+        delta[i] = 0.01*((+this.getAttribute("c")) - (+dataset[labels[i]]));
+        set[i] = true;
+      }
+      if (Math.abs((+this.getAttribute("c")) - (+dataset[labels[i]])) >= Math.abs(0.9*delta[i])){
+        this.setAttribute("c",(+this.getAttribute("c")) - delta[i]);
+        if (+this.getAttribute("c") < 0) {
+          this.setAttribute("c",Math.abs(+this.getAttribute("c")));
+        }
+        d3.active(this)
+        .text((+this.getAttribute("c")).toFixed(0))
+        .transition()
+        .on("start", repeat);
+      }
+      else {
+        d3.interrupt(this);
+      }
+    });
+  }
+}
+
+function update(t,e) {
+  counts(data[t.id]);
+  return;
+}
+</script>
+
+<script>
+// Async load video as per API
+// https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+var player;
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('player', {
+    height: '315',
+    width: '560',
+    videoId: 'uW2r0jGNp8I',
+  });
+}
+</script>
+{% endcompress %}
 
 {% endblock %}
