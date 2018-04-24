@@ -3,7 +3,7 @@
 {% load staticfiles compress %}
 
 {% block stylesheets %}
-{% compress css %}
+{% compress css inline %}
 <style>
 body {
   color: var(--mdc-theme-secondary);
@@ -12,7 +12,7 @@ body {
   overflow:visible;
   position: absolute;
   left:0px;
-  bottom:-5px;
+  bottom:-3px;
 }
 .site-content {
   margin-bottom: 80pt;
@@ -256,7 +256,7 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
 {% endblock %}
 
 {% block scripts %}
-{% compress js %}
+{% compress js inline %}
 <script>
 var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
 

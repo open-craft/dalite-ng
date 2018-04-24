@@ -139,8 +139,6 @@ def dashboard(request):
     return HttpResponse('dashboard')
 
 
-
-
 def sign_up(request):
     template = "registration/sign_up.html"
     context = {}
