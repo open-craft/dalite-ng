@@ -5,17 +5,6 @@
 {% block stylesheets %}
 {% compress css inline %}
 <style>
-body {
-  color: var(--mdc-theme-secondary);
-}
-main {
-  max-width:900px;
-  margin:auto;
-}
-section {
-  padding-left:5px;
-  padding-right:20px;
-}
 header {
   padding-right: 0px;
 }
@@ -27,12 +16,6 @@ footer {
 footer a {
   color: white;
   padding-left:10px;
-}
-.underline {
-  overflow:visible;
-  position: absolute;
-  left:0px;
-  bottom:-3px;
 }
 .site-content {
   margin-bottom: 80pt;
@@ -110,9 +93,6 @@ footer a {
 .count {
   font-size: 32pt;
 }
-.count {
-  font-size: 32pt;
-}
 #scrollprompt {
   position:absolute;
   bottom:0px;
@@ -122,11 +102,6 @@ footer a {
   display:block;
   margin:auto;
   overflow:visible;
-}
-@media (max-width: 450px) {
-  .mdc-typography--display3 {
-    font-size:30pt;
-  }
 }
 </style>
 {% endcompress %}
@@ -266,6 +241,8 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
 {% block scripts %}
 {% compress js inline %}
 <script>
+underlines();
+
 var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
 
 /*var chips = {}
@@ -287,64 +264,6 @@ toolbar.listen('MDCToolbar:change', function(evt) {
   flexibleExpansionRatio = evt.detail.flexibleExpansionRatio;
   arrow.style.opacity = flexibleExpansionRatio;
 });
-</script>
-
-<script>
-function underlines() {
-  'use strict';
-
-  // Decorate h1 headers
-  let lines = d3.selectAll(".underline");
-  lines.selectAll("g").remove();
-  let w = document.querySelector("main").offsetWidth;
-
-  let gradientX = lines.append("linearGradient")
-  .attr("id",'underlineGradientX')
-  .attr('x1',0)
-  .attr('x2',1)
-  .attr('y1',0)
-  .attr('y2',0);
-
-  gradientX.append("stop")
-  .attr("offset",'0%')
-  .attr('stop-color','var(--mdc-theme-primary)');
-
-  gradientX.append("stop")
-  .attr("offset",'100%')
-  .attr('stop-color','var(--mdc-theme-secondary)');
-
-  let gradientY = lines.append("linearGradient")
-  .attr("id",'underlineGradientY')
-  .attr('x1',0)
-  .attr('x2',0)
-  .attr('y1',0)
-  .attr('y2',1);
-
-  gradientY.append("stop")
-  .attr("offset",'0%')
-  .attr('stop-color','var(--mdc-theme-secondary)');
-
-  gradientY.append("stop")
-  .attr("offset",'100%')
-  .attr('stop-color','var(--mdc-theme-primary)');
-
-  let g = lines.append("g");
-  g.append("rect")
-  .attr("x",-10)
-  .attr("y",0)
-  .attr("width",w+10)
-  .attr("height",1)
-  .attr("fill",'url(#underlineGradientX)');
-
-  g.append("rect")
-  .attr("x",w)
-  .attr("y",0)
-  .attr("width",1)
-  .attr("height",120)
-  .attr("fill",'url(#underlineGradientY)');
-}
-
-underlines();
 </script>
 
 <script>
@@ -524,7 +443,7 @@ function logo(){
 
     title();
   }
-  
+
   function title(){
     'use strict';
 

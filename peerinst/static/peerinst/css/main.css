@@ -4,9 +4,18 @@
 .material-icons.md-48 { font-size: 48px; }
 .material-icons.md-96 { font-size: 96px; }
 
+
 body {
-    color: #3C3C3C;
-    margin: 0pt;
+  color: var(--mdc-theme-secondary);
+  margin:0pt;
+}
+main {
+  max-width:900px;
+  margin:auto;
+}
+section {
+  padding-left:5px;
+  padding-right:20px;
 }
 p {
     margin: 0.25em 0;
@@ -152,7 +161,7 @@ header a {
   margin: 20pt;
 }
 .admin-link {
-  margin-top:-16pt;
+  margin-top:-20pt;
   margin-bottom:12pt;
   font-size:9pt;
   opacity:0.8;
@@ -217,6 +226,20 @@ a {
 .note {
   font-size: 10pt;
 }
+.underline {
+  overflow:visible;
+  position: absolute;
+  left:0px;
+  bottom:-3px;
+}
+
+.small-button {
+  padding-left:0pt;
+  padding-right:0pt;
+  min-width:20pt;
+  height:20pt;
+  margin:4pt;
+}
 
 @media (max-width: 450px) {
   ul {
@@ -225,5 +248,11 @@ a {
   img {
     max-width: 100%;
     max-height: 200px;
+  }
+  .mdc-typography--display3 {
+    font-size:30pt;
+  }
+  .mdc-typography--display1 {
+    font-size:20pt;
   }
 }

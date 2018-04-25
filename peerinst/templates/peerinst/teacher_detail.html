@@ -1,129 +1,113 @@
 {% extends 'peerinst/base.html' %}
 
-{% load i18n %}
+{% load compress i18n %}
 
 {% block body %}
-
-<h1>My account</h1>
-
-<div>
-  <h2>Identity</h2>
-
-  <ul class="mdc-list mdc-list--two-line">
-    <li class="mdc-list-item" onclick="edit_user()">
-      <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">account_circle</i></span>
-      <span class="mdc-list-item__text">
-        {{ object.user.username }}
-        <span class="mdc-list-item__secondary-text">
-          {% trans "Email: " %} {{ user.email }}
-        </span>
-        <span class="mdc-list-item__secondary-text">
-          {% trans "Member since: " %} {{ user.date_joined|date:"M d Y"  }}
-        </span>
+<main>
+<section>
+<h1 class="mdc-typography--display3" style="position:sticky;">My Account
+  <svg class="underline" width=150 height=4></svg>
+</h1>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">Identity</h2>
+<ul class="mdc-list mdc-list--two-line">
+  <li class="mdc-list-item mdc-elevation--z1" onclick="edit_user()">
+    <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">account_circle</i></span>
+    <span class="mdc-list-item__text mdc-theme--secondary bold">
+      {{ object.user.username }}
+      <span class="mdc-list-item__secondary-text">
+        {% trans "Email: " %} {{ user.email }}
       </span>
-      <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
-    </li>
-    <li class="mdc-list-item" onclick="edit_identity()">
-      <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">book</i></span>
-      <span class="mdc-list-item__text">
-        {% for d in object.disciplines.all %}
-          {{ d.title }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-        <span class="mdc-list-item__secondary-text">
-          {% trans "Discipline" %}
-        </span>
+      <span class="mdc-list-item__secondary-text">
+        {% trans "Member since: " %} {{ user.date_joined|date:"M d Y"  }}
       </span>
-      <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
-    </li>
-    <li class="mdc-list-item" onclick="edit_identity()">
-      <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">school</i></span>
-      <span class="mdc-list-item__text">
-        {% for i in object.institutions.all %}
-          {{ i.name }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-        <span class="mdc-list-item__secondary-text">
-          {% trans "Institution" %}
-        </span>
+    </span>
+    <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
+  </li>
+  <li class="mdc-list-item mdc-elevation--z1" onclick="edit_identity()">
+    <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">book</i></span>
+    <span class="mdc-list-item__text mdc-theme--secondary bold">
+      {% for d in object.disciplines.all %}
+        {{ d.title }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+      <span class="mdc-list-item__secondary-text">
+        {% trans "Discipline" %}
       </span>
-      <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
-    </li>
-  </ul>
-</div>
+    </span>
+    <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
+  </li>
+  <li class="mdc-list-item mdc-elevation--z1" onclick="edit_identity()">
+    <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">school</i></span>
+    <span class="mdc-list-item__text mdc-theme--secondary bold">
+      {% for i in object.institutions.all %}
+        {{ i.name }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+      <span class="mdc-list-item__secondary-text">
+        {% trans "Institution" %}
+      </span>
+    </span>
+    <span class="mdc-list-item__meta"><i class="material-icons md-18">mode_edit</i></span>
+  </li>
+</ul>
 
-<div>
-  <h2>Groups</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-groups' teacher.id %}">Add/remove groups</a></div>
-  <ol>
-  {% for g in object.groups.all %}
-    <li>{{ g.name }}</li>
-  {% endfor %}
-  </ol>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">Groups</h2>
+<div class="admin-link">
+  <a href="{% url 'teacher-groups' teacher.id %}">Add/remove groups</a>
 </div>
+<ol>
+{% for g in object.groups.all %}
+  <li>{{ g.name }}</li>
+{% endfor %}
+</ol>
 
-<div>
-  <h2>Assignments</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-assignments' teacher.id %}">Select/edit/create an assignment</a></div>
-  {% if not object.assignments.all %}
-  You do not have any assignments.
-  {% endif %}
-  <ol>
-  {% for a in object.assignments.all %}
-    <li>{{ a.identifier }} <span class="admin-link" ><a href="">Report</a></span></li>
-  {% endfor %}
-  </ol>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">Assignments</h2>
+<div class="admin-link">
+  <a href="{% url 'teacher-assignments' teacher.id %}">Select/edit/create an assignment</a>
 </div>
+{% if not object.assignments.all %}
+You do not have any assignments.
+{% endif %}
+<ol>
+{% for a in object.assignments.all %}
+  <li>{{ a.identifier }} <span class="admin-link"><a href="">Report</a></span></li>
+{% endfor %}
+</ol>
 
-<!-- <div>
-  <h2>Blink questions</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-blinks' teacher.id %}">Add/remove blink questions</a></div>
-  {% if not object.blinkquestion_set.all %}
-  You do not have any blink questions.
-  {% endif %}
-  Students can always access the current active question at <span style="font-weight:bold;">{% url 'blink-get-current' object.user.username %}</span>
-  <ol>
-  {% for a in object.blinkquestion_set.all %}
-    {% if a.current %}
-      <li style="margin-bottom:10px;"> {{a|safe|striptags}}<br>
-        Question url: <span style="font-weight:bold;">{% url 'blink-question' a.key %}</span><br>
-        <a href="{% url 'blink-summary' a.key %}"><input type="button" value="START"></a>
-      </li>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">Blink scripts</h2>
+<div class="admin-link">
+  <a href="{% url 'blinkAssignment-create' %}">Create a new blink script</a>
+</div>
+{% if not object.blinkassignment_set.all %}
+<p>A blink script is a series of blink questions strung together into one activity.  You do not have any blink scripts.</p>
+{% endif %}
+<p>Students can always access the current active question at <span style="font-weight:bold;">{{ request.get_host}}{% url 'blink-get-current' object.user.username %}</span></p>
+<ol>
+{% for a in object.blinkassignment_set.all %}
+  <li style="margin-bottom:10px;"> {{a.title|safe|striptags}}
+    <span class="admin-link" ><a href="{% url 'blinkAssignment-update' a.pk %}">Edit</a></span>
+    <br>
+    {% if a.blinkassignmentquestion_set.all|length > 0 %}
+      <a href="{% url 'blinkAssignment-start' a.key %}">
+          <input class="mdc-button mdc-button--raised mdc-ripple-surface" type="button" value="Start" data-mdc-auto-init="MDCRipple"/>
+      </a>
     {% endif %}
-  {% endfor %}
-  </ol>
-</div> -->
+  </li>
+{% endfor %}
+</ol>
+</section>
+</main>
+{% endblock %}
 
-
-<div>
-  <h2>Blink scripts</h2>
-  <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'blinkAssignment-create' %}">Create a new blink script</a></div>
-  {% if not object.blinkassignment_set.all %}
-  A blink script is a series of blink questions strung together into one activity.  You do not have any blink scripts.
-  {% endif %}
-    Students can always access the current active question at <span style="font-weight:bold;">{{ request.get_host}}{% url 'blink-get-current' object.user.username %}</span>
-  <ol>
-
-  {% for a in object.blinkassignment_set.all %}
-    <li style="margin-bottom:10px;"> {{a.title|safe|striptags}}
-      <span class="admin-link" ><a href="{% url 'blinkAssignment-update' a.pk %}">Edit</a></span>
-      <br>
-      {% if a.blinkassignmentquestion_set.all|length > 0 %}
-        <a href="{% url 'blinkAssignment-start' a.key %}">
-            <input class="mdc-button mdc-button--raised mdc-ripple-surface" type="button" value="Start" data-mdc-auto-init="MDCRipple"/>
-        </a>
-      {% endif %}
-    </li>
-  {% endfor %}
-  </ol>
-</div>
-
-
-
+{% block scripts %}
+{% compress js inline %}
 <script>
+underlines();
 function edit_user() {
   location="{% url 'password_change' %}";
 }
 function edit_identity() {
   location="{% url 'teacher-update' teacher.id %}";
 }
+window.addEventListener("resize",underlines);
 </script>
+{% endcompress %}
 {% endblock %}
