@@ -1,59 +1,69 @@
 {% extends 'peerinst/base.html' %}
-{% load i18n %}
+
+{% load compress i18n %}
 
 {% block body %}
-<h1>Assignment: {{assignment.title}}</h1>
 
-<h2>{% trans 'Questions' %}</h2>
-{% if user.is_staff %}
-  <div class="admin-link"><a href="{% url 'assignment-update' assignment_id=assignment.identifier%}">Click here to change which questions are part of this assignment</a></div>
-{% endif %}
+<main>
+  <section>
+    <h1 class="mdc-typography--display3" style="position:sticky;"> {{assignment.title}}
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
 
-<script>
-function plot(matrix,freq,id){
-  var colour = {
-    'easy' : 'rgb(30, 142, 62)',
-    'hard' : 'rgb(237, 69, 40)',
-    'tricky' : 'rgb(237, 170, 30)',
-    'peer' : 'rgb(25, 118, 188)'
-  }
-  var max = -0;
-  for (entry in d3.entries(matrix)){
-    var item = d3.entries(matrix)[entry];
-    if (item.value > max) {
-      max = item.value;
-      label = item.key;
-    }
-  }
-  if (max > 0){
-    var rating = document.getElementById("rating-"+id);
-    rating.innerHTML = label.substring(0,1).toUpperCase()+label.substring(1,);
+    <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Question List' %}</h2>
 
-    var stats = document.getElementById("stats-"+id);
-    stats.style.color = colour[label];
-  }
+    {% if user.is_staff %}
+    <div class="admin-link">
+      <a href="{% url 'assignment-update' assignment_id=assignment.identifier%}">Click here to change which questions are part of this assignment</a>
+    </div>
+    {% endif %}
 
-  var matrix_svg = d3.select("#matrix-"+id);
-  var size = matrix_svg.attr("width");
-  var g = matrix_svg.append("g");
+    {% compress js inline %}
+    <script>
+    function plot(matrix,freq,id){
+      var colour = {
+        'easy' : 'rgb(30, 142, 62)',
+        'hard' : 'rgb(237, 69, 40)',
+        'tricky' : 'rgb(237, 170, 30)',
+        'peer' : 'rgb(25, 118, 188)'
+      }
+      var max = -0;
+      for (entry in d3.entries(matrix)){
+        var item = d3.entries(matrix)[entry];
+        if (item.value > max) {
+          max = item.value;
+          label = item.key;
+        }
+      }
+      if (max > 0){
+        var rating = document.getElementById("rating-"+id);
+        rating.innerHTML = label.substring(0,1).toUpperCase()+label.substring(1,);
 
-  var easy = g.append("rect")
-  .attr("x", 0)
-  .attr("y", 0)
-  .attr("width", size/2)
-  .attr("height", size/2)
-  .attr("fill",colour['easy'])
-  .style("opacity",0.5+0.5*matrix['easy']);
+        var stats = document.getElementById("stats-"+id);
+        stats.style.color = colour[label];
+      }
 
-  /**easy.on("mouseover",function(d){
-    tooltip.html("Correct to correct");
+      var matrix_svg = d3.select("#matrix-"+id);
+      var size = matrix_svg.attr("width");
+      var g = matrix_svg.append("g");
 
-    tooltip.transition()
-    .duration(100)
-    .style("opacity",1);
-  });
+      var easy = g.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", size/2)
+      .attr("height", size/2)
+      .attr("fill",colour['easy'])
+      .style("opacity",0.5+0.5*matrix['easy']);
 
-  easy.on("mouseout",function(d){
+      /**easy.on("mouseover",function(d){
+      tooltip.html("Correct to correct");
+
+      tooltip.transition()
+      .duration(100)
+      .style("opacity",1);
+    });
+
+    easy.on("mouseout",function(d){
     tooltip.style("opacity",0);
   })**/
 
@@ -242,15 +252,16 @@ function plot(matrix,freq,id){
   return;
 }
 </script>
+{% endcompress %}
 
 <ul>
-{% for obj in object_list %}
+  {% for obj in object_list %}
   <li>{{ forloop.counter }}. <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">{{ obj.title }}</a>
     <span id="stats-{{obj.id}}" class="stats">
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:20px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showAnalytics({{ obj.id }})">assessment</i><span id="rating-{{obj.id}}"></span>
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(3px);opacity:0.6;" onclick="showAssignments({{ obj.id }})">description</i>{{ obj.assignment_set.all.count }}
       <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
-      
+
     </span>
     <div class="question-text">
       {{ obj.text|safe|striptags }}
@@ -258,7 +269,7 @@ function plot(matrix,freq,id){
     {% if obj.image %}
     <div class="question-text" id="question-image">
       <img src="{{ obj.image.url }}"
-           width=200 alt="obj.image_alt_text">
+      width=200 alt="obj.image_alt_text">
     </div>
     {% endif %}
     <div style="clear:both;"></div>
@@ -270,14 +281,14 @@ function plot(matrix,freq,id){
         <svg id="second-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
       </div>
       <script>
-        plot({{ obj.get_matrix|safe }},{{ obj.get_frequency|safe|striptags }},{{ obj.id }})
+      plot({{ obj.get_matrix|safe }},{{ obj.get_frequency|safe|striptags }},{{ obj.id }})
       </script>
     </div>
     <div>
       <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>
       <ul>
         {% for assignment in obj.assignment_set.all %}
-          <li id="{{ obj.id }}" name="assignment" class="items-for-question"><a href="{% url 'question-list' assignment_id=assignment.pk %}">{{ assignment.title }}</a></li>
+        <li id="{{ obj.id }}" name="assignment" class="items-for-question"><a href="{% url 'question-list' assignment_id=assignment.pk %}">{{ assignment.title }}</a></li>
         {% endfor %}
       </ul>
     </div>
@@ -285,14 +296,14 @@ function plot(matrix,freq,id){
       <span id="{{ obj.id }}" name="rationale" class="items-for-question"><b>Rationales:</b></span>
       <ul>
         {% for answer in obj.answer_set.all %}
-          <li id="{{ obj.id }}" name="rationale" class="items-for-question">{{ answer.rationale|safe|striptags  }}</li>
+        <li id="{{ obj.id }}" name="rationale" class="items-for-question">{{ answer.rationale|safe|striptags  }}</li>
         {% endfor %}
       </ul>
     </div>
   </li>
-{% empty %}
+  {% empty %}
   <li>{% trans 'No questions available.' %}</li>
-{% endfor %}
+  {% endfor %}
 </ul>
 
 <script>
@@ -337,5 +348,13 @@ function showRationales(id){
 }
 
 </script>
+</section>
+</main>
+{% endblock %}
 
+{% block scripts %}
+<script>
+underlines();
+window.addEventListener("resize",underlines);
+</script>
 {% endblock %}
