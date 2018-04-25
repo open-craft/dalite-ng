@@ -1,54 +1,58 @@
 {% extends 'peerinst/base.html' %}
+
 {% load i18n %}
 
 {% block body %}
 
-<style>
-  input[type="submit"] {
-    font-family: 'Material Icons';
-    font-size: 10pt;
-    padding:1pt;
-    margin-left:3pt;
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">My Groups
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+  <div class="admin-link">
+    <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
+  </div>
 
-  }
-</style>
-
-<h1>My groups</h1>
-<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher' teacher.id %}">Back to My Account</a></div>
-<h2>Current</h2>
-{% if not teacher.groups.all %}
-You are not currently following any student groups.  You can select groups to follow from the lists below using the <input type="submit" value="add" />.
-{% endif %}
-<ol>
-{% for g in teacher.groups.all %}
-  <li>
-    <form action="" method="post">
-        {% csrf_token %}
-        <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
-        {{g}}  <input type="submit" value="clear" />
-    </form>
-  </li>
-{% endfor %}
-</ol>
-
-<h2>Suggested</h2>
-<p> Logic to come to suggest groups based on assignments. </p>
-
-
-
-<h2>All</h2>
-<ol>
-{% for g in object_list.all %}
-  {% if g not in teacher.groups.all %}
-  <li>
-    <form action="" method="post">
-        {% csrf_token %}
-        <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
-        {{g}}  <input type="submit" value="add" />
-    </form>
-  </li>
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">Current</h2>
+  {% if not teacher.groups.all %}
+    <p>You are not currently following any student groups.  You can select groups to follow from the lists below using the <input  class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />.</p>
   {% endif %}
-{% endfor %}
-</ol>
+  <ol>
+    {% for g in teacher.groups.all %}
+    <li>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
+        {{g}} <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear" />
+      </form>
+    </li>
+    {% endfor %}
+  </ol>
 
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">Suggested</h2>
+  <p> Logic to come to suggest groups based on assignments. </p>
+
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">All</h2>
+  <ol>
+  {% for g in object_list.all %}
+    {% if g not in teacher.groups.all %}
+    <li>
+      <form action="" method="post">
+          {% csrf_token %}
+          <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
+          {{g}} <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
+      </form>
+    </li>
+    {% endif %}
+  {% endfor %}
+  </ol>
+</section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+underlines();
+window.addEventListener("resize",underlines);
+</script>
 {% endblock %}
