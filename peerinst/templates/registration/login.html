@@ -4,56 +4,68 @@
 
 {% block body %}
 
-<h1>Login</h1>
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">Login
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
 
   <div class="admin-link">
     <a href="{% url 'password_reset' %}">Forgot password</a> | <a href="{% url 'sign_up' %}">Sign up</a>
   </div>
 
-{% if form.errors %}
-  <p>
-    Your username and password didn't match or your account has not yet been activated. Please try again.
-  </p>
-{% endif %}
-
-{% if next %}
-  {% if user.is_authenticated %}
+  {% if form.errors %}
     <p>
-      Your account doesn't have access to this page. To proceed, please login with an account that has access.
+      Your username and password didn't match or your account has not yet been activated. Please try again.
     </p>
-  {% else %}
-    <p>Please login to access this page.</p>
   {% endif %}
-{% endif %}
 
-<form method="post">
-  {% csrf_token %}
+  {% if next %}
+    {% if user.is_authenticated %}
+      <p>
+        Your account doesn't have access to this page. To proceed, please login with an account that has access.
+      </p>
+    {% else %}
+      <p>Please login to access this page.</p>
+    {% endif %}
+  {% endif %}
 
-  <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
-    {{ form.username|add_class:"mdc-text-field__input" }}
-    {{ form.username.label_tag|add_class:"mdc-floating-label"|cut:":" }}
-    <div class="mdc-notched-outline">
-      <svg>
-        <path class="mdc-notched-outline__path"/>
-      </svg>
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
+      {{ form.username|add_class:"mdc-text-field__input" }}
+      {{ form.username.label_tag|add_class:"mdc-floating-label"|cut:":" }}
+      <div class="mdc-notched-outline">
+        <svg>
+          <path class="mdc-notched-outline__path"/>
+        </svg>
+      </div>
+      <div class="mdc-notched-outline__idle"></div>
     </div>
-    <div class="mdc-notched-outline__idle"></div>
-  </div>
-  <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
-    {{ form.password|add_class:"mdc-text-field__input" }}<br>
-    {{ form.password.label_tag|add_class:"mdc-floating-label"|cut:":" }}
-    <div class="mdc-notched-outline">
-      <svg>
-        <path class="mdc-notched-outline__path"/>
-      </svg>
+    <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
+      {{ form.password|add_class:"mdc-text-field__input" }}<br>
+      {{ form.password.label_tag|add_class:"mdc-floating-label"|cut:":" }}
+      <div class="mdc-notched-outline">
+        <svg>
+          <path class="mdc-notched-outline__path"/>
+        </svg>
+      </div>
+      <div class="mdc-notched-outline__idle"></div>
     </div>
-    <div class="mdc-notched-outline__idle"></div>
-  </div>
 
-  <div>
-    <input type="hidden" name="next" value="{{ next }}"/>
-    <input class="mdc-button mdc-button--raised" type="submit" value="Submit"/>
-  </div>
-</form>
+    <div>
+      <input type="hidden" name="next" value="{{ next }}"/>
+      <input class="mdc-button mdc-button--raised" type="submit" value="Submit"/>
+    </div>
+  </form>
+</section>
+</main>
+{% endblock %}
 
+{% block scripts %}
+<script>
+underlines();
+window.addEventListener("resize",underlines);
+</script>
 {% endblock %}
