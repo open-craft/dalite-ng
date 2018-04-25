@@ -87,7 +87,7 @@ You do not have any assignments.
     <br>
     {% if a.blinkassignmentquestion_set.all|length > 0 %}
       <a href="{% url 'blinkAssignment-start' a.key %}">
-          <input class="mdc-button mdc-button--raised mdc-ripple-surface" type="button" value="Start" data-mdc-auto-init="MDCRipple"/>
+          <input class="mdc-button mdc-button--raised" type="button" value="Start"/>
       </a>
     {% endif %}
   </li>

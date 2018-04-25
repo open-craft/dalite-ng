@@ -1,63 +1,86 @@
 {% extends 'peerinst/base.html' %}
-{% load i18n %}
+
+{% load i18n add_class %}
 
 {% block body %}
 
-<style>
-  input[class="icon"] {
-    font-family: 'Material Icons';
-    font-size: 10pt;
-    padding:1pt;
-    margin-left:3pt;
-  }
-</style>
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">My Assignments
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+  <div class="admin-link">
+    <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
+  </div>
 
-<h1>My Assignments</h1>
-<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher' teacher.id %}">Back to My Account</a></div>
-
-<h2>Create a new assignment</h2>
-{{form.errors}}
-<form action="" method="post">
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">Create a new assignment</h2>
+  {{form.errors}}
+  <form method="post">
     {% csrf_token %}
-    {{form.identifier.label_tag}} {{ form.identifier }} <span class="helptext">{{ form.identifier.help_text }}</span><br>
-    {{form.title.label_tag}} {{ form.title }}<br>
-    <input type="submit" value="Create" />
-</form>
+    {% for field in form %}
+      <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+        {{ field|add_class:"mdc-text-field__input" }}
+        {{ field.label_tag|add_class:"mdc-floating-label"|cut:":" }}
+        <div class="mdc-notched-outline">
+          <svg>
+            <path class="mdc-notched-outline__path"/>
+          </svg>
+        </div>
+        <div class="mdc-notched-outline__idle"></div>
+      </div>
+      <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+        {{ field.help_text|safe }}
+      </p>
+      {{ field.errors }}
+    {% endfor %}
+    <input class="mdc-button mdc-button--raised" type="submit" value="Create" />
+  </form>
 
-<h2>Current</h2>
-These are the assignments for which reports will be available (based on your selected groups).
-{% if not teacher.groups.all %}
-You do not have any assignments.  You can select and modify an existing assignment from the list below or create a new one.
-{% endif %}
-<ol>
-{% for g in teacher.assignments.all %}
-  <li>
-    <form action="" method="post">
-        {% csrf_token %}
-        <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-        {{g}}  <input class="icon" type="submit" value="clear" /> <span class="admin-link" ><a href="{% url 'assignment-update' g.pk %}">Edit</a></span></li>
-    </form>
-  </li>
-{% endfor %}
-</ol>
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">Current</h2>
 
-<h2>My assignments</h2>
-These are all the assignments for which you are an author.
-
-<h2>All</h2>
-These are all the assignments in the database.
-<ol>
-{% for g in object_list.all %}
-  {% if g not in teacher.assignments.all %}
-  <li>
-    <form action="" method="post">
-        {% csrf_token %}
-        <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-        {{g}}  <input class="icon" type="submit" value="add" />
-    </form>
-  </li>
+  <p>These are the assignments for which reports will be available (based on your selected groups).</p>
+  {% if not teacher.groups.all %}
+    <p>You do not have any assignments.  You can select and modify an existing assignment from the list below or create a new one.</p>
   {% endif %}
-{% endfor %}
-</ol>
+  <ol>
+  {% for g in teacher.assignments.all %}
+    <li>
+      <form method="post">
+          {% csrf_token %}
+          <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
+          {{g}}  <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear" /> <span class="admin-link" ><a href="{% url 'assignment-update' g.pk %}">Edit</a></span>
+      </form>
+    </li>
+  {% endfor %}
+  </ol>
 
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">My assignments</h2>
+
+  These are all the assignments for which you are an author.
+
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">All</h2>
+  These are all the assignments in the database.
+  <ol>
+  {% for g in object_list.all %}
+    {% if g not in teacher.assignments.all %}
+    <li>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
+        {{g}} <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
+      </form>
+    </li>
+    {% endif %}
+  {% endfor %}
+  </ol>
+
+</section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+underlines();
+window.addEventListener("resize",underlines);
+</script>
 {% endblock %}
