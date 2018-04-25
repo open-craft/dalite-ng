@@ -32,14 +32,16 @@
   {% for a in object.blinkassignmentquestion_set.all %}
     <li>{{a.blinkquestion.question.text|safe}}
       <br>
-      <span class="mdc-typography--caption">
-        {{a.blinkquestion.question.title|safe}}
-      </span>
+      <div class="mdc-typography--caption">
+        {{a.blinkquestion.question.title|safe}}:
+        {% for c in a.blinkquestion.question.category.all %}
+          {{c.title|safe}}
+        {% endfor %}
+      </div>
       <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
           {% csrf_token %}
           <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
           <input type="hidden" name="rank" value="clear" />
-          <br>
           <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear"/>
       </form>
       {% if forloop.counter > 1 %}
@@ -68,13 +70,15 @@
     {% if not g in object.blinkquestions.all %}
     <li>{{g.question.text|safe}}
       <br>
-      <span class="mdc-typography--caption">
-        {{g.question.title|safe}}
-      </span>
+      <div class="mdc-typography--caption">
+        {{g.question.title|safe}}:
+        {% for c in g.question.category.all %}
+          {{c.title|safe}}
+        {% endfor %}
+      </div>
       <form style="display:inline" action="" method="post">
           {% csrf_token %}
           <input type="hidden" name="blink" value="{{g.pk}}" />
-          <br>
           <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
       </form>
       {% if g.question.image %}
@@ -96,14 +100,16 @@
   <ol>
   {% for g in suggested_questions %}
     <li>{{g.text|safe}}
-        <br>
-        <span class="mdc-typography--caption">
-          {{g.title|safe}}
-        </span>
+      <br>
+      <div class="mdc-typography--caption">
+        {{g.title|safe}}:
+        {% for c in g.category.all %}
+          {{c.title|safe}}
+        {% endfor %}
+      </div>
       <form action="" method="post">
           {% csrf_token %}
           <input type="hidden" name="new_blink" value="{{g.pk}}" />
-          <br>
           <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
       </form>
       {% if g.image %}

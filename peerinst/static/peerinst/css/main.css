@@ -54,6 +54,10 @@ ul#id_first_answer_choice {
     margin-bottom: 2em;
 }
 
+li {
+  margin-bottom:5px;
+}
+
 
 .rationales {
     display: table;
@@ -242,7 +246,7 @@ a {
 }
 
 @media (max-width: 450px) {
-  ul {
+  ul,ol {
     -webkit-padding-start: 20px;
   }
   img {
