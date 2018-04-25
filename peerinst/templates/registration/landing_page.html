@@ -8,6 +8,26 @@
 body {
   color: var(--mdc-theme-secondary);
 }
+main {
+  max-width:900px;
+  margin:auto;
+}
+section {
+  padding-left:5px;
+  padding-right:20px;
+}
+header {
+  padding-right: 0px;
+}
+footer {
+  color: white;
+  padding-top: 5px;
+  padding-bottom:5px;
+}
+footer a {
+  color: white;
+  padding-left:10px;
+}
 .underline {
   overflow:visible;
   position: absolute;
@@ -60,36 +80,11 @@ body {
 .white {
   background-color: white;
 }
-main {
-  max-width:900px;
-  margin:auto;
-}
-section {
-  padding-left:5px;
-  padding-right:20px;
-}
-header {
-  padding-right: 0px;
-}
-footer {
-  color: white;
-  padding-top: 5px;
-  padding-bottom:5px;
-}
-footer a {
-  color: white;
-  padding-left:10px;
-}
 .footer_content {
   font-size:11pt;
   margin-top:10px;
   margin-left:20px;
   margin-right:20px;
-}
-#scrollprompt {
-  position:absolute;
-  bottom:0px;
-  left:50%;
 }
 .navleft {
   position:absolute;
@@ -112,15 +107,22 @@ footer a {
   padding-left:20px;
   color: white;
 }
+.count {
+  font-size: 32pt;
+}
+.count {
+  font-size: 32pt;
+}
+#scrollprompt {
+  position:absolute;
+  bottom:0px;
+  left:50%;
+}
 #animation {
   display:block;
   margin:auto;
   overflow:visible;
 }
-.count {
-  font-size: 32pt;
-}
-
 @media (max-width: 450px) {
   .mdc-typography--display3 {
     font-size:30pt;
@@ -266,8 +268,8 @@ document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-
 <script>
 var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
 
-var chips = {}
-/*var c = document.querySelectorAll('.mdc-chip');
+/*var chips = {}
+var c = document.querySelectorAll('.mdc-chip');
 c.forEach(function(d){
 const chip = new mdc.chips.MDCChip(d);
 chips[d.id] = chip;
@@ -522,7 +524,7 @@ function logo(){
 
     title();
   }
-
+  
   function title(){
     'use strict';
 

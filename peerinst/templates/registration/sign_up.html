@@ -1,19 +1,14 @@
 {% extends 'peerinst/base.html' %}
 
-{% load add_class %}
+{% load add_class i18n %}
 
 {% block body %}
-
 <div>
   <h1>Sign up</h1>
 
   <p> To create an account, provide a unique username, an e-mail address, and a password. </p>
 
   <p> After the sign-up form is submitted, a site administrator will contact you to finalize the registration process. </p>
-
-  <!--
-  <p> If you have a faculty e-mail address (i.e. from a recognized server reserved exclusively for teachers or faculty), you will be sent a confirmation e-mail through which you can activate a teacher account.  Otherwise, a site administrator will contact you.</p>
-  -->
 
   {{ form.non_field_errors }}
 
@@ -40,10 +35,8 @@
     <br>
     <br>
     <div>
-      <input class="mdc-button mdc-button--raised mdc-ripple-surface" type="submit" value="Register" data-mdc-auto-init="MDCRipple"/>
+      <input class="mdc-button mdc-button--raised" type="submit" value="Register"/>
     </div>
   </form>
-
 </div>
-
 {% endblock %}

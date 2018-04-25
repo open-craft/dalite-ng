@@ -132,6 +132,7 @@ def landing_page(request):
 def admin_check(user):
     return user.is_superuser
 
+
 @login_required
 @user_passes_test(admin_check,login_url='/welcome/',redirect_field_name=None)
 def dashboard(request):
@@ -140,7 +141,10 @@ def dashboard(request):
 
 
 def sign_up(request):
+    from django.template import loader
+
     template = "registration/sign_up.html"
+    html_email_template = "registration/sign_up_admin_email.html"
     context = {}
 
     if request.method == "POST":
@@ -152,10 +156,18 @@ def sign_up(request):
                 form.save()
                 # Notify administrators
                 try:
+                    email_context = dict(
+                        user=form.cleaned_data['username'],
+                        date=timezone.now(),
+                        email=form.cleaned_data['email'],
+                        url=form.cleaned_data['url'],
+                    )
+                    print(loader.render_to_string(html_email_template, context=email_context))
                     mail_admins(
                         'New user request on dalite-ng',
                         'A new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.\n\n{}\n\nCheers,\nThe myDalite Team'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url'],'https://'+request.get_host()+reverse('dashboard')),
                         fail_silently=False,
+                        html_message=loader.render_to_string(html_email_template, context=email_context),
                     )
                 except:
                     pass

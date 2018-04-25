@@ -89,6 +89,7 @@ class QuestionAdmin(admin.ModelAdmin):
     readonly_fields = ['id']
     inlines = [AnswerChoiceInline, AnswerInline]
     list_display = ['title', 'discipline']
+    list_filter=['category']
     ordering = ['discipline']
     search_fields = ['title','text','category__title']
 

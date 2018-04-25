@@ -1,23 +1,19 @@
 {% extends 'peerinst/base.html' %}
-{% load i18n %}
 
-{% block body %}
+{% load staticfiles compress i18n %}
 
+{% block stylesheets %}
+{% compress css inline %}
 <style>
-  input[type="submit"] {
-    font-family: 'Material Icons';
-    font-size: 10pt;
-    padding:1pt;
-    margin-left:3pt;
-
-  }
   img {
     max-width:50%;
     max-height:200px;
   }
 </style>
+{% endcompress %}
+{% endblock %}
 
-
+{% block body %}
 <h1>Update blink script</h1>
 <div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher' teacher.id %}">Back to My Account</a></div>
 <h2>{{object.title}}</h2>
@@ -32,7 +28,7 @@
         {% csrf_token %}
         <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
         <input type="hidden" name="rank" value="clear" />
-        <input type="submit" value="clear" />
+        <input class="material-icons mdc-button mdc-button--raised mdc-ripple-surface" type="submit" value="clear" data-mdc-auto-init="MDCRipple"/>
     </form>
     {% if forloop.counter > 1 %}
     <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
@@ -53,12 +49,6 @@
   </li>
 {% endfor %}
 </ol>
-
-<!-- <h2>Available blinks</h2>
-<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher-blinks' teacher.id %}">Add/remove blink questions</a></div>
-{% if not teacher.blinkquestion_set.all %}
-You do not have any blink questions.
-{% endif %} -->
 
 
 <h2>All your blinks</h2>
@@ -90,7 +80,7 @@ You do not have any blink questions.
 <h2>All questions in discipline</h2>
 <ol>
 {% for g in suggested_questions %}
-  <li>    
+  <li>
     <strong>
       {{g.title|safe}}
     </strong> - {{g.text|safe}}

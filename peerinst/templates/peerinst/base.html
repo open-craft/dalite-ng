@@ -10,11 +10,11 @@
   <meta name="description" content="DALITE NG">
   <link rel="icon" href="{% static 'peerinst/img/logo.png' %}">
   {% compress css %}
-  <link rel="stylesheet" href="{% static 'peerinst/css/vendor/material-components-web.min.css' %}">
-  <link rel="stylesheet" href="{% static 'peerinst/css/vendor/ionicons.css' %}">
-  <link rel="stylesheet" href="{% static 'peerinst/css/main.css' %}">
+  <link href="{% static 'peerinst/css/vendor/material-components-web.min.css' %}" rel="stylesheet">
+  <link href="{% static 'peerinst/css/vendor/ionicons.css' %}" rel="stylesheet">
+  <link href="{% static 'peerinst/css/main.css' %}" rel="stylesheet">
   {% endcompress %}
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <!-- Custom settings for local instance of dalite-ng -->
   {% include 'peerinst/custom-instance-head.html' %}

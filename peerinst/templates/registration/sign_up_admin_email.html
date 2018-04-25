@@ -1,0 +1,19 @@
+{% load i18n %}
+
+{% blocktrans %}
+
+Dear administrator,
+
+<p>A new user {{user}} was created on {{date}}.</p>
+
+<ul>
+  <li>Email: {{email}} </li>
+  <li>Verification url: {{url}} </li>
+</ul>
+
+<p>Access your administrator account to activate this new user at: https://{{ request.get_host }}{% url 'dashboard' %}</p>
+
+Cheers,
+The myDalite Team
+
+{% endblocktrans %}
