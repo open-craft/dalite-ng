@@ -3,11 +3,15 @@
 {% load add_class i18n %}
 
 {% block body %}
-<div>
-  <h1>Sign up</h1>
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">Sign up
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+
 
   <p> To create an account, provide a unique username, an e-mail address, and a password. </p>
-
+  <br>
   <p> After the sign-up form is submitted, a site administrator will contact you to finalize the registration process. </p>
 
   {{ form.non_field_errors }}
@@ -38,5 +42,13 @@
       <input class="mdc-button mdc-button--raised" type="submit" value="Register"/>
     </div>
   </form>
-</div>
+</section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+underlines();
+window.addEventListener("resize",underlines);
+</script>
 {% endblock %}
