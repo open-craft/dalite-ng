@@ -1,38 +1,64 @@
 {% extends 'peerinst/base.html' %}
+
 {% load i18n %}
 
 {% block body %}
-<h1>{% trans 'Assignments' %}</h1>
-{% if user.is_staff %}
-  <div class="admin-link"><a href="{% url 'admin_index_wrapper' %}">Click here to add or edit content</a></div>
-{% endif %}
-<div class="search">
-  Search: <input type="search" id="search-bar" oninput="search()"></input>
-</div>
-<ul>
-{% for obj in object_list %}
-  <li id="{{ obj.title }}" name="item">{{ forloop.counter }}. <a href="{% url 'question-list' assignment_id=obj.pk %}">
-    {{ obj.title }}
-  </a></li>
-{% empty %}
-  <li>{% trans 'No assignments available.' %}</li>
-{% endfor %}
-</ul>
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'Browse Assignments' %}
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+  {% if user.is_staff %}
+    <div class="admin-link"><a href="{% url 'admin_index_wrapper' %}">Click here to add or edit content</a></div>
+  {% endif %}
 
-<script>
-var search_string = document.getElementById('search-bar');
-search_string.focus();
-function search(){
-  var items = document.getElementsByName('item');
-  for (var i=0; i<items.length; i++) {
-    if (items[i].id.toLowerCase().indexOf(search_string.value.toLowerCase()) < 0) {
-      items[i].style.display = "none";
-    } else {
-      items[i].style.display = "block";
+  <div class="search">
+    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+      <label class="mdc-floating-label" for="search-bar">Search</label>
+      <input class="mdc-text-field__input" type="search" id="search-bar" oninput="search()" size="50">
+      <div class="mdc-notched-outline">
+        <svg>
+          <path class="mdc-notched-outline__path"/>
+        </svg>
+      </div>
+      <div class="mdc-notched-outline__idle"></div>
+    </div>
+    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+      The assignment list will be filtered for titles that contain the string entered here.
+    </p>
+  </div>
+
+  <ul>
+  {% for obj in object_list %}
+    <li id="{{ obj.title }}" name="item">{{ forloop.counter }}. <a href="{% url 'question-list' assignment_id=obj.pk %}">
+      {{ obj.title }}
+    </a></li>
+  {% empty %}
+    <li>{% trans 'No assignments available.' %}</li>
+  {% endfor %}
+  </ul>
+
+  <script>
+  var search_string = document.getElementById('search-bar');
+  search_string.focus();
+  function search(){
+    var items = document.getElementsByName('item');
+    for (var i=0; i<items.length; i++) {
+      if (items[i].id.toLowerCase().indexOf(search_string.value.toLowerCase()) < 0) {
+        items[i].style.display = "none";
+      } else {
+        items[i].style.display = "block";
+      }
     }
+    return;
   }
-  return;
-}
-</script>
+  </script>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+underlines();
+window.addEventListener("resize",underlines);
+</script>
 {% endblock %}
