@@ -2,17 +2,6 @@
 
 {% load compress i18n %}
 
-{% block stylesheets %}
-{% compress css inline %}
-<style>
-  img {
-    max-width:50%;
-    max-height:200px;
-  }
-</style>
-{% endcompress %}
-{% endblock %}
-
 {% block body %}
 <main>
 <section>
@@ -31,21 +20,23 @@
   <ol>
     {% for a in object.questions.all %}
     <li>{{a.text|safe}}
-    <br>
-    <span class="mdc-typography--caption">
-      {{a.title|safe}}
-    </span>
-    <form style="display:inline;" method="post">
-      {% csrf_token %}
-      <input type="hidden" name="q" value="{{a.pk}}" />
       <br>
-      <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear" />
-    </form>
-    {% if a.image %}
-    <div>
-      <img style="display:block;margin:auto;padding-top:10pt;padding-bottom:10pt;" src="{{a.image.url }}" alt="a.image_alt_text">
-    </div>
-    {% endif %}
+      <div class="mdc-typography--caption">
+        {{a.title|safe}}:
+        {% for c in a.category.all %}
+          {{c.title|safe}}
+        {% endfor %}
+      </div>
+      <form style="display:inline;" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="q" value="{{a.pk}}" />
+        <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear" />
+      </form>
+      {% if a.image %}
+      <div>
+        <img style="display:block;margin:auto;padding-top:10pt;padding-bottom:10pt;" src="{{a.image.url }}" alt="a.image_alt_text">
+      </div>
+      {% endif %}
     </li>
     {% endfor %}
   </ol>
@@ -60,13 +51,15 @@
   {% for g in suggested_questions %}
     <li>{{g.text|safe}}
       <br>
-      <span class="mdc-typography--caption">
-        {{g.title|safe}}
-      </span>
+      <div class="mdc-typography--caption">
+        {{g.title|safe}}:
+        {% for c in g.category.all %}
+          {{c.title|safe}}
+        {% endfor %}
+      </div>
       <form style="display:inline;" method="post">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{g.pk}}" />
-        <br>
         <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
       </form>
       {% if g.image %}
