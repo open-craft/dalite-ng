@@ -110,7 +110,10 @@ footer a {
 {% block body %}
 <script>
 // Override default size of header to fill page based on window size
-document.styleSheets[0].insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-flexible:"+window.innerHeight/64+" !important;}");
+var styles = document.createElement('style');
+document.head.appendChild(styles);
+var styleSheet = styles.sheet;
+styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-flexible:"+window.innerHeight/64+" !important;}");
 </script>
 
 <header class="mdc-toolbar mdc-toolbar--fixed mdc-toolbar--flexible mdc-toolbar--waterfall">
