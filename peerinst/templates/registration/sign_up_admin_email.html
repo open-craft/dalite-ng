@@ -1,7 +1,7 @@
 {% load i18n %}
 
 <head>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
   <style>
   a {
     color: #54c0db;
@@ -11,32 +11,27 @@
 
 <body style="padding:20pt;background-color: #f4f4f4;font-family: 'Montserrat', sans-serif;font-weight: 400;font-size: 11pt;color: #004266;">
 
-{% blocktrans %}
+  <h1 style="color: #54c0db;font-weight:700;">{% trans 'New user request' %}</h1>
 
-<h1 style="color: #54c0db;">New user request</h1>
+  {% blocktrans %}
 
-<p>Dear administrator,</p>
+  <p>Dear administrator,</p>
 
-<p>A new user {{user}} was created on {{date}}</p>
+  <p>A new user {{user}} was created on {{date}}</p>
 
-<ul>
-  <li>Email: {{email}} </li>
-  <li>Verification url: {{url}} </li>
-</ul>
+  <ul>
+    <li>Email: {{email}} </li>
+    <li>Verification url: {{url}} </li>
+  </ul>
 
-<p>Access your administrator account to activate this new user at: </p>
+  <p>Access your administrator account to activate this new user at: </p>
 
-{% endblocktrans %}
+  {% endblocktrans %}
 
-<p>https://{{ request.get_host }}{% url 'dashboard' %}</p>
+  <p>https://{{ request.get_host }}{% url 'dashboard' %}</p>
 
-{% blocktrans %}
+  <p>{% trans 'Cheers'%},</p>
 
-<p>Cheers,</p>
+  <p>{% blocktrans %}The {{ site_name }} team{% endblocktrans %}</p>
 
-<p>
-The myDalite Team
-</p>
-
-{% endblocktrans %}
 </body>
