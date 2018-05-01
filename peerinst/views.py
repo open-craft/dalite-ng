@@ -137,7 +137,12 @@ def admin_check(user):
 @user_passes_test(admin_check,login_url='/welcome/',redirect_field_name=None)
 def dashboard(request):
 
-    return HttpResponse('dashboard')
+    return TemplateResponse(
+        request,
+        'peerinst/dashboard.html',
+        context={
+            'new_users': User.objects.filter(is_active=False).order_by('-date_joined'),
+        })
 
 
 def sign_up(request):

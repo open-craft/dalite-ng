@@ -1,0 +1,29 @@
+{% extends 'peerinst/base.html' %}
+
+{% load i18n %}
+
+{% block body %}
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'Inactive users' %}
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+
+  <ul>
+  {% for u in new_users %}
+    <li>{{u.username}} - {{u.date_joined}}</li>
+  {% empty %}
+    <li>{% trans 'No users to activate.' %}</li>
+  {% endfor %}
+  </ul>
+
+</section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+underlines();
+window.addEventListener("resize",underlines);
+</script>
+{% endblock %}
