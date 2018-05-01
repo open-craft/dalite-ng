@@ -1,10 +1,23 @@
 {% load i18n %}
 
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400">
+  <style>
+  a {
+    color: #54c0db;
+  }
+  </style>
+</head>
+
+<body style="padding:20pt;background-color: #f4f4f4;font-family: 'Montserrat', sans-serif;font-weight: 400;font-size: 11pt;color: #004266;">
+
 {% blocktrans %}
 
-Dear administrator,
+<h1 style="color: #54c0db;">New user request</h1>
 
-<p>A new user {{user}} was created on {{date}}.</p>
+<p>Dear administrator,</p>
+
+<p>A new user {{user}} was created on {{date}}</p>
 
 <ul>
   <li>Email: {{email}} </li>
@@ -19,8 +32,11 @@ Dear administrator,
 
 {% blocktrans %}
 
-<p>Cheers,
+<p>Cheers,</p>
+
+<p>
 The myDalite Team
 </p>
 
 {% endblocktrans %}
+</body>

@@ -165,7 +165,7 @@ def sign_up(request):
                     mail_admins(
                         'New user request',
                         'Dear administrator,\n\nA new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.\n\n{}\n\nCheers,\nThe myDalite Team'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url'],'https://'+request.get_host()+reverse('dashboard')),
-                        fail_silently=False,
+                        fail_silently=True,
                         html_message=loader.render_to_string(html_email_template_name, context=email_context, request=request),
                     )
                 except:
