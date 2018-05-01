@@ -11,9 +11,16 @@ Dear administrator,
   <li>Verification url: {{url}} </li>
 </ul>
 
-<p>Access your administrator account to activate this new user at: https://{{ request.get_host }}{% url 'dashboard' %}</p>
+<p>Access your administrator account to activate this new user at: </p>
 
-Cheers,
+{% endblocktrans %}
+
+<p>https://{{ request.get_host }}{% url 'dashboard' %}</p>
+
+{% blocktrans %}
+
+<p>Cheers,
 The myDalite Team
+</p>
 
 {% endblocktrans %}

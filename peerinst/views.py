@@ -144,7 +144,7 @@ def sign_up(request):
     from django.template import loader
 
     template = "registration/sign_up.html"
-    html_email_template = "registration/sign_up_admin_email.html"
+    html_email_template_name = "registration/sign_up_admin_email.html"
     context = {}
 
     if request.method == "POST":
@@ -162,12 +162,11 @@ def sign_up(request):
                         email=form.cleaned_data['email'],
                         url=form.cleaned_data['url'],
                     )
-                    print(loader.render_to_string(html_email_template, context=email_context))
                     mail_admins(
-                        'New user request on dalite-ng',
-                        'A new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.\n\n{}\n\nCheers,\nThe myDalite Team'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url'],'https://'+request.get_host()+reverse('dashboard')),
+                        'New user request',
+                        'Dear administrator,\n\nA new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.\n\n{}\n\nCheers,\nThe myDalite Team'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url'],'https://'+request.get_host()+reverse('dashboard')),
                         fail_silently=False,
-                        html_message=loader.render_to_string(html_email_template, context=email_context),
+                        html_message=loader.render_to_string(html_email_template_name, context=email_context, request=request),
                     )
                 except:
                     pass
@@ -175,20 +174,6 @@ def sign_up(request):
                 return TemplateResponse(request,'registration/sign_up_done.html')
             except:
                 pass
-
-            # domain = new_user.email.split("@")[1]
-            # print(domain)
-            # if VerifiedDomain.objects.filter(domain=domain).exists():
-            #     print("verified domain")
-            #     try:
-            #         new_teacher = Teacher(
-            #             user = new_user,
-            #         )
-            #         new_teacher.save()
-            #         print("new teacher created")
-            #         return HttpResponseRedirect(reverse('teacher', kwargs={ 'pk' : new_teacher.pk } ))
-            #     except:
-            #         pass
         else:
             context['form'] = form
     else:
