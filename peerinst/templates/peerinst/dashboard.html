@@ -9,12 +9,48 @@
     <svg class="underline" width=150 height=4></svg>
   </h1>
 
-  <ul>
-  {% for u in new_users %}
-    <li>{{u.username}} - {{u.date_joined}}</li>
-  {% empty %}
-    <li>{% trans 'No users to activate.' %}</li>
-  {% endfor %}
+  <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
+    {% for u in new_users %}
+    <li class="mdc-list-item mdc-elevation--z1">
+      <span class="mdc-list-item__text mdc-theme--secondary bold">
+        {{ u.username }}
+        <span class="mdc-list-item__secondary-text">
+          {{u.date_joined}}
+        </span>
+        <span class="mdc-list-item__secondary-text">
+          {{ u.email  }}
+        </span>
+      </span>
+      <span class="mdc-list-item__meta">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mdc-form-field">
+            <div class="mdc-checkbox  mdc-theme--primary">
+              <input type="checkbox"
+                     name='is_teacher'
+                     class="mdc-checkbox__native-control"/>
+              <div class="mdc-checkbox__background">
+                <svg class="mdc-checkbox__checkmark"
+                     viewBox="0 0 24 24">
+                  <path class="mdc-checkbox__checkmark-path"
+                        fill="none"
+                        stroke="white"
+                        d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                </svg>
+                <div class="mdc-checkbox__mixedmark"></div>
+              </div>
+            </div>
+
+            <label style="padding-right:10pt;" for="is_teacher">Teacher?</label>
+          </div>
+          <input type='hidden' name='user' value='{{u.pk}}'>
+          <input type='submit' class='material-icons small-button mdc-button mdc-button--raised' value='add'>
+        </form>
+      </span>
+    </li>
+    {% empty %}
+      <li>{% trans 'No users to add.' %}</li>
+    {% endfor %}
   </ul>
 
 </section>

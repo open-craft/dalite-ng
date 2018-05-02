@@ -137,6 +137,22 @@ def admin_check(user):
 @user_passes_test(admin_check,login_url='/welcome/',redirect_field_name=None)
 def dashboard(request):
 
+    if request.method=='POST':
+        form = forms.ActivateForm(request.POST)
+        print(form)
+        if form.is_valid():
+            try:
+                user = form.cleaned_data['user']
+                user.is_active = True
+                user.save()
+
+                print(form.cleaned_data['is_teacher'])
+                if form.cleaned_data['is_teacher']:
+                    teacher = Teacher(user=user)
+                    teacher.save()
+            except:
+                pass
+
     return TemplateResponse(
         request,
         'peerinst/dashboard.html',

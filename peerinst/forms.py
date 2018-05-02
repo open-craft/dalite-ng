@@ -167,5 +167,11 @@ class SignUpForm(UserCreationForm):
         fields = ['email','username']
 
 
+class ActivateForm(forms.Form):
+    """Form to activate a User and initialize as Teacher, if indicated."""
+    is_teacher = forms.BooleanField(required=False)
+    user = forms.ModelChoiceField(queryset=User.objects.filter(is_active=False))
+
+
 class AddRemoveQuestionForm(forms.Form):
     q = forms.ModelChoiceField(queryset=Question.objects.all())
