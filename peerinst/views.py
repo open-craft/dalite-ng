@@ -11,8 +11,9 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
-from django.core.mail import mail_admins
+from django.core.mail import mail_admins, send_mail
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
+from django.template import loader
 from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape, format_html
@@ -137,21 +138,36 @@ def admin_check(user):
 @user_passes_test(admin_check,login_url='/welcome/',redirect_field_name=None)
 def dashboard(request):
 
+    html_email_template_name = 'registration/account_activated_html.html'
+
     if request.method=='POST':
         form = forms.ActivateForm(request.POST)
-        print(form)
         if form.is_valid():
+            user = form.cleaned_data['user']
             try:
-                user = form.cleaned_data['user']
                 user.is_active = True
                 user.save()
 
-                print(form.cleaned_data['is_teacher'])
                 if form.cleaned_data['is_teacher']:
                     teacher = Teacher(user=user)
                     teacher.save()
             except:
                 pass
+
+            # Notify user
+            email_context = dict(
+                username=user.username,
+                site_name='myDALITE',
+            )
+            send_mail(
+                _('Your myDALITE account has been activated'),
+                'Dear {},\n\nYour account has been recently activated. \n\nYou can login at:\n\n{}\n\nCheers,\nThe myDalite Team'.format(user.username,'https://'+request.get_host(),),
+                'noreply@myDALITE.org',
+                [user.email],
+                fail_silently=True,
+                html_message=loader.render_to_string(html_email_template_name, context=email_context, request=request),
+            )
+
 
     return TemplateResponse(
         request,
@@ -162,10 +178,9 @@ def dashboard(request):
 
 
 def sign_up(request):
-    from django.template import loader
 
     template = "registration/sign_up.html"
-    html_email_template_name = "registration/sign_up_admin_email.html"
+    html_email_template_name = "registration/sign_up_admin_email_html.html"
     context = {}
 
     if request.method == "POST":
@@ -182,6 +197,7 @@ def sign_up(request):
                         date=timezone.now(),
                         email=form.cleaned_data['email'],
                         url=form.cleaned_data['url'],
+                        site_name='myDALITE',
                     )
                     mail_admins(
                         'New user request',

@@ -22,10 +22,10 @@
         </span>
       </span>
       <span class="mdc-list-item__meta">
-        <form method="post">
+        <form id='activate_{{u.pk}}' method="post">
           {% csrf_token %}
           <div class="mdc-form-field">
-            <div class="mdc-checkbox  mdc-theme--primary">
+            <div class="mdc-checkbox" data-mdc-auto-init="MDCCheckbox">
               <input type="checkbox"
                      name='is_teacher'
                      class="mdc-checkbox__native-control"/>
@@ -40,12 +40,13 @@
                 <div class="mdc-checkbox__mixedmark"></div>
               </div>
             </div>
-
-            <label style="padding-right:10pt;" for="is_teacher">Teacher?</label>
+            <label for="is_teacher">Teacher?</label>
           </div>
           <input type='hidden' name='user' value='{{u.pk}}'>
-          <input type='submit' class='material-icons small-button mdc-button mdc-button--raised' value='add'>
         </form>
+      </span>
+      <span class="mdc-list-item__meta">
+        <input form='activate_{{u.pk}}' type='submit' class='material-icons small-button mdc-button mdc-button--raised' value='add'>
       </span>
     </li>
     {% empty %}
