@@ -43,8 +43,9 @@
       </div>
       <div class="mdc-notched-outline__idle"></div>
     </div>
+    <br>
     <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
-      {{ form.password|add_class:"mdc-text-field__input" }}<br>
+      {{ form.password|add_class:"mdc-text-field__input" }}
       {{ form.password.label_tag|add_class:"mdc-floating-label"|cut:":" }}
       <div class="mdc-notched-outline">
         <svg>
@@ -61,11 +62,4 @@
   </form>
 </section>
 </main>
-{% endblock %}
-
-{% block scripts %}
-<script>
-underlines();
-window.addEventListener("resize",underlines);
-</script>
 {% endblock %}
