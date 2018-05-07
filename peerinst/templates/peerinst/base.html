@@ -10,16 +10,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="myDALITE">
 
-  <!-- External resources -->
-  <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
   <!-- Local resources -->
   <link href="{% static 'peerinst/img/logo.png' %}" rel="icon">
   {% compress css %}
   <link href="{% static 'peerinst/css/vendor/material-components-web.min.css' %}" rel="stylesheet">
   <link href="{% static 'peerinst/css/main.css' %}" rel="stylesheet">
   {% endcompress %}
+
+  <!-- External resources -->
+  <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <!-- Custom settings for local instance -->
   {% include 'peerinst/custom-instance-head.html' %}

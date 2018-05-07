@@ -134,7 +134,6 @@
 {% block scripts %}
 {% compress js inline %}
 <script>
-underlines();
 function edit_user() {
   location="{% url 'password_change' %}";
 }
@@ -160,8 +159,6 @@ document.getElementById('{{a.pk}}').onclick=function() {
       location="";
     }
   });*/
-
-window.addEventListener("resize",underlines);
 </script>
 {% endcompress %}
 {% endblock %}

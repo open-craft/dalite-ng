@@ -242,6 +242,10 @@ a {
   max-width:600px;
 }
 
+.mdc-text-field__input {
+  width: 250px;
+}
+
 @media (max-width: 450px) {
   ul,ol {
     -webkit-padding-start: 20px;
