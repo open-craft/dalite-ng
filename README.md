@@ -305,10 +305,18 @@ Bruce][entypo].
 [entypo]: http://www.entypo.com/
 
 
+# Packaging of front-end bundles
 
 Javascript bundle preparation
 -----------------------------
 
-Requires node, npm, rollup
+Requires: node, npm, rollup
 
 ./node_modules/.bin/rollup -c
+
+CSS bundle preparation
+----------------------
+
+Requires: sass
+
+./node_modules/.bin/sass --load-path='./node_modules/' --style=compressed peerinst/static/peerinst/css/material-components-web.scss peerinst/static/peerinst/css/material-components-web.min.css
