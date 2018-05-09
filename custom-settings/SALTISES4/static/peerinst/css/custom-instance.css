@@ -26,3 +26,6 @@ h1 {
 #timer-bg {
   fill:  var(--mdc-theme-primary);
 }
+.mdc-button {
+  color: white !important;
+}
