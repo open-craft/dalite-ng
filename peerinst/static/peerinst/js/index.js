@@ -1,14 +1,12 @@
 // MDC
 import autoInit from '@material/auto-init/index';
 import * as chips from '@material/chips/index';
-import * as formField from '@material/form-field/index';
 import * as radio from '@material/radio/index';
 import * as textField from '@material/textfield/index';
 import * as toolbar from '@material/toolbar/index';
 
 autoInit.register('MDCChip', chips.MDCChip);
 autoInit.register('MDCChipSet', chips.MDCChipSet);
-autoInit.register('MDCFormField', formField.MDCFormField);
 autoInit.register('MDCRadio', radio.MDCRadio);
 autoInit.register('MDCTextField', textField.MDCTextField);
 autoInit.register('MDCToolbar', toolbar.MDCToolbar);
@@ -16,7 +14,6 @@ autoInit.register('MDCToolbar', toolbar.MDCToolbar);
 export {
   autoInit,
   chips,
-  formField,
   radio,
   textField,
   toolbar,
