@@ -190,6 +190,12 @@ a {
     font-size: 10pt;
     line-height:1.3;
 }
+.question-image {
+  display:block;
+  margin:auto;
+  padding-top:10pt;
+  padding-bottom:10pt;
+}
 .search {
   display:inline;
   vertical-align: middle;
@@ -242,6 +248,13 @@ a {
 
 .mdc-text-field__input {
   width: 250px;
+}
+.analytics-tags {
+  cursor:pointer;
+  padding-left:4pt;
+  font-size:20px;
+  transform: translateY(4px);
+  opacity:0.6;
 }
 
 @media (max-width: 450px) {

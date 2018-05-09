@@ -26,11 +26,11 @@ export default {
     eslint({
       exclude: [
         '**.css',
-      ]
+      ],
     }),
     babel({
       exclude: 'node_modules/**',
     }),
     uglify(),
-  ]
+  ],
 };

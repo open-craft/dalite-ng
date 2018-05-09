@@ -72,7 +72,7 @@
       </form>
       {% if g.question.image %}
       <div>
-        <img style="display:block;margin:auto;padding-top:10pt;padding-bottom:10pt;" src="{{ g.question.image.url }}" alt="g.question.image_alt_text">
+        <img class="question-image" src="{{ g.question.image.url }}" alt="g.question.image_alt_text">
       </div>
       {% endif %}
     </li>
@@ -103,7 +103,7 @@
       </form>
       {% if g.image %}
       <div>
-        <img style="display:block;margin:auto;padding-top:10pt;padding-bottom:10pt;" src="{{ g.image.url }}" alt="g.image_alt_text">
+        <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text">
       </div>
       {% endif %}
     </li>
