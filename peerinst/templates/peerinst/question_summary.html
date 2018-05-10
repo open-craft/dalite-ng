@@ -3,7 +3,7 @@
 
 {% block answers %}
 {{ block.super }}
-<p>
+<p class="mdc-typography--body1">
   {% if first_choice_label == second_choice_label %}
     {% if chosen_rationale == None %}
       {% blocktrans %}
@@ -24,14 +24,14 @@
   {% endif %}
 </p>
 
-<p>
+<p class='mdc-typography--body1'>
   Correct answer(s):
     {% for answer in correct %}
       <blockquote>{{ answer.text|safe }}</blockquote>
     {% endfor %}
 </p>
 
-<p>
+<p class='mdc-typography--body1'>
   Expert rationale(s):
     {% for expert in experts %}
       {% for option in question.answerchoice_set.all %}

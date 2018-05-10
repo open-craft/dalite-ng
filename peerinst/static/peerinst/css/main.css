@@ -53,9 +53,6 @@ ul#id_first_answer_choice {
     margin-bottom: 2em;
 }
 
-li {
-  margin-bottom:5px;
-}
 
 .rationales {
     display: table;
@@ -77,9 +74,13 @@ li {
 .rationale-choice input {
     display: none;
 }
+.rationale li {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
 
 form ul {
-  padding-left:10px;
+  padding-left:5px;
 }
 
 .errorlist, ul li.error {
@@ -248,6 +249,14 @@ a {
 
 .mdc-text-field__input {
   width: 250px;
+}
+.mdc-typography--body1 {
+  font-size: 16px;
+  letter-spacing: 0em;
+  -webkit-font-smoothing: auto;
+}
+.mdc-form-field > label {
+  padding-left: 2px;
 }
 .analytics-tags {
   cursor:pointer;

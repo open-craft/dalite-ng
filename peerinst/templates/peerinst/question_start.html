@@ -6,13 +6,7 @@
 <main>
   <section>
   <div class="meta-container">
-    {% if messages %}
-    <ul class="messages">
-      {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
+
     <div class="container">
 
       {% block pretext %}{% endblock %}
@@ -30,41 +24,56 @@
           {% endif %}
         </div>
       {% endif %}
-      <div id="question-text">
+
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <p class="mdc-typography--body1">
         {{ question.text|safe }}
-      </div>
+      </p>
+
       {% if question.image %}
       <img class="question-image" src="{{ question.image.url }}" height="{{ question.image.height }}"
            width="{{ question.image.width }}" alt="question.image_alt_text">
       {% endif %}
+
       {% if question.video_url %}
       <div id="question-video">
         <object width="640" height="390" data="{{ question.video_url }}"></object>
       </div>
       {% endif %}
+
       {% block answers %}{% endblock %}
+
       {% if form %}
       {% block form %}
       <form method="post">
         {% csrf_token %}
         {% block inner_form %}
-        {{ form.first_answer_choice.label }}
-        <br>
+        <span class="mdc-typography--body1">{{ form.first_answer_choice.label }}</span>
+        <ul>
         {% for choice in form.first_answer_choice %}
-        <div class="mdc-form-field">
-          <div class="mdc-radio" data-mdc-auto-init="MDCRadio">
-            {{ choice.tag|add_class:"mdc-radio__native-control" }}
-            <div class="mdc-radio__background">
-              <div class="mdc-radio__outer-circle"></div>
-              <div class="mdc-radio__inner-circle"></div>
+          <li>
+            <div class="mdc-form-field">
+              <div class="mdc-radio" data-mdc-auto-init="MDCRadio">
+                {{ choice.tag|add_class:"mdc-radio__native-control" }}
+                <div class="mdc-radio__background">
+                  <div class="mdc-radio__outer-circle"></div>
+                  <div class="mdc-radio__inner-circle"></div>
+                </div>
+              </div>
+              <label class="mdc-typography--body1" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
             </div>
-          </div>
-          <label for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
-        </div>
-        <br>
+          </li>
         {% endfor %}
+        </ul>
         <div>
-          <span style="vertical-align:top;">{{ form.rationale.label }}:</span> <span style="vertical-align:top;">{{ form.rationale }}</span>
+          <span class="mdc-typography--body1" style="vertical-align:top;padding-right:10px;">{{ form.rationale.label }}:</span> <span style="vertical-align:top;">{{ form.rationale|add_class:"mdc-typography--body1" }}</span>
         </div>
         {% endblock %}
         <div>
@@ -73,7 +82,6 @@
       </form>
       {% endblock %}
       {% endif %}
-
     </div>
   </div>
 </section>
