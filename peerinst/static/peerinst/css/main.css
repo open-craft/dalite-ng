@@ -173,10 +173,10 @@ header a {
   font-size:9pt;
   opacity:0.8;
   padding-left: 15pt;
-}
-.dense-list {
-  margin-bottom:4px;
-}
+  }
+  .dense-list {
+    margin-bottom:4px;
+  }
 #logo {
   width: 40px;
   vertical-align: middle;
