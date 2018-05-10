@@ -11,7 +11,7 @@
   <div class="admin-link">
     <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
   </div>
-  <h2 class="mdc-typography--headline  mdc-theme--secondary">{{object.title}}</h2>
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{{object.title}}</h2>
   {% if not object.blinkassignmentquestion_set.all %}
   <ul>
     <li><strong>Note:</strong> There are currently no blink questions in this script.  You can add them from the list below.</li>
@@ -19,12 +19,14 @@
   {% endif %}
   <ol>
   {% for a in object.blinkassignmentquestion_set.all %}
-    <li>{{a.blinkquestion.question.text|safe}}
+    <li class="dense-list">{{a.blinkquestion.question.text|safe}}
       <br>
       <div class="mdc-typography--caption">
         {{a.blinkquestion.question.title|safe}}:
         {% for c in a.blinkquestion.question.category.all %}
           {{c.title|safe}}
+        {% empty %}
+          {% trans 'Uncategorized' %}
         {% endfor %}
       </div>
       <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
