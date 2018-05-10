@@ -68,7 +68,7 @@ ul#id_first_answer_choice {
     /* Keeps things looking sane if there are no example rationales. */
     padding-bottom: 1em;
 }
-.rationale-choice, .rationale-text-container{
+.rationale-text-container{
     display: table-cell;
 }
 .rationale-choice input {
