@@ -271,6 +271,7 @@ a {
 
 @media (max-width: 450px) {
   ul,ol {
+    -moz-padding-start: 20px;
     -webkit-padding-start: 20px;
   }
   img {
