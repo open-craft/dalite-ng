@@ -29,9 +29,15 @@ $mdc-theme-background: #f4f4f4;
 @import '@material/line-ripple/mdc-line-ripple';
 @import '@material/list/mdc-list';
 @import '@material/notched-outline/mdc-notched-outline';
-@import "@material/radio/mdc-radio";
+@import '@material/radio/mdc-radio';
 @import '@material/ripple/mdc-ripple';
 @import '@material/textfield/mdc-text-field';
 @import '@material/theme/mdc-theme';
 @import '@material/toolbar/mdc-toolbar';
 @import '@material/typography/mdc-typography';
+
+.ripple-icon {
+  @include mdc-ripple-surface;
+  @include mdc-ripple-radius-unbounded;
+  @include mdc-states($mdc-theme-secondary);
+}

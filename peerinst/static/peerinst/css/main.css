@@ -223,7 +223,7 @@ input[type="submit"].thumbs-down {
   cursor:pointer;
   font-size:20px;
   transform: translateY(4px);
-  opacity:0.6;
+  opacity:0.8;
 }
 .small-button {
   padding-left:0pt;
@@ -248,6 +248,7 @@ input[type="submit"].thumbs-down {
 }
 .material-icons.md-18 { font-size: 18px; }
 .material-icons.md-24 { font-size: 24px; }
+.material-icons.md-32 { font-size: 32px; }
 .material-icons.md-36 { font-size: 36px; }
 .material-icons.md-48 { font-size: 48px; }
 .material-icons.md-96 { font-size: 96px; }

@@ -10,20 +10,25 @@
     <div class="container">
 
       {% block pretext %}{% endblock %}
-      <h1 class="mdc-typography--display3" style="position:sticky;">{{question.title}}
+      <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'Question' %}
         <svg class="underline" width=150 height=4></svg>
       </h1>
 
+      <div class="admin-link">
       {% if user.is_staff %}
-        <div class="admin-link">
-          <a href="{% url 'admin:peerinst_question_change' question.id %}">Edit question</a>
-          {% if assignment %}
-          {% if first_choice_label and second_choice_label %}
-            <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'reset-question' assignment_id=assignment.pk question_id=question.id %}">Reset answers</a>
-          {% endif %}
-          {% endif %}
-        </div>
+        {% if assignment %}
+          <a href="{% url 'question-list' assignment_id=assignment.pk %}">{% trans 'Back to assignment' %}</a>
+        {% endif %}
+        <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'admin:peerinst_question_change' question.id %}">{% trans 'Edit question' %}</a>
+        {% if assignment %}
+        {% if first_choice_label and second_choice_label %}
+          <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'reset-question' assignment_id=assignment.pk question_id=question.id %}">{% trans 'Reset answers' %}</a>
+        {% endif %}
+        {% endif %}
       {% endif %}
+      </div>
+
+      <h2 class="mdc-typography--display1 mdc-theme--secondary">{{question.title}}</h2>
 
       {% if messages %}
       <ul class="messages">

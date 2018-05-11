@@ -9,13 +9,13 @@
       <svg class="underline" width=150 height=4></svg>
     </h1>
 
-    <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Question List' %}</h2>
-
     {% if user.is_staff %}
     <div class="admin-link">
-      <a href="{% url 'assignment-update' assignment_id=assignment.identifier%}">{% trans 'Click here to change question list' %}</a>
+      <a href="{% url 'assignment-update' assignment_id=assignment.identifier%}">{% trans 'Edit question list' %}</a>
     </div>
     {% endif %}
+
+    <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Questions' %}</h2>
 
     <ol>
     {% for obj in object_list %}
@@ -35,7 +35,7 @@
         <i class="material-icons analytics-tags" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
         <i class="material-icons analytics-tags" onclick="showAnalytics({{ obj.id }})">assessment</i>
         <span id="rating-{{obj.id}}"></span>
-        <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}"><i class="material-icons analytics-tags">play_circle_filled</i></a>
+        <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}"><i style="overflow:visible;transform: translateY(8px);" class="material-icons analytics-tags ripple-icon mdc-theme--secondary md-32">play_arrow</i></a>
       </div>
 
       {% if obj.image %}
@@ -79,6 +79,12 @@
 {% block scripts %}
 {% compress js inline %}
 <script>
+document.querySelectorAll('.ripple-icon').forEach(
+  function(x,i,a) {
+    const ripple = bundle.ripple.MDCRipple.attachTo(x);
+    ripple.unbounded = true;
+  }
+)
 function showItems(items,id){
 for (var i=0; i<items.length; i++){
 if (items[i].id == id){
