@@ -233,6 +233,11 @@ input[type="submit"].thumbs-down {
   height:20pt;
   margin:4pt;
 }
+.icon-list {
+  margin-left:10px;
+  cursor: pointer;
+  overflow: visible;
+}
 .mdc-list {
   max-width:600px;
 }
