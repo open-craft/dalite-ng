@@ -77,11 +77,12 @@
           </li>
         {% endfor %}
         </ul>
-        <div>
-          <span class="mdc-typography--body1" style="vertical-align:top;padding-right:10px;">{{ form.rationale.label }}:</span> <span style="vertical-align:top;">{{ form.rationale|add_class:"mdc-typography--body1" }}</span>
+        <div class="mdc-text-field mdc-text-field--textarea mdc-theme--background " data-mdc-auto-init="MDCTextField">
+          {{ form.rationale|add_class:"mdc-text-field__input" }}
+          <label for="id_rationale" class="mdc-floating-label"> {{ form.rationale.label }}</label>
         </div>
         {% endblock %}
-        <div>
+        <div style="margin-top:20px;">
           <input class="mdc-button mdc-button--raised" type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
         </div>
       </form>

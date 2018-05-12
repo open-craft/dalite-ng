@@ -263,6 +263,9 @@ input[type="submit"].thumbs-down {
   vertical-align: middle;
   padding-right: 4pt;
 }
+#id_rationale {
+  width: 100%;
+}
 
 
 @media (max-width: 450px) {
@@ -288,8 +291,5 @@ input[type="submit"].thumbs-down {
   }
   .mdc-typography--display1 {
     font-size: 20pt;
-  }
-  #id_rationale {
-    width: 100%;
   }
 }

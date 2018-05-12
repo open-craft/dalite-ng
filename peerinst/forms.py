@@ -21,7 +21,7 @@ class FirstAnswerForm(forms.Form):
     first_answer_choice = forms.ChoiceField(
         label=_('Choose one of these answers:'), widget=forms.RadioSelect
     )
-    rationale = forms.CharField(widget=forms.Textarea)
+    rationale = forms.CharField(widget=forms.Textarea(attrs={'cols': 100, 'rows': 7}))
 
     def __init__(self, answer_choices, *args, **kwargs):
         choice_texts = [mark_safe(". ".join(pair)) for pair in answer_choices]

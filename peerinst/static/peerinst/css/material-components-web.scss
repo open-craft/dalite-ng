@@ -41,3 +41,7 @@ $mdc-theme-background: #f4f4f4;
   @include mdc-ripple-radius-unbounded;
   @include mdc-states($mdc-theme-secondary);
 }
+
+.mdc-text-field--textarea .mdc-floating-label {
+  background-color: $mdc-theme-background;
+}
