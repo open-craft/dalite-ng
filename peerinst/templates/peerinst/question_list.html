@@ -35,7 +35,7 @@
         <i class="material-icons analytics-tags" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
         <i class="material-icons analytics-tags" onclick="showAnalytics({{ obj.id }})">assessment</i>
         <span id="rating-{{obj.id}}"></span>
-        <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}"><i style="overflow:visible;transform: translateY(8px);" class="material-icons analytics-tags ripple-icon mdc-theme--secondary md-32">play_arrow</i></a>
+        <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}"><i style="overflow:visible;transform: translateY(8px);" class="material-icons analytics-tags ripple-icon mdc-theme--primary mdc-ripple-surface--primary md-32">play_arrow</i></a>
       </div>
 
       {% if obj.image %}

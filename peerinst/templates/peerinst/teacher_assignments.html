@@ -6,14 +6,14 @@
 
 <main>
 <section>
-  <h1 class="mdc-typography--display3" style="position:sticky;">My Assignments
+  <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'My Assignments' %}
     <svg class="underline" width=150 height=4></svg>
   </h1>
   <div class="admin-link">
-    <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
+    <a href="{% url 'teacher' teacher.id %}">{% trans 'Back to My Account' %}</a>
   </div>
 
-  <h2 class="mdc-typography--display1 mdc-theme--secondary">Create a new assignment</h2>
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Create a new assignment' %}</h2>
   {{form.errors}}
   <form method="post">
     {% csrf_token %}
@@ -36,23 +36,43 @@
     <input class="mdc-button mdc-button--raised" type="submit" value="Create" />
   </form>
 
-  <h2 class="mdc-typography--display1 mdc-theme--secondary">Current</h2>
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Current' %}</h2>
 
   <p>These are the assignments for which reports will be available (based on your selected groups).</p>
   {% if not teacher.groups.all %}
     <p>You do not have any assignments.  You can select and modify an existing assignment from the list below or create a new one.</p>
   {% endif %}
-  <ol>
-  {% for g in teacher.assignments.all %}
-    <li>
-      <form method="post">
-          {% csrf_token %}
-          <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-          {{g}}  <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear" /> <span class="admin-link" ><a href="{% url 'assignment-update' g.pk %}">Edit</a></span>
-      </form>
+
+  <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
+    {% for g in teacher.assignments.all %}
+    <li role="separator" class="mdc-list-divider"></li>
+    <li class="mdc-list-item">
+      <span class="mdc-list-item__graphic mdc-theme--primary">
+          <a href="" style="transform:translateY(4pt);">
+            <i class="mdc-theme--primary material-icons md-48">assignment</i>
+          </a>
+      </span>
+      <span class="mdc-list-item__text mdc-theme--secondary bold">
+        {{ g.identifier }}
+        <span class="mdc-list-item__secondary-text">
+          {{ g.questions.count }} {% trans "questions" %}
+        </span>
+      </span>
+      <span class="mdc-list-item__meta">
+        <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"/>
+            <input class="material-icons md-24 mdc-button icon-list small-button" type="submit" value="remove_circle"/>
+        </form>
+        <a href="{% url 'assignment-update' g.pk %}" class="md-24">
+          <i class="material-icons md-24 mdc-ripple-surface icon-list">mode_edit</i>
+        </a>
+      </span>
     </li>
-  {% endfor %}
-  </ol>
+    {% endfor %}
+    <li role="separator" class="mdc-list-divider"></li>
+  </ul>
+
 
   <h2 class="mdc-typography--display1 mdc-theme--secondary">My assignments</h2>
 

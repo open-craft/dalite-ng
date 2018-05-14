@@ -238,6 +238,9 @@ input[type="submit"].thumbs-down {
   cursor: pointer;
   overflow: visible;
 }
+.mdc-list-item__meta i{
+  vertical-align: middle;
+}
 .mdc-list {
   max-width:600px;
 }

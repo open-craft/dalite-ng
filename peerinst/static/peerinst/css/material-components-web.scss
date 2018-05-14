@@ -39,7 +39,7 @@ $mdc-theme-background: #f4f4f4;
 .ripple-icon {
   @include mdc-ripple-surface;
   @include mdc-ripple-radius-unbounded;
-  @include mdc-states($mdc-theme-secondary);
+  @include mdc-states($mdc-theme-primary);
 }
 
 .mdc-text-field--textarea .mdc-floating-label {
