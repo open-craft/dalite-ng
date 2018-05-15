@@ -238,6 +238,14 @@ input[type="submit"].thumbs-down {
   cursor: pointer;
   overflow: visible;
 }
+.input-ripple-wrapper {
+   margin-right:6px;
+   float:left;
+   overflow:visible;
+   width:25px;
+   max-height:25px;
+   cursor: pointer;
+}
 .mdc-list-item__meta i{
   vertical-align: middle;
 }

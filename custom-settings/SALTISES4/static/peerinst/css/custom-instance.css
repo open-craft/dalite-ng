@@ -29,6 +29,6 @@ h1 {
 .mdc-button {
   color: white !important;
 }
-.mdc-button.icon-list {
+div.input-ripple-wrapper input {
   color: grey !important;
 }

@@ -62,8 +62,8 @@
         <form method="post" style="display:inline;">
             {% csrf_token %}
             <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"/>
-            <div class="mdc-ripple-surface" style="margin-right:6px;float:left;overflow:visible;width:25px;max-height:25px;">
-              <input class="material-icons md-24 mdc-button small-button icon-list" style="padding:0pt;margin:0pt;" type="submit" value="remove_circle"/>
+            <div class="mdc-ripple-surface input-ripple-wrapper">
+              <input class="material-icons md-24 mdc-button small-button" style="padding:0pt;margin:0pt;" type="submit" value="remove_circle"/>
             </div>
         </form>
         <a href="{% url 'assignment-update' g.pk %}" class="md-24">
@@ -75,26 +75,38 @@
     <li role="separator" class="mdc-list-divider"></li>
   </ul>
 
+  <!-- Not yet implemented
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'My assignments' %}</h2>
 
-  <h2 class="mdc-typography--display1 mdc-theme--secondary">My assignments</h2>
-
-  These are all the assignments for which you are an author.
+  {% trans 'These are the assignments for which you are an author.' %}
+  -->
 
   <h2 class="mdc-typography--display1 mdc-theme--secondary">All</h2>
-  These are all the assignments in the database.
-  <ol>
-  {% for g in object_list.all %}
+  {% trans 'These are all the assignments in the database.' %}
+
+  <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
+    {% for g in object_list.all %}
     {% if g not in teacher.assignments.all %}
-    <li>
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"></input>
-        {{g}} <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
-      </form>
+    <li role="separator" class="mdc-list-divider"></li>
+    <li class="mdc-list-item">
+      <span class="mdc-list-item__graphic mdc-theme--primary">
+        <form method="post">
+          {% csrf_token %}
+          <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add"/>
+          <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"/>
+        </form>
+      </span>
+      <span class="mdc-list-item__text mdc-theme--secondary bold">
+        {{ g.identifier }}
+        <span class="mdc-list-item__secondary-text">
+          {{ g.questions.count }} {% trans "questions" %}
+        </span>
+      </span>
     </li>
     {% endif %}
-  {% endfor %}
-  </ol>
+    {% endfor %}
+    <li role="separator" class="mdc-list-divider"></li>
+  </ul>
 
 </section>
 </main>

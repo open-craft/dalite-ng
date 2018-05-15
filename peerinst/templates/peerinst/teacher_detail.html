@@ -129,9 +129,9 @@
 </ul>
 
 
-<h2 class="mdc-typography--display1 mdc-theme--secondary">Groups</h2>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Groups' %}</h2>
 <div class="admin-link">
-  <a href="{% url 'teacher-groups' teacher.id %}">Add groups</a>
+  <a href="{% url 'teacher-groups' teacher.id %}">{% trans 'Manage groups' %}</a>
 </div>
 <ul class="mdc-list mdc-list--two-line">
   {% for g in object.groups.all %}
