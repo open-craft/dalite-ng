@@ -62,7 +62,9 @@
         <form method="post" style="display:inline;">
             {% csrf_token %}
             <input type="hidden" id="id_assignment" name="assignment" value="{{g.pk}}"/>
-            <input class="material-icons md-24 mdc-button icon-list small-button" type="submit" value="remove_circle"/>
+            <div class="mdc-ripple-surface" style="margin-right:6px;float:left;overflow:visible;width:25px;max-height:25px;">
+              <input class="material-icons md-24 mdc-button small-button icon-list" style="padding:0pt;margin:0pt;" type="submit" value="remove_circle"/>
+            </div>
         </form>
         <a href="{% url 'assignment-update' g.pk %}" class="md-24">
           <i class="material-icons md-24 mdc-ripple-surface icon-list">mode_edit</i>
