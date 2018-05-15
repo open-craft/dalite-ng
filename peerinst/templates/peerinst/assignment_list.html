@@ -14,8 +14,8 @@
 
   <div class="search">
     <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
-      <label class="mdc-floating-label" for="search-bar">Search</label>
-      <input class="mdc-text-field__input" type="search" id="search-bar" oninput="search()" size="50" style="transform:translateY(-8pt)">
+      <label class="mdc-floating-label" for="search-bar">{% trans 'Search' %}</label>
+      <input class="mdc-text-field__input" id="search-bar" oninput="search()">
       <div class="mdc-notched-outline">
         <svg>
           <path class="mdc-notched-outline__path"/>
@@ -30,7 +30,7 @@
 
   <ul>
   {% for obj in object_list %}
-    <li id="{{ obj.title }}" name="item">
+    <li class="dense-list" id="{{ obj.title }}" name="item">
       {{ forloop.counter }}. <a href="{% url 'question-list' assignment_id=obj.pk %}">
       {{ obj.title }}</a>
     </li>
@@ -56,11 +56,4 @@
   </script>
 </section>
 </main>
-{% endblock %}
-
-{% block scripts %}
-<script>
-underlines();
-window.addEventListener("resize",underlines);
-</script>
 {% endblock %}

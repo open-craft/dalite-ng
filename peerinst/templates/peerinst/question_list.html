@@ -3,358 +3,122 @@
 {% load compress i18n %}
 
 {% block body %}
-
 <main>
   <section>
     <h1 class="mdc-typography--display3" style="position:sticky;"> {{assignment.title}}
       <svg class="underline" width=150 height=4></svg>
     </h1>
 
-    <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Question List' %}</h2>
-
     {% if user.is_staff %}
     <div class="admin-link">
-      <a href="{% url 'assignment-update' assignment_id=assignment.identifier%}">Click here to change which questions are part of this assignment</a>
+      <a href="{% url 'assignment-update' assignment_id=assignment.identifier%}">{% trans 'Edit question list' %}</a>
     </div>
     {% endif %}
 
-    {% compress js inline %}
-    <script>
-    function plot(matrix,freq,id){
-      var colour = {
-        'easy' : 'rgb(30, 142, 62)',
-        'hard' : 'rgb(237, 69, 40)',
-        'tricky' : 'rgb(237, 170, 30)',
-        'peer' : 'rgb(25, 118, 188)'
-      }
-      var max = -0;
-      for (entry in d3.entries(matrix)){
-        var item = d3.entries(matrix)[entry];
-        if (item.value > max) {
-          max = item.value;
-          label = item.key;
-        }
-      }
-      if (max > 0){
-        var rating = document.getElementById("rating-"+id);
-        rating.innerHTML = label.substring(0,1).toUpperCase()+label.substring(1,);
+    <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Questions' %}</h2>
 
-        var stats = document.getElementById("stats-"+id);
-        stats.style.color = colour[label];
-      }
+    <ol>
+    {% for obj in object_list %}
+      <li class="dense-list mdc-typography--body1"> {{ obj.text|safe }}
 
-      var matrix_svg = d3.select("#matrix-"+id);
-      var size = matrix_svg.attr("width");
-      var g = matrix_svg.append("g");
-
-      var easy = g.append("rect")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("width", size/2)
-      .attr("height", size/2)
-      .attr("fill",colour['easy'])
-      .style("opacity",0.5+0.5*matrix['easy']);
-
-      /**easy.on("mouseover",function(d){
-      tooltip.html("Correct to correct");
-
-      tooltip.transition()
-      .duration(100)
-      .style("opacity",1);
-    });
-
-    easy.on("mouseout",function(d){
-    tooltip.style("opacity",0);
-  })**/
-
-  g.append("text")
-  .attr("x", size/4)
-  .attr("y", size/4)
-  .attr("dy",4)
-  .style("font-size","8pt")
-  .style("fill","white")
-  .style("text-anchor","middle")
-  .text(parseInt(100*matrix['easy'])+"%");
-
-  g.append("rect")
-  .attr("x", size/2)
-  .attr("y", size/2)
-  .attr("width", size/2)
-  .attr("height", size/2)
-  .attr("fill",colour['hard'])
-  .style("opacity",0.5+0.5*matrix['hard']);
-
-  g.append("text")
-  .attr("x", 3*size/4)
-  .attr("y", 3*size/4)
-  .attr("dy",4)
-  .style("font-size","8pt")
-  .style("fill","white")
-  .style("text-anchor","middle")
-  .text(parseInt(100*matrix['hard'])+"%");
-
-  g.append("rect")
-  .attr("x", 0)
-  .attr("y", size/2)
-  .attr("width", size/2)
-  .attr("height", size/2)
-  .attr("fill",colour['peer'])
-  .style("opacity",0.5+0.5*matrix['peer']);
-
-  g.append("text")
-  .attr("x", size/4)
-  .attr("y", 3*size/4)
-  .attr("dy",4)
-  .style("font-size","8pt")
-  .style("fill","white")
-  .style("text-anchor","middle")
-  .text(parseInt(100*matrix['peer'])+"%");
-
-  g.append("rect")
-  .attr("x", size/2)
-  .attr("y", 0)
-  .attr("width", size/2)
-  .attr("height", size/2)
-  .attr("fill",colour['tricky'])
-  .style("opacity",0.5+0.5*matrix['tricky']);
-
-  g.append("text")
-  .attr("x", 3*size/4)
-  .attr("y", size/4)
-  .attr("dy",4)
-  .style("font-size","8pt")
-  .style("fill","white")
-  .style("text-anchor","middle")
-  .text(parseInt(100*matrix['tricky'])+"%");
-
-  /*
-  g.append("text")
-  .attr("x", size/4)
-  .attr("y", 5*size/4)
-  .attr("dy",4)
-  .style("font-size","8pt")
-  .style("fill","black")
-  .style("text-anchor","middle")
-  .text(parseInt(100*(matrix['easy']+matrix['peer']))+"%");
-
-  g.append("text")
-  .attr("x", 3*size/4)
-  .attr("y", 5*size/4)
-  .attr("dy",4)
-  .style("font-size","8pt")
-  .style("fill","black")
-  .style("text-anchor","middle")
-  .text(parseInt(100*(matrix['hard']+matrix['tricky']))+"%");
-  */
-
-  var first_freq_svg = d3.select("#first-frequency-"+id),
-  second_freq_svg = d3.select("#second-frequency-"+id),
-  margin = {left:30,right:30};
-
-  var sum = 0;
-  for (entry in freq['first_choice']){
-    sum += freq['first_choice'][entry];
-  }
-  for (entry in freq['first_choice']){
-    freq['first_choice'][entry] /= sum;
-    freq['second_choice'][entry] /= sum;
-  }
-
-  var size = (second_freq_svg.attr("width")-margin.left);
-
-  var x = d3.scaleLinear().domain([0,1]).rangeRound([0,size]);
-  var y = d3.scaleBand().domain(d3.keys(freq['first_choice']).sort()).rangeRound([0,first_freq_svg.attr("height")]);
-
-  var gg = second_freq_svg.append("g")
-  .attr("transform","translate("+margin.left+",0)");
-
-  var ggg = first_freq_svg.append("g");
-
-  gg.append("g")
-  .attr("class", "axis axis--x")
-  .style("opacity",0)
-  .call(d3.axisBottom(x));
-
-  ggg.append("g")
-  .attr("class", "axis axis--x")
-  .style("opacity",0)
-  .call(d3.axisBottom(x));
-
-  gg.append("g")
-  .attr("class", "axis axis--y")
-  .style("opacity",0)
-  .call(d3.axisLeft(y).ticks);
-
-  gg.append("g")
-  .selectAll("rect")
-  .data(d3.entries(freq['second_choice']))
-  .enter().append("rect")
-  .attr("id","second_choice-"+id)
-  .attr("finalwidth",function(d){return x(d.value);})
-  .attr("x",x(0))
-  .attr("y",function(d){return y(d.key);})
-  .attr("width",0)
-  .attr("height",first_freq_svg.attr("height")/d3.values(freq['second_choice']).length)
-  .attr("fill","gray")
-  .style("stroke","white")
-  .style("opacity",0.2);
-
-  ggg.append("g")
-  .selectAll("rect")
-  .data(d3.entries(freq['first_choice']))
-  .enter().append("rect")
-  .attr("id","first_choice-"+id)
-  .attr("finalwidth",function(d){return x(d.value);})
-  .attr("finalx",function(d){return x(1-d.value);})
-  .attr("x",x(1))
-  .attr("y",function(d){return y(d.key);})
-  .attr("width",0)
-  .attr("height",first_freq_svg.attr("height")/d3.values(freq['first_choice']).length)
-  .attr("fill","gray")
-  .style("stroke","white")
-  .style("opacity",0.2);
-
-  gg.append("g")
-  .selectAll("text")
-  .data(d3.entries(freq['second_choice']))
-  .enter().append("text")
-  .attr("x",x(0))
-  .attr("dx",-2)
-  .attr("y",function(d){return y(d.key);})
-  .attr("dy",y.bandwidth()/2+4)
-  .style("font-size","8pt")
-  .style("text-anchor","end")
-  .text(function(d){return parseInt(100*d.value)+"%";});
-
-  ggg.append("g")
-  .selectAll("text")
-  .data(d3.entries(freq['first_choice']))
-  .enter().append("text")
-  .attr("x",x(1))
-  .attr("dx",2)
-  .attr("y",function(d){return y(d.key);})
-  .attr("dy",y.bandwidth()/2+4)
-  .style("font-size","8pt")
-  .style("text-anchor","start")
-  .text(function(d){return parseInt(100*d.value)+"%";});
-
-  gg.append("g")
-  .selectAll("text")
-  .data(d3.entries(freq['second_choice']))
-  .enter().append("text")
-  .attr("x",x(0))
-  .attr("dx",2)
-  .attr("y",function(d){return y(d.key);})
-  .attr("dy",y.bandwidth()/2+4)
-  .style("font-size","8pt")
-  .text(function(d){return d.key;});
-
-  return;
-}
-</script>
-{% endcompress %}
-
-<ul>
-  {% for obj in object_list %}
-  <li>{{ forloop.counter }}. <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">{{ obj.title }}</a>
-    <span id="stats-{{obj.id}}" class="stats">
-      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:20px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showAnalytics({{ obj.id }})">assessment</i><span id="rating-{{obj.id}}"></span>
-      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(3px);opacity:0.6;" onclick="showAssignments({{ obj.id }})">description</i>{{ obj.assignment_set.all.count }}
-      <i class="material-icons" style="cursor:pointer;padding-left:4pt;font-size:18px;-webkit-transform: translateY(4px);opacity:0.6;" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
-
-    </span>
-    <div class="question-text">
-      {{ obj.text|safe|striptags }}
-    </div>
-    {% if obj.image %}
-    <div class="question-text" id="question-image">
-      <img src="{{ obj.image.url }}"
-      width=200 alt="obj.image_alt_text">
-    </div>
-    {% endif %}
-    <div style="clear:both;"></div>
-    <div>
-      <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
-      <div id="{{ obj.id }}" name="analytics" class="items-for-question">
-        <svg id="first-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
-        <svg id="matrix-{{ obj.id }}" width="60" height="60" style="vertical-align:middle"></svg>
-        <svg id="second-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
+      <div class="mdc-typography--caption">
+        <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">{{ obj.title|safe }}</a>:
+        {% for c in obj.category.all %}
+          {{ c.title|safe }}
+        {% empty %}
+          {% trans 'Uncategorized' %}
+        {% endfor %}
       </div>
-      <script>
-      plot({{ obj.get_matrix|safe }},{{ obj.get_frequency|safe|striptags }},{{ obj.id }})
-      </script>
-    </div>
-    <div>
-      <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>
-      <ul>
-        {% for assignment in obj.assignment_set.all %}
-        <li id="{{ obj.id }}" name="assignment" class="items-for-question"><a href="{% url 'question-list' assignment_id=assignment.pk %}">{{ assignment.title }}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div>
-      <span id="{{ obj.id }}" name="rationale" class="items-for-question"><b>Rationales:</b></span>
-      <ul>
-        {% for answer in obj.answer_set.all %}
-        <li id="{{ obj.id }}" name="rationale" class="items-for-question">{{ answer.rationale|safe|striptags  }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </li>
-  {% empty %}
-  <li>{% trans 'No questions available.' %}</li>
-  {% endfor %}
-</ul>
 
-<script>
+      <div id="stats-{{obj.id}}" class="stats">
+        <i class="material-icons analytics-tags" onclick="showAssignments({{ obj.id }})">description</i>{{ obj.assignment_set.all.count }}
+        <i class="material-icons analytics-tags" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
+        <i class="material-icons analytics-tags" onclick="showAnalytics({{ obj.id }})">assessment</i>
+        <span id="rating-{{obj.id}}"></span>
+        <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}"><i style="overflow:visible;transform: translateY(8px);" class="material-icons analytics-tags ripple-icon mdc-theme--primary mdc-ripple-surface--primary md-32">play_arrow</i></a>
+      </div>
 
-/*var tooltip = d3.select("body").append("div")
-.attr("class", "tooltip")
-.style("width","50px")
-.style("height","50px")
-.style("opacity", 0);*/
-
-function showItems(items,id){
-  for (var i=0; i<items.length; i++){
-    if (items[i].id == id){
-      if (items[i].style.display != "block"){
-        items[i].style.display = "block";
-      } else {
-        items[i].style.display = "none";
-      }
-    }
-  }
-  return;
-}
-
-function showAnalytics(id){
-  var items = document.getElementsByName('analytics');
-  showItems(items,id);
-  d3.selectAll("#first_choice-"+id).transition().duration(1000).attr("x",function(d){return d3.select(this).attr("finalx");}).attr("width",function(d){return d3.select(this).attr("finalwidth");});
-  d3.selectAll("#second_choice-"+id).transition().delay(1000).duration(1000).attr("width",function(d){return d3.select(this).attr("finalwidth");});
-  return;
-}
-
-function showAssignments(id){
-  var items = document.getElementsByName('assignment');
-  showItems(items,id);
-  return;
-}
-
-function showRationales(id){
-  var items = document.getElementsByName('rationale');
-  showItems(items,id);
-  return;
-}
-
-</script>
+      {% if obj.image %}
+      <img class="question-image" src="{{ obj.image.url }}"
+        width=200 alt="obj.image_alt_text">
+      {% endif %}
+      <div style="clear:both;"></div>
+      <div>
+        <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
+        <div id="{{ obj.id }}" name="analytics" class="items-for-question">
+          <svg id="first-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
+          <svg id="matrix-{{ obj.id }}" width="60" height="60" style="vertical-align:middle"></svg>
+          <svg id="second-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
+        </div>
+      </div>
+      <div>
+        <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>
+        <ul>
+          {% for assignment in obj.assignment_set.all %}
+          <li id="{{ obj.id }}" name="assignment" class="items-for-question"><a href="{% url 'question-list' assignment_id=assignment.pk %}">{{ assignment.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <span id="{{ obj.id }}" name="rationale" class="items-for-question"><b>Rationales:</b></span>
+        <ul>
+          {% for answer in obj.answer_set.all %}
+          <li id="{{ obj.id }}" name="rationale" class="items-for-question">{{ answer.rationale|safe|striptags  }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      </li>
+      {% empty %}
+      <li>{% trans 'No questions available.' %}</li>
+      {% endfor %}
+    </ol>
 </section>
 </main>
 {% endblock %}
 
 {% block scripts %}
+{% compress js inline %}
 <script>
-underlines();
-window.addEventListener("resize",underlines);
+document.querySelectorAll('.ripple-icon').forEach(
+  function(x,i,a) {
+    const ripple = bundle.ripple.MDCRipple.attachTo(x);
+    ripple.unbounded = true;
+  }
+)
+function showItems(items,id){
+for (var i=0; i<items.length; i++){
+if (items[i].id == id){
+  if (items[i].style.display != "block"){
+    items[i].style.display = "block";
+  } else {
+    items[i].style.display = "none";
+  }
+}
+}
+return;
+}
+function showAnalytics(id){
+var items = document.getElementsByName('analytics');
+showItems(items,id);
+bundle.selectAll("#first_choice-"+id).transition().duration(1000).attr("x",function(d){return bundle.select(this).attr("finalx");}).attr("width",function(d){return bundle.select(this).attr("finalwidth");});
+bundle.selectAll("#second_choice-"+id).transition().delay(1000).duration(1000).attr("width",function(d){return bundle.select(this).attr("finalwidth");});
+return;
+}
+function showAssignments(id){
+var items = document.getElementsByName('assignment');
+showItems(items,id);
+return;
+}
+function showRationales(id){
+var items = document.getElementsByName('rationale');
+showItems(items,id);
+return;
+}
 </script>
+{% for obj in object_list %}
+<script>
+bundle.plot({{ obj.get_matrix|safe }},{{ obj.get_frequency|safe|striptags }},{{ obj.id }});
+</script>
+{% endfor %}
+{% endcompress %}
 {% endblock %}

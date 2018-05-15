@@ -1,148 +1,6 @@
-.material-icons.md-18 { font-size: 18px; }
-.material-icons.md-24 { font-size: 24px; }
-.material-icons.md-36 { font-size: 36px; }
-.material-icons.md-48 { font-size: 48px; }
-.material-icons.md-96 { font-size: 96px; }
-
-
 body {
   color: var(--mdc-theme-secondary);
-  margin:0pt;
-}
-main {
-  max-width:900px;
-  margin:auto;
-}
-section {
-  padding-left:5px;
-  padding-right:20px;
-}
-p {
-    margin: 0.25em 0;
-}
-img {
-    max-width: 80%;
-    max-height: 300px;
-    width: auto;
-    height: auto;
-}
-dt  {
-    clear:left;
-    float:left;
-}
-dd {
-    clear:right;
-}
-blockquote, .rationale-text {
-    color: #525252;
-    background-color: #F6F6F6;
-    border: 1px solid #C8C8C8;
-    padding: 1em;
-}
-div.action {
-    height: 40px;
-    vertical-align: middle;
-    font-weight: 600;
-}
-
-ul {
-    list-style: none;
-}
-
-ul#id_first_answer_choice {
-    margin-top: 0;
-    margin-bottom: 2em;
-}
-
-li {
-  margin-bottom:5px;
-}
-
-
-.rationales {
-    display: table;
-    border-collapse: collapse;
-    margin-left:40px;
-    margin-right:40px;
-}
-.rationale {
-    display: table-row;
-}
-.rationale-choice {
-    white-space: nowrap;
-    /* Keeps things looking sane if there are no example rationales. */
-    padding-bottom: 1em;
-}
-.rationale-choice, .rationale-text-container{
-    display: table-cell;
-}
-.rationale-choice input {
-    display: none;
-}
-
-form ul {
-  padding-left:10px;
-}
-
-.errorlist, ul li.error {
-    display: block;
-    box-shadow: 0 -1px 2px 0 #F3D9DB inset;
-    border-bottom: 3px solid #A0050E;
-    background: none repeat scroll 0 0 #FBF2F3;
-    box-sizing: border-box;
-    margin: 0 0 20px;
-    padding: 20px;
-    font-size: 15px;
-    color: #3C3C3C;
-    line-height: 1.41575em;
-}
-
-li.error h3{
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0 !important;
-    color: #A0050E;
-    margin: 0;
-}
-
-li.first-choice{
-    font-weight: bold;
-}
-li.second-choice{
-    font-style: italic;
-}
-.rationale:not(:first-child) {
-    border-top: 1px solid lightgray;
-}
-input[type="submit"].thumbs-button {
-    font-size: 0;  /* Make text invisible */
-    width: 80px;
-    height: 40px;
-    background-size: 20px;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-input[type="submit"].thumbs-up {
-    background-image: url("/static/peerinst/img/thumbs-up.svg");
-}
-input[type="submit"].thumbs-down {
-    background-image: url("/static/peerinst/img/thumbs-down.svg");
-}
-.votable-rationale q {
-    font-style: italic;
-}
-.share-question-answers-summary label {
-    font-weight: bold;
-}
-.share-question-answers-summary textarea {
-    width: 50%;
-    height: 100px;
-}
-.wrapper {
-  display: grid;
-  grid-template-columns: 60% 40%;
-  align-items: center;
+  margin: 0pt;
 }
 header {
   background-color: black;
@@ -153,13 +11,141 @@ header {
 header a {
   color: white;
 }
-.bold {
-   font-weight:bold;
+main {
+  max-width: 900px;
+  margin: auto;
+}
+section {
+  padding-left: 5px;
+  padding-right: 20px;
+}
+p {
+  margin: 0.25em 0;
+}
+a {
+  color: grey;
+  text-decoration: none;
+}
+img {
+  max-width: 80%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+}
+dt  {
+  clear:left;
+  float:left;
+}
+dd {
+  clear:right;
+}
+blockquote, .rationale-text {
+  color: #525252;
+  background-color: #F6F6F6;
+  border: 1px solid #C8C8C8;
+  padding: 1em;
+}
+div.action {
+  height: 40px;
+  vertical-align: middle;
+  font-weight: 600;
+}
+ul {
+  list-style: none;
+}
+ul#id_first_answer_choice {
+  margin-top: 0;
+  margin-bottom: 2em;
+}
+form ul {
+  padding-left: 5px;
+}
+.rationales {
+  display: table;
+  border-collapse: collapse;
+  margin-left:40px;
+  margin-right:40px;
+}
+.rationale {
+  display: table-row;
+}
+.rationale-choice {
+  white-space: nowrap;
+  /* Keeps things looking sane if there are no example rationales. */
+  padding-bottom: 1em;
+}
+.rationale-text-container{
+  display: table-cell;
+}
+.rationale-choice input {
+  display: none;
+}
+.rationale li {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.rationale:not(:first-child) {
+  border-top: 1px solid lightgray;
+}
+.errorlist, ul li.error {
+  display: block;
+  box-shadow: 0 -1px 2px 0 #F3D9DB inset;
+  border-bottom: 3px solid #A0050E;
+  background: none repeat scroll 0 0 #FBF2F3;
+  box-sizing: border-box;
+  margin: 0 0 20px;
+  padding: 20px;
+  font-size: 15px;
+  color: #3C3C3C;
+  line-height: 1.41575em;
+}
+li.error h3{
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0 !important;
+  color: #A0050E;
+  margin: 0;
+}
+li.first-choice{
+  font-weight: bold;
+}
+li.second-choice{
+  font-style: italic;
+}
+input[type="submit"].thumbs-button {
+  font-size: 0;  /* Make text invisible */
+  width: 80px;
+  height: 40px;
+  background-size: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+input[type="submit"].thumbs-up {
+  background-image: url("/static/peerinst/img/thumbs-up.svg");
+}
+input[type="submit"].thumbs-down {
+  background-image: url("/static/peerinst/img/thumbs-down.svg");
+}
+.votable-rationale q {
+  font-style: italic;
+}
+.share-question-answers-summary label {
+  font-weight: bold;
+}
+.share-question-answers-summary textarea {
+  width: 50%;
+  height: 100px;
+}
+.wrapper {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  align-items: center;
 }
 .header-right {
-   text-align:right;
-   font-size:10pt;
-   line-height:1.2;
+  text-align:right;
+  font-size:10pt;
+  line-height:1.2;
 }
 .site-content {
   margin: 20pt;
@@ -175,22 +161,25 @@ header a {
   opacity:0.8;
   padding-left: 15pt;
 }
-#logo {
-  width: 40px;
-  vertical-align: middle;
-  padding-right: 4pt;
+.dense-list {
+  margin-bottom:4px;
 }
-a {
-  color: grey;
-  text-decoration: none;
+.bold {
+  font-weight:bold;
 }
-.question-text {
-    margin-left: 30pt;
-    margin-right: 20pt;
-    margin-top: 2pt;
-    margin-bottom: 10pt;
-    font-size: 10pt;
-    line-height:1.3;
+/*.question-text {
+  margin-left: 30pt;
+  margin-right: 20pt;
+  margin-top: 2pt;
+  margin-bottom: 10pt;
+  font-size: 10pt;
+  line-height:1.3;
+}*/
+.question-image {
+  display:block;
+  margin:auto;
+  padding-top:10pt;
+  padding-bottom:10pt;
 }
 .search {
   display:inline;
@@ -223,6 +212,7 @@ a {
 }
 .note {
   font-size: 10pt;
+  margin-bottom: 20px;
 }
 .underline {
   overflow:visible;
@@ -230,7 +220,12 @@ a {
   left:0px;
   bottom:-3px;
 }
-
+.analytics-tags {
+  cursor:pointer;
+  font-size:20px;
+  transform: translateY(4px);
+  opacity:0.8;
+}
 .small-button {
   padding-left:0pt;
   padding-right:0pt;
@@ -238,12 +233,58 @@ a {
   height:20pt;
   margin:4pt;
 }
+.icon-list {
+  margin-left:20px;
+  cursor: pointer;
+  overflow: visible;
+}
+.input-ripple-wrapper {
+   margin-right:6px;
+   float:left;
+   overflow:visible;
+   width:25px;
+   max-height:25px;
+   cursor: pointer;
+}
+.mdc-list-item__meta i{
+  vertical-align: middle;
+}
 .mdc-list {
   max-width:600px;
 }
+.mdc-text-field__input {
+  width: 250px;
+}
+.mdc-typography--body1 {
+  font-size: 16px;
+  letter-spacing: 0em;
+  -webkit-font-smoothing: auto;
+}
+.mdc-form-field > label {
+  padding-left: 2px;
+}
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-32 { font-size: 32px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+.material-icons.md-96 { font-size: 96px; }
+#logo {
+  width: 40px;
+  vertical-align: middle;
+  padding-right: 4pt;
+}
+#id_rationale {
+  width: 100%;
+}
+
 
 @media (max-width: 450px) {
+  section {
+    padding-right: 5pt;
+  }
   ul,ol {
+    -moz-padding-start: 20px;
     -webkit-padding-start: 20px;
   }
   img {
@@ -251,15 +292,15 @@ a {
     max-height: 200px;
   }
   .site-content {
-    margin:2pt;
+    margin: 2pt;
   }
-  section {
-    padding-right:5pt;
+  .rationales {
+    margin-left:20px;
   }
   .mdc-typography--display3 {
-    font-size:30pt;
+    font-size: 30pt;
   }
   .mdc-typography--display1 {
-    font-size:20pt;
+    font-size: 20pt;
   }
 }

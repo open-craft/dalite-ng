@@ -10,7 +10,8 @@
 </h1>
 <h2 class="mdc-typography--display1 mdc-theme--secondary">Identity</h2>
 <ul class="mdc-list mdc-list--two-line">
-  <li class="mdc-list-item mdc-elevation--z1" onclick="edit_user()">
+  <li role="separator" class="mdc-list-divider"></li>
+  <li class="mdc-list-item" onclick="edit_user()">
     <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">account_circle</i></span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {{ object.user.username }}
@@ -21,9 +22,10 @@
         {% trans "Member since: " %} {{ user.date_joined|date:"M d Y"  }}
       </span>
     </span>
-    <span class="mdc-list-item__meta"><i class="material-icons md-24">mode_edit</i></span>
+    <span class="mdc-list-item__meta"><i class="material-icons md-24">lock</i></span>
   </li>
-  <li class="mdc-list-item mdc-elevation--z1" onclick="edit_identity()">
+  <li role="separator" class="mdc-list-divider"></li>
+  <li class="mdc-list-item" onclick="edit_identity()">
     <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">book</i></span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {% for d in object.disciplines.all %}
@@ -33,9 +35,10 @@
         {% trans "Discipline" %}
       </span>
     </span>
-    <span class="mdc-list-item__meta"><i class="material-icons md-24">mode_edit</i></span>
+    <span class="mdc-list-item__meta"><i class="material-icons md-24">settings</i></span>
   </li>
-  <li class="mdc-list-item mdc-elevation--z1" onclick="edit_identity()">
+  <li role="separator" class="mdc-list-divider"></li>
+  <li class="mdc-list-item" onclick="edit_identity()">
     <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">school</i></span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {% for i in object.institutions.all %}
@@ -45,8 +48,9 @@
         {% trans "Institution" %}
       </span>
     </span>
-    <span class="mdc-list-item__meta"><i class="material-icons md-24">mode_edit</i></span>
+    <span class="mdc-list-item__meta"><i class="material-icons md-24">settings</i></span>
   </li>
+  <li role="separator" class="mdc-list-divider"></li>
 </ul>
 
 
@@ -60,9 +64,10 @@
 <p>Student link: <span class="bold">{{ request.get_host}}{% url 'blink-get-current' object.user.username %}</span></p>
 
 
-<ul class="mdc-list mdc-list--two-line">
+<ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
   {% for a in object.blinkassignment_set.all %}
-  <li class="mdc-list-item mdc-elevation--z1 blink" id="{{a.pk}}">
+  <li role="separator" class="mdc-list-divider"></li>
+  <li class="mdc-list-item blink" id="edit-blink-{{a.pk}}">
     <span class="mdc-list-item__graphic mdc-theme--primary">
       {% if a.blinkassignmentquestion_set.all|length > 0 %}
         <a href="{% url 'blinkAssignment-start' a.key %}" style="transform:translateY(4pt);">
@@ -73,45 +78,68 @@
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {{a.title|safe|striptags}}
       <span class="mdc-list-item__secondary-text">
-        {{a.blinkassignmentquestion_set.count}} {% trans 'questions' %}
+        {{a.blinkassignmentquestion_set.count}} {% trans 'question(s)' %}
       </span>
     </span>
-    <span class="mdc-list-item__meta"><i class="material-icons md-24">mode_edit</i></span>
+    <span class="mdc-list-item__meta">
+      <a href="{% url 'blinkAssignment-delete' a.key %}">
+        <i class="material-icons md-24 mdc-ripple-surface icon-list">delete</i>
+      </a>
+      <a href="{% url 'blinkAssignment-update' a.pk %}">
+        <i class="material-icons md-24 mdc-ripple-surface icon-list">mode_edit</i>
+      </a>
+    </span>
   </li>
   {% endfor %}
+  <li role="separator" class="mdc-list-divider"></li>
 </ul>
 
 
 
-<h2 class="mdc-typography--display1 mdc-theme--secondary">Assignments</h2>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Assignments' %}</h2>
 <div class="admin-link">
   <a href="{% url 'teacher-assignments' teacher.id %}">Manage assignments</a>
 </div>
 {% if not object.assignments.all %}
 <p>You do not have any assignments.</p>
 {% endif %}
-<ul class="mdc-list mdc-list--two-line">
+<ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
   {% for a in object.assignments.all %}
-  <li class="mdc-list-item mdc-elevation--z1" onclick="report()">
+  <li role="separator" class="mdc-list-divider"></li>
+  <li class="mdc-list-item">
+    <span class="mdc-list-item__graphic mdc-theme--primary">
+        <a href="" style="transform:translateY(4pt);">
+          <i class="mdc-theme--primary material-icons md-48">assignment</i>
+        </a>
+    </span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {{ a.identifier }}
       <span class="mdc-list-item__secondary-text">
         {{ a.questions.count }} {% trans "questions" %}
       </span>
     </span>
-    <span class="mdc-list-item__meta"><i class="material-icons md-24">assignment</i></span>
+    <span class="mdc-list-item__meta">
+      <a href="{% url 'assignment-update' a.pk %}">
+        <i class="material-icons md-24 mdc-ripple-surface icon-list">mode_edit</i>
+      </a>
+    </span>
   </li>
   {% endfor %}
+  <li role="separator" class="mdc-list-divider"></li>
 </ul>
 
 
-<h2 class="mdc-typography--display1 mdc-theme--secondary">Groups</h2>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Groups' %}</h2>
 <div class="admin-link">
-  <a href="{% url 'teacher-groups' teacher.id %}">Add groups</a>
+  <a href="{% url 'teacher-groups' teacher.id %}">{% trans 'Manage groups' %}</a>
 </div>
 <ul class="mdc-list mdc-list--two-line">
   {% for g in object.groups.all %}
-  <li class="mdc-list-item mdc-elevation--z1" onclick="edit_groups()">
+  <li role="separator" class="mdc-list-divider"></li>
+  <li class="mdc-list-item" onclick="edit_groups()">
+    <span class="mdc-list-item__graphic mdc-theme--primary">
+      <i class="mdc-theme--primary material-icons md-48">group</i>
+    </span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {{ g.name }}
       <span class="mdc-list-item__secondary-text">
@@ -121,12 +149,11 @@
         {% trans "Students: " %} {{ g.student_set.count  }}
       </span>
     </span>
-    <span class="mdc-list-item__meta"><i class="material-icons md-24">mode_edit</i></span>
+    <span class="mdc-list-item__meta"><i class="material-icons md-24">info</i></span>
   </li>
   {% endfor %}
+  <li role="separator" class="mdc-list-divider"></li>
 </ul>
-
-
 </section>
 </main>
 {% endblock %}
@@ -134,7 +161,13 @@
 {% block scripts %}
 {% compress js inline %}
 <script>
-underlines();
+// This needs to be fix to activate JS part of ripple
+document.querySelectorAll('.ripple-icon').forEach(
+  (el,i,list)=>{
+  //  const ripple = bundle.ripple.MDCRipple.attachTo(el);
+  //  ripple.unbounded = true;
+  }
+)
 function edit_user() {
   location="{% url 'password_change' %}";
 }
@@ -144,24 +177,21 @@ function edit_identity() {
 function edit_groups() {
   location="{% url 'teacher-groups' teacher.id %}";
 }
-function report() {
-  location="";
-}
+</script>
 
-// Bind onclick
 {% for a in object.blinkassignment_set.all %}
-document.getElementById('{{a.pk}}').onclick=function() {
+<script>
+// Bind onclick
+/*document.getElementById('edit-blink-{{a.pk}}').onclick=function() {
   location="{% url 'blinkAssignment-update' a.pk %}";
-}
-{% endfor %}
+}*/
 /*document.querySelectorAll('.blink').forEach(
   (el,i,list)=>{
     el.onclick=function() {
       location="";
     }
   });*/
-
-window.addEventListener("resize",underlines);
 </script>
+{% endfor %}
 {% endcompress %}
 {% endblock %}

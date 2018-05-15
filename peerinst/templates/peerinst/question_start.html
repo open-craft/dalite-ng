@@ -1,55 +1,95 @@
 {% extends 'peerinst/base.html' %}
-{% load i18n %}
+
+{% load add_class i18n %}
 
 {% block body %}
-<div class="meta-container">
-  {% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-  <div class="container">
-    {% block pretext %}{% endblock %}
-    <h1>{{ question.title }}</h1>
-    {% if user.is_staff %}
+<main>
+  <section>
+  <div class="meta-container">
+
+    <div class="container">
+
+      {% block pretext %}{% endblock %}
+      <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'Question' %}
+        <svg class="underline" width=150 height=4></svg>
+      </h1>
+
       <div class="admin-link">
-        <a href="{% url 'admin:peerinst_question_change' question.id %}">Edit question</a>
+      {% if user.is_staff %}
+        {% if assignment %}
+          <a href="{% url 'question-list' assignment_id=assignment.pk %}">{% trans 'Back to assignment' %}</a>
+        {% endif %}
+        <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'admin:peerinst_question_change' question.id %}">{% trans 'Edit question' %}</a>
         {% if assignment %}
         {% if first_choice_label and second_choice_label %}
-          <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'reset-question' assignment_id=assignment.pk question_id=question.id %}">Reset answers</a>
+          <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'reset-question' assignment_id=assignment.pk question_id=question.id %}">{% trans 'Reset answers' %}</a>
         {% endif %}
         {% endif %}
+      {% endif %}
       </div>
-    {% endif %}
-    <div id="question-text">
-      {{ question.text|safe }}
-    </div>
-    {% if question.image %}
-    <div id="question-image">
-      <img src="{{ question.image.url }}" height="{{ question.image.height }}"
-           width="{{ question.image.width }}" alt="question.image_alt_text">
-    </div>
-    {% endif %}
-    {% if question.video_url %}
-    <div id="question-video">
-      <object width="640" height="390" data="{{ question.video_url }}"></object>
-    </div>
-    {% endif %}
-    {% block answers %}{% endblock %}
-    {% if form %}
-    {% block form %}
-    <form action="" method="post">
-      {% csrf_token %}
-      {% block inner_form %}{{ form.as_p }}{% endblock %}
-      <div>
-        <input type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
-      </div>
-    </form>
-    {% endblock %}
-    {% endif %}
 
+      <h2 class="mdc-typography--display1 mdc-theme--secondary">{{question.title}}</h2>
+
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <p class="mdc-typography--body1">
+        {{ question.text|safe }}
+      </p>
+
+      {% if question.image %}
+      <img class="question-image" src="{{ question.image.url }}" height="{{ question.image.height }}"
+           width="{{ question.image.width }}" alt="question.image_alt_text">
+      {% endif %}
+
+      {% if question.video_url %}
+      <div id="question-video">
+        <object width="640" height="390" data="{{ question.video_url }}"></object>
+      </div>
+      {% endif %}
+
+      {% block answers %}{% endblock %}
+
+      {% if form %}
+      {% block form %}
+      <form method="post">
+        {% csrf_token %}
+        {% block inner_form %}
+        <span class="mdc-typography--body1">{{ form.first_answer_choice.label }}</span>
+        <ul>
+        {% for choice in form.first_answer_choice %}
+          <li>
+            <div class="mdc-form-field">
+              <div class="mdc-radio" data-mdc-auto-init="MDCRadio">
+                {{ choice.tag|add_class:"mdc-radio__native-control" }}
+                <div class="mdc-radio__background">
+                  <div class="mdc-radio__outer-circle"></div>
+                  <div class="mdc-radio__inner-circle"></div>
+                </div>
+              </div>
+              <label class="mdc-typography--body1" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+            </div>
+          </li>
+        {% endfor %}
+        </ul>
+        <div class="mdc-text-field mdc-text-field--textarea mdc-theme--background " data-mdc-auto-init="MDCTextField">
+          {{ form.rationale|add_class:"mdc-text-field__input" }}
+          <label for="id_rationale" class="mdc-floating-label"> {{ form.rationale.label }}</label>
+        </div>
+        {% endblock %}
+        <div style="margin-top:20px;">
+          <input class="mdc-button mdc-button--raised" type="submit" value="{% block submit_button %}{% trans 'Next' %}{% endblock %}" />
+        </div>
+      </form>
+      {% endblock %}
+      {% endif %}
+    </div>
   </div>
-</div>
+</section>
+</main>
 {% endblock %}

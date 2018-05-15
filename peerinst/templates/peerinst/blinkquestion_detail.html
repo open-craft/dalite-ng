@@ -10,61 +10,69 @@
 // MIT licensed
 </script>
 
+<main>
+  <section>
+    <h1 class="mdc-typography--display3" style="position:sticky;"> {% trans 'Blink Question' %}
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
 
-<h1>Blink question</h1>
+    <h2 class="mdc-typography--display1 mdc-theme--secondary">{{object.question.title}}</h2>
 
-<h2>{{object.question.title}}</h2>
-<p>{{object.question.text|safe}}</p>
+    <p class="mdc-theme--secondary">{{object.question.text|safe}}</p>
+
     {% if object.question.image %}
     <div>
-      <img src="{{ object.question.image.url }}" alt="object.image_alt_text" style="display:block;margin:auto;padding-top:10pt;padding-bottom:10pt;" >
+      <img class="question-image" src="{{ object.question.image.url }}" alt="object.image_alt_text" >
     </div>
     {% endif %}
-<div>
-<div style="display:inline;float:left;max-width:400px;">
-  <ul>
-{% for label, choice in object.question.get_choices %}
-  <li>
-    {% if not request.user.is_authenticated and label = latest_answer_choice %}
-      <span style="font-weight:bold;">{{label}}. {{choice|safe}}</span>
-    {% else %}
-      {{label}}. {{choice|safe}}
+
+    <div>
+      <div style="display:inline;float:left;max-width:400px;">
+        <ul>
+        {% for label, choice in object.question.get_choices %}
+          <li class="dense-list">
+            {% if not request.user.is_authenticated and label = latest_answer_choice %}
+            <span class="bold">{{label}}. {{choice|safe}}</span>
+            {% else %}
+            {{label}}. {{choice|safe}}
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
+      </div>
+    <svg id="timer" width=300 height=200 style="display:block;margin: auto;"></svg>
+    <svg id="results" width=300 height=200 style="display:none;margin: auto;"></svg>
+    </div>
+    <div style="clear:both;"></div>
+
+    <div class="note">
+      Round: {{round}}<br>
+      {% if request.user.is_authenticated %}
+        Number of respondents: <span id="counter"></span>
+      {% endif %}
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <input class="mdc-button mdc-button--raised" id="reset_button" type="button" style="display:none;" value="Reset" onclick="reset()">
     {% endif %}
-  </li>
-{% endfor %}
-</ul>
-</div>
-<svg id="timer" width=300 height=200 style="display:block;margin: auto;"></svg>
-<svg id="results" width=300 height=200 style="display:none;margin: auto;"></svg>
-</div>
-<div style="clear:both;"></div>
 
-<div class="note">
-  Round: {{round}}<br>
-  {% if request.user.is_authenticated %}
-    Number of respondents: <span id="counter"></span>
-  {% endif %}
-</div>
+    {% if request.user.is_authenticated %}
+    <input class="mdc-button mdc-button--raised" id="next_button" type="button" style="margin-left:20px;display:none;" value="Next" onclick="next()">
+    {% endif %}
 
-{% if request.user.is_authenticated %}
-<input id="reset_button" type="button" style="display:none;" value="Reset" onclick="reset()">
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
 <script>
 function reset(){
   location="{% url 'blink-reset' pk=object.pk %}"
 }
-</script>
-{% endif %}
-
-{% if request.user.is_authenticated %}
-<input id="next_button" type="button" style="display:none;" value="Next" onclick="next()">
-{% endif %}
-<script>
 function next(){
   location="{% url 'blink-get-next' pk=object.pk %}"
 }
-</script>
 
-<script>
 var csrftoken = Cookies.get('csrftoken');
 
 // AJAX
@@ -74,12 +82,15 @@ function get(url,callback) {
   request.onreadystatechange = function() {
     if (request.readyState === 4 && request.status === 200) {
       var type = request.getResponseHeader("Content-Type");
+      console.info('URL: '+url);
+      console.info('Type: '+type);
+      console.info('Response: '+request.responseText);
       if (type === 'application/json') {
-        console.info(request.responseText);
         callback(JSON.parse(request.responseText));
       }
       else {
-        callback(request.responseText);
+        // Strip any html
+        callback(jQuery(request.responseText).text());
       }
     }
   }
@@ -99,7 +110,7 @@ var counterID = window.setInterval(get,1000,"{% url 'blink-count' pk=object.pk %
 // Countdown
 var startTime = parseInt({{ time_left }});
 
-var svg = d3.select("#timer"),
+var svg = bundle.select("#timer"),
 width = +svg.attr("width"),
 height = +svg.attr("height");
 
@@ -166,9 +177,9 @@ function update_time(){
         clearInterval(counterID);
       {% endif %}
       clearInterval(timerID);
-      d3.select("#timer-bg").style('fill','red');
-      d3.select("#reset_button").style('display','inline');
-      d3.select("#next_button").style('display','inline');
+      bundle.select("#timer-bg").style('fill','red');
+      bundle.select("#reset_button").style('display','inline');
+      bundle.select("#next_button").style('display','inline');
       // Close the question if authenticated, otherwise get results and start checking for redirect
       if ({{request.user.is_authenticated|lower}}){
         changeQuestionState("{% url 'blink-close' pk=object.pk %}",false,getResults);
@@ -214,9 +225,9 @@ function update_time(){
 
 function showResults(data){
   // Partly based on: https://bl.ocks.org/mbostock/3048450
-  var timer = d3.select("#timer").style("display","none");
+  var timer = bundle.select("#timer").style("display","none");
 
-  var svg = d3.select("#results")
+  var svg = bundle.select("#results")
   .style('display','block');
 
   var margin = {left:30,right:30,top:30,bottom:30};
@@ -227,22 +238,22 @@ function showResults(data){
   var g = svg.append("g")
   .attr('transform','translate('+margin.left+','+margin.top+')');
 
-  var x = d3.scaleBand().domain(d3.keys(data).sort()).rangeRound([0,width]).padding(0.1);
-  var y = d3.scaleLinear().domain([0,Math.max(...d3.values(data))]).rangeRound([height,0]);
+  var x = bundle.scaleBand().domain(bundle.keys(data).sort()).rangeRound([0,width]).padding(0.1);
+  var y = bundle.scaleLinear().domain([0,Math.max(...bundle.values(data))]).rangeRound([height,0]);
 
   g.append("g")
   .attr("class", "axis axis--x")
   .attr("transform", "translate(0," + height + ")")
-  .call(d3.axisBottom(x));
+  .call(bundle.axisBottom(x));
 
   g.append("g")
   .attr("class", "axis axis--y")
   .style("opacity",0)
-  .call(d3.axisLeft(y));
+  .call(bundle.axisLeft(y));
 
   g.append("g")
   .selectAll("rect")
-  .data(d3.entries(data))
+  .data(bundle.entries(data))
   .enter().append("rect")
   .attr("class","blink_rect")
   .attr("x",function(d){return x(d.key);})
@@ -269,7 +280,7 @@ function showResults(data){
 
   g.append("g")
   .selectAll("text")
-  .data(d3.entries(data))
+  .data(bundle.entries(data))
   .enter().append("text")
   .attr("class","blink_labels")
   .attr("x",function(d){return x(d.key)+0.9*x.bandwidth();})
@@ -279,8 +290,5 @@ function showResults(data){
 
   // show average response time per choice1
 }
-
-
 </script>
-
 {% endblock %}

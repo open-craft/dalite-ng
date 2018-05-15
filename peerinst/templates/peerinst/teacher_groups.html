@@ -6,53 +6,84 @@
 
 <main>
 <section>
-  <h1 class="mdc-typography--display3" style="position:sticky;">My Groups
+  <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'My Groups' %}
     <svg class="underline" width=150 height=4></svg>
   </h1>
   <div class="admin-link">
-    <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
+    <a href="{% url 'teacher' teacher.id %}">{% trans 'Back to My Account' %}</a>
   </div>
 
-  <h2 class="mdc-typography--display1 mdc-theme--secondary">Current</h2>
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Current' %}</h2>
   {% if not teacher.groups.all %}
-    <p>You are not currently following any student groups.  You can select groups to follow from the lists below using the <input  class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />.</p>
+    <p>You are not currently following any student groups.  You can select groups to follow from the lists below.</p>
   {% endif %}
-  <ol>
+
+  <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
     {% for g in teacher.groups.all %}
-    <li>
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
-        {{g}} <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear" />
-      </form>
+    <li role="separator" class="mdc-list-divider"></li>
+    <li class="mdc-list-item" onclick="edit_groups()">
+      <span class="mdc-list-item__graphic mdc-theme--primary">
+        <i class="mdc-theme--primary material-icons md-48">group</i>
+      </span>
+      <span class="mdc-list-item__text mdc-theme--secondary bold">
+        {{ g.name }}
+        <span class="mdc-list-item__secondary-text">
+          {% trans "Created: " %}{{ g.creation_date }}
+        </span>
+        <span class="mdc-list-item__secondary-text">
+          {% trans "Students: " %} {{ g.student_set.count  }}
+        </span>
+      </span>
+      <span class="mdc-list-item__meta">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" id="id_group" name="group" value="{{g.pk}}"/>
+            <div class="mdc-ripple-surface input-ripple-wrapper">
+              <input class="material-icons md-24 mdc-button small-button" style="padding:0pt;margin:0pt;" type="submit" value="remove_circle"/>
+            </div>
+        </form>
+      </span>
     </li>
     {% endfor %}
-  </ol>
+    <li role="separator" class="mdc-list-divider"></li>
+  </ul>
 
+
+
+  <!-- Not implemented yet
   <h2 class="mdc-typography--display1 mdc-theme--secondary">Suggested</h2>
   <p> Logic to come to suggest groups based on assignments. </p>
+  -->
 
-  <h2 class="mdc-typography--display1 mdc-theme--secondary">All</h2>
-  <ol>
-  {% for g in object_list.all %}
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'All' %}</h2>
+
+  <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
+    {% for g in object_list.all %}
     {% if g not in teacher.groups.all %}
-    <li>
-      <form action="" method="post">
+    <li role="separator" class="mdc-list-divider"></li>
+    <li class="mdc-list-item">
+      <span class="mdc-list-item__graphic mdc-theme--primary">
+        <form action="" method="post">
           {% csrf_token %}
-          <input type="hidden" id="id_group" name="group" value="{{g.pk}}"></input>
-          {{g}} <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
-      </form>
+          <input type="hidden" id="id_group" name="group" value="{{g.pk}}"/>
+          <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add"/>
+        </form>
+      </span>
+      <span class="mdc-list-item__text mdc-theme--secondary bold">
+        {{ g }}
+        <span class="mdc-list-item__secondary-text">
+          {% trans "Created: " %}{{ g.creation_date }}
+        </span>
+        <span class="mdc-list-item__secondary-text">
+          {% trans "Students: " %} {{ g.student_set.count  }}
+        </span>
+      </span>
     </li>
     {% endif %}
-  {% endfor %}
-  </ol>
-</section>
-</main>
-{% endblock %}
+    {% endfor %}
+    <li role="separator" class="mdc-list-divider"></li>
+  </ul>
 
-{% block scripts %}
-<script>
-underlines();
-window.addEventListener("resize",underlines);
-</script>
+  </section>
+</main>
 {% endblock %}

@@ -1,33 +1,34 @@
-:root {
-    --mdc-theme-primary: #54c0db;
-    --mdc-theme-secondary: #004266;
-    --mdc-theme-background: #f4f4f4;
-}
 body {
-    background-color: #f4f4f4;
+    background-color: var(--mdc-theme-background);
     font-family: 'Montserrat', sans-serif;
     font-weight: 400;
     font-size: 12pt;
 }
 header {
-  background-color: #54c0db;
+  background-color: var(--mdc-theme-primary);
 }
 footer {
   background-image: linear-gradient(0deg,var(--mdc-theme-secondary) 0%, var(--mdc-theme-secondary) 90%, var(--mdc-theme-primary) 90%);
 }
 h1 {
-  color: #54c0db;
+  color: var(--mdc-theme-primary);
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   font-size: 24pt;
   text-transform: uppercase;
 }
 #check {
-  color:  #54c0db;
+  color:  var(--mdc-theme-primary);
 }
 .blink_rect {
-  fill: #54c0db;
+  fill: var(--mdc-theme-primary);
 }
 #timer-bg {
-  fill:  #54c0db;
+  fill:  var(--mdc-theme-primary);
+}
+.mdc-button {
+  color: white !important;
+}
+div.input-ripple-wrapper input {
+  color: grey !important;
 }

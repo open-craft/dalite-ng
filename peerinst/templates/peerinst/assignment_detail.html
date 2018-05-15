@@ -4,79 +4,73 @@
 
 {% block body %}
 <main>
-<section>
-  <h1 class="mdc-typography--display3" style="position:sticky;">Update Assignment
-    <svg class="underline" width=150 height=4></svg>
-  </h1>
-  <div class="admin-link">
-    <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
-  </div>
-  <h2 class="mdc-typography--headline  mdc-theme--secondary">{{object.title}}</h2>
-  {% if not object.questions.all %}
-  <ul>
-    <li><strong>Note:</strong> There are currently no questions in this assignment.  You can add them from the list below.</li>
-  </ul>
-  {% endif %}
-  <ol>
-    {% for a in object.questions.all %}
-    <li>{{a.text|safe}}
-      <br>
-      <div class="mdc-typography--caption">
-        {{a.title|safe}}:
-        {% for c in a.category.all %}
-          {{c.title|safe}}
-        {% endfor %}
-      </div>
-      <form style="display:inline;" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="q" value="{{a.pk}}" />
-        <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear" />
-      </form>
-      {% if a.image %}
-      <div>
-        <img style="display:block;margin:auto;padding-top:10pt;padding-bottom:10pt;" src="{{a.image.url }}" alt="a.image_alt_text">
-      </div>
-      {% endif %}
-    </li>
+  <section>
+    <h1 class="mdc-typography--display3" style="position:sticky;">Update Assignment
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
+    <div class="admin-link">
+      <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
+      <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'teacher-assignments' teacher.id %}">{% trans 'Back to My Assignments' %}</a>
+    </div>
+    <h2 class="mdc-typography--display1  mdc-theme--secondary">{{object.title}}</h2>
+    {% if not object.questions.all %}
+    <ul>
+      <li><strong>Note:</strong> There are currently no questions in this assignment.  You can add them from the list below.</li>
+    </ul>
+    {% endif %}
+    <ol>
+      {% for a in object.questions.all %}
+      <li>{{a.text|safe}}
+        <br>
+        <div class="mdc-typography--caption">
+          {{a.title|safe}}:
+          {% for c in a.category.all %}
+            {{c.title|safe}}
+          {% endfor %}
+        </div>
+        <form style="display:inline;" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="q" value="{{a.pk}}" />
+          <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear" />
+        </form>
+        {% if a.image %}
+        <div>
+          <img class="question-image" src="{{a.image.url }}" alt="a.image_alt_text">
+        </div>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+
+    <h2 class="mdc-typography--headline  mdc-theme--secondary">All questions in discipline</h2>
+    {% if not suggested_questions %}
+    <ul>
+      <li><strong>Note:</strong> You have selected all available questions for this discipline.</li>
+    </ul>
+    {% endif %}
+    <ol>
+    {% for g in suggested_questions %}
+      <li>{{g.text|safe}}
+        <br>
+        <div class="mdc-typography--caption">
+          {{g.title|safe}}:
+          {% for c in g.category.all %}
+            {{c.title|safe}}
+          {% endfor %}
+        </div>
+        <form style="display:inline;" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="q" value="{{g.pk}}" />
+          <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
+        </form>
+        {% if g.image %}
+        <div>
+          <img class="question-image" src="{{g.image.url }}" alt="g.image_alt_text">
+        </div>
+        {% endif %}
+      </li>
     {% endfor %}
-  </ol>
-
-  <h2 class="mdc-typography--headline  mdc-theme--secondary">All questions in discipline</h2>
-  {% if not suggested_questions %}
-  <ul>
-    <li><strong>Note:</strong> You have selected all available questions for this discipline.</li>
-  </ul>
-  {% endif %}
-  <ol>
-  {% for g in suggested_questions %}
-    <li>{{g.text|safe}}
-      <br>
-      <div class="mdc-typography--caption">
-        {{g.title|safe}}:
-        {% for c in g.category.all %}
-          {{c.title|safe}}
-        {% endfor %}
-      </div>
-      <form style="display:inline;" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="q" value="{{g.pk}}" />
-        <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
-      </form>
-      {% if g.image %}
-      <div>
-        <img style="display:block;margin:auto;padding-top:10pt;padding-bottom:10pt;" src="{{g.image.url }}" alt="g.image_alt_text">
-      </div>
-      {% endif %}
-    </li>
-  {% endfor %}
-  </ol>
-</section>
+    </ol>
+  </section>
 </main>
-{% endblock %}
-
-{% block scripts %}
-<script>
-underlines();
-window.addEventListener("resize",underlines);
-</script>
 {% endblock %}

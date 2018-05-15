@@ -4,15 +4,15 @@
 {% block answers %}
 <ul id="answer-choices">
   {% for label, choice in answer_choices %}
-  <li class="{% if label == first_choice_label %}first-choice{% endif %}{% if label == second_choice_label %} second-choice{% endif %}">{{ label }}. {{ choice|safe }}
+  <li class="dense-list {% if label == first_choice_label %}first-choice{% endif %}{% if label == second_choice_label %} second-choice{% endif %}">{{ label }}. {{ choice|safe }}
     {% if first_choice_label and second_choice_label %}
       {% if label == second_choice_label %}
         {% for c in question.answerchoice_set.all %}
           {% if forloop.counter == forloop.parentloop.counter %}
             {% if c.correct %}
-              <i id="check" class="material-icons" style="-webkit-transform: translateY(5px);font-size:16pt;">check</i>
+              <i id="check" class="material-icons" style="-webkit-transform: translateY(3px);font-size:12pt;">check</i>
             {% else %}
-              <i id="check" class="material-icons" style="-webkit-transform: translateY(5px);font-size:16pt;">close</i>
+              <i id="check" class="material-icons" style="-webkit-transform: translateY(3px);font-size:12pt;">close</i>
             {% endif %}
           {% endif %}
         {% endfor %}
@@ -22,7 +22,7 @@
   {% endfor %}
 </ul>
 <div id="your-answer">
-  <p>
+  <p class="mdc-typography--body1">
     {% blocktrans %}
     You answered <strong>{{ first_choice_label }}</strong> and gave this rationale:
     {% endblocktrans %}

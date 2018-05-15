@@ -10,5 +10,4 @@ src
 locust*
 /sent_emails
 /node_modules
-package*.json
 /CACHE

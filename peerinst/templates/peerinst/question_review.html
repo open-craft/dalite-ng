@@ -1,10 +1,10 @@
 {% extends 'peerinst/question_review_base.html' %}
-{% load i18n %}
-{% load staticfiles %}
+
+{% load add_class i18n staticfiles %}
 
 {% block answers %}
 {{ block.super }}
-<p>
+<p class="mdc-typography--body1">
   {% if sequential_review %}
   {% blocktrans %}
   Consider the problem again, and select the most convincing rationale.
@@ -21,11 +21,28 @@
 
 {% block inner_form %}
 {{ form.non_field_errors }}
-<div class="rationales">
+<div class="rationales mdc-typography--body1">
   {% for second_answer_choice, rationale_choice in form.rationale_groups %}
   <div class="rationale" id="rationales-{{ forloop.counter0 }}">
     <div class="rationale-choice">{{ second_answer_choice }}.</div>
-    <div class="rationale-text-container">{{ rationale_choice.errors }} {{ rationale_choice }}</div>
+    <div class="rationale-text-container">{{ rationale_choice.errors }}
+      <ul>
+      {% for r in rationale_choice %}
+        <li>
+          <div class="mdc-form-field">
+            <div class="mdc-radio" data-mdc-auto-init="MDCRadio">
+              {{ r.tag|add_class:"mdc-radio__native-control" }}
+              <div class="mdc-radio__background">
+                <div class="mdc-radio__outer-circle"></div>
+                <div class="mdc-radio__inner-circle"></div>
+              </div>
+            </div>
+            <label class="mdc-typography--body1" for="{{ choice.id_for_label }}">{{ r.choice_label }}</label>
+          </div>
+        </li>
+      {% endfor %}
+      </ul>
+    </div>
   </div>
   {% endfor %}
 </div>

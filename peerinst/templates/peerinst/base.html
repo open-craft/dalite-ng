@@ -3,26 +3,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>{% block title %}DALITE NG{% endblock %}</title>
+  <!-- Meta -->
+  <title>{% block title %}myDALITE{% endblock %}</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="DALITE NG">
-  <link rel="icon" href="{% static 'peerinst/img/logo.png' %}">
-  <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
+  <meta name="description" content="myDALITE">
+
+  <!-- Local resources -->
+  <link href="{% static 'peerinst/img/logo.png' %}" rel="icon">
   {% compress css %}
-  <link href="{% static 'peerinst/css/vendor/material-components-web.min.css' %}" rel="stylesheet">
+  <link href="{% static 'peerinst/css/material-components-web.min.css' %}" rel="stylesheet">
   <link href="{% static 'peerinst/css/main.css' %}" rel="stylesheet">
   {% endcompress %}
+
+  <!-- External resources -->
+  <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <!-- Custom settings for local instance of dalite-ng -->
+  <!-- Custom settings for local instance -->
   {% include 'peerinst/custom-instance-head.html' %}
+
   {% block stylesheets %}{% endblock %}
 </head>
 
 <body>
-  <!-- Custom header for local instance of dalite-ng -->
+  <!-- Custom header for local instance -->
   <header>
     <div class="wrapper">
       <div>
@@ -49,12 +55,6 @@
     </div>
   </header>
 
-  {% compress js %}
-  <script src="{% static 'peerinst/js/vendor/d3.v4.min.js'  %}"></script>
-  <script src="{% static 'peerinst/js/vendor/material-components-web.min.js'  %}"></script>
-  <script src="{% static 'peerinst/js/underline.js'  %}"></script>
-  {% endcompress %}
-
   <div class="site-content">
     {% block body %}{% endblock %}
   </div>
@@ -62,6 +62,7 @@
   {% block footer %}{% endblock %}
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
   <script>
   // Fix potential CSRF token conflicts when loading multiple iframes in parallel,
   // if the user did not have a CSRF cookie set already.
@@ -83,12 +84,12 @@
   });
   </script>
 
-  {% block scripts %}{% endblock %}
+  <!-- JS bundle -->
+  {% compress js %}
+  <script src="{% static 'peerinst/js/index.min.js'  %}"></script>
+  {% endcompress %}
 
-  <script>
-  // Auto-initialize Google Material Design Components
-  mdc.autoInit()
-  </script>
+  {% block scripts %}{% endblock %}
 
 </body>
 </html>

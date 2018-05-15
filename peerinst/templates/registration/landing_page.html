@@ -94,6 +94,7 @@ footer a {
   font-size: 32pt;
 }
 #scrollprompt {
+  color: white;
   position:absolute;
   bottom:0px;
   left:50%;
@@ -155,7 +156,7 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
         {% endfor %}
       </div>
     </div>
-    <div class="mdc-chip-set mdc-chip-set--choice">
+    <div class="mdc-chip-set mdc-chip-set--choice" data-mdc-auto-init="MDCChipSet">
       {% for d in disciplines %}
       <div id="{{ d.name }}" class="mdc-chip" onclick="update(this,event)" tabindex="0" data-mdc-auto-init="MDCChip">
         <div class="mdc-chip__checkmark">
@@ -244,21 +245,7 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 {% block scripts %}
 {% compress js inline %}
 <script>
-underlines();
-
-var chipset = mdc.chips.MDCChipSet.attachTo(document.querySelector('.mdc-chip-set'));
-
-/*var chips = {}
-var c = document.querySelectorAll('.mdc-chip');
-c.forEach(function(d){
-const chip = new mdc.chips.MDCChip(d);
-chips[d.id] = chip;
-if (d.id == "All"){
-chip.toggleSelected();
-}
-});*/
-
-var toolbar = mdc.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
+var toolbar = bundle.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
 toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
 
 const arrow = document.getElementById('scrollprompt');
@@ -274,7 +261,7 @@ function logo(){
   'use strict';
 
   // Animate waves
-  var svg = d3.select("#animation");
+  var svg = bundle.select("#animation");
   svg.attr("width",document.body.offsetWidth);
 
   var width = +svg.attr("width"),
@@ -288,13 +275,13 @@ function logo(){
 
   var g = svg.append("g").attr("transform","translate("+margin.left+","+(margin.top+innerHeight/2)+")");
 
-  var x = d3.scaleLinear().domain([0,2*Math.PI]).range([0,innerWidth]),
-  y = d3.scaleLinear().domain([-1,1]).range([-innerHeight/2,innerHeight/2]);
+  var x = bundle.scaleLinear().domain([0,2*Math.PI]).range([0,innerWidth]),
+  y = bundle.scaleLinear().domain([-1,1]).range([-innerHeight/2,innerHeight/2]);
 
-  var xAxis = g.append("g").style("opacity",0).call(d3.axisBottom(x)),
-  yAxis = g.append("g").style("opacity",0).call(d3.axisLeft(y));
+  var xAxis = g.append("g").style("opacity",0).call(bundle.axisBottom(x)),
+  yAxis = g.append("g").style("opacity",0).call(bundle.axisLeft(y));
 
-  var xPoints = d3.range(0,2*Math.PI+0.01,(2*Math.PI/5));
+  var xPoints = bundle.range(0,2*Math.PI+0.01,(2*Math.PI/5));
 
   function f(v,x,t,a) {
     return Math.min(Math.max(10*flexibleExpansionRatio,2),4)*a*Math.sin(x-0.5*v*t);
@@ -307,7 +294,7 @@ function logo(){
     var offset1 = null;
     var offset2 = null;
     var offset3 = null;
-    var t0 = d3.now();
+    var t0 = bundle.now();
     var t = t0;
 
     var a1 = 0.5;
@@ -322,45 +309,45 @@ function logo(){
     var y2 = -0.1;
     var y3 = +0.05;
 
-    var line1 = d3.line()
+    var line1 = bundle.line()
     .x(function(d) { return x(d); })
     .y(function(d) { return y(f(v1,d,t-dt-offset1,a1)+y1); })
-    .curve(d3.curveNatural);
+    .curve(bundle.curveNatural);
 
-    var line2 = d3.line()
+    var line2 = bundle.line()
     .x(function(d) { return x(d); })
     .y(function(d) { return y(f(v2,d,t-dt-offset2,a2)+y2); })
-    .curve(d3.curveNatural);
+    .curve(bundle.curveNatural);
 
-    var line3 = d3.line()
+    var line3 = bundle.line()
     .x(function(d) { return x(d); })
     .y(function(d) { return y(f(v3,d,t-dt-offset3,a3)+y3); })
-    .curve(d3.curveNatural);
+    .curve(bundle.curveNatural);
 
-    var intersection1 = d3.area()
+    var intersection1 = bundle.area()
     .x(line1.x())
     .y0(y(0))
     .y1(line1.y())
-    .curve(d3.curveNatural);
+    .curve(bundle.curveNatural);
 
-    var intersection2 = d3.area()
+    var intersection2 = bundle.area()
     .x0(line1.x())
     .y0(line1.y())
     .x1(line2.x())
     .y1(line2.y())
-    .curve(d3.curveNatural);
+    .curve(bundle.curveNatural);
 
-    var intersection3 = d3.area()
+    var intersection3 = bundle.area()
     .x0(line1.x())
     .y0(line1.y())
     .x1(line3.x())
     .y1(line3.y())
-    .curve(d3.curveNatural);
+    .curve(bundle.curveNatural);
 
     g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
-    .attr("fill",d3.rgb(244,244,244,0.3))
+    .attr("fill",bundle.rgb(244,244,244,0.3))
     .attr("opacity",0)
     .attr("d",intersection1)
     .transition()
@@ -370,19 +357,19 @@ function logo(){
     .duration(50)
     .on("start", function repeat() {
       if (offset1 == null) {
-        offset1 = d3.now()-t0;
+        offset1 = bundle.now()-t0;
       }
       if (flexibleExpansionRatio>0.01) {
-        t = d3.now();
-        d3.active(this)
+        t = bundle.now();
+        bundle.active(this)
         .attr("d",intersection1)
         .transition()
         .on("start", repeat);
       }
       else {
-        dt += d3.now() - t;
-        t = d3.now();
-        d3.active(this)
+        dt += bundle.now() - t;
+        t = bundle.now();
+        bundle.active(this)
         .transition()
         .on("start", repeat);
       }
@@ -391,7 +378,7 @@ function logo(){
     g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
-    .attr("fill",d3.rgb(244,244,244,0.5))
+    .attr("fill",bundle.rgb(244,244,244,0.5))
     .attr("opacity",0)
     .attr("d",intersection2)
     .transition()
@@ -401,16 +388,16 @@ function logo(){
     .duration(50)
     .on("start", function repeat() {
       if (offset2 == null) {
-        offset2 = d3.now()-t0;
+        offset2 = bundle.now()-t0;
       }
       if (flexibleExpansionRatio>0.01) {
-        d3.active(this)
+        bundle.active(this)
         .attr("d",intersection2)
         .transition()
         .on("start", repeat);
       }
       else {
-        d3.active(this)
+        bundle.active(this)
         .transition()
         .on("start", repeat);
       }
@@ -419,7 +406,7 @@ function logo(){
     g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
-    .attr("fill",d3.rgb(0,66,102,0.5))
+    .attr("fill",bundle.rgb(0,66,102,0.5))
     .attr("opacity",0)
     .attr("d",intersection3)
     .transition()
@@ -429,16 +416,16 @@ function logo(){
     .duration(50)
     .on("start", function repeat() {
       if (offset3 == null) {
-        offset3 = d3.now()-t0;
+        offset3 = bundle.now()-t0;
       }
       if (flexibleExpansionRatio>0.01) {
-        d3.active(this)
+        bundle.active(this)
         .attr("d",intersection3)
         .transition()
         .on("start", repeat);
       }
       else {
-        d3.active(this)
+        bundle.active(this)
         .transition()
         .on("start", repeat);
       }
@@ -450,7 +437,7 @@ function logo(){
   function title(){
     'use strict';
 
-    d3.selectAll(".title").remove();
+    bundle.selectAll(".title").remove();
 
     g.append("text")
     .attr("class","title")
@@ -515,20 +502,15 @@ function logo(){
     window.onload = animation;
   }
 }
+
 logo();
 
-function handleResize(){
-  logo();
-  underlines();
-  return;
-}
-
-window.addEventListener("resize",handleResize);
+window.addEventListener("resize", logo);
 </script>
 
 <script>
 data = {{ json|safe }};
-labels = d3.keys(data['All']);
+labels = bundle.keys(data['All']);
 svg = [];
 width = [];
 height = [];
@@ -536,7 +518,7 @@ height = [];
 var g = [];
 var text = [];
 for (var i in labels){
-  svg[i] =  d3.select("#"+labels[i]);
+  svg[i] =  bundle.select("#"+labels[i]);
   width[i] = +svg[i].attr('width');
   height[i] = +svg[i].attr('height');
 
@@ -604,7 +586,7 @@ function counts(dataset) {
   'use strict';
 
   // Update counts for new discipline
-  d3.selectAll(".count").interrupt();
+  bundle.selectAll(".count").interrupt();
 
   var delta = [];
   var set = [];
@@ -624,13 +606,13 @@ function counts(dataset) {
         if (+this.getAttribute("c") < 0) {
           this.setAttribute("c",Math.abs(+this.getAttribute("c")));
         }
-        d3.active(this)
+        bundle.active(this)
         .text((+this.getAttribute("c")).toFixed(0))
         .transition()
         .on("start", repeat);
       }
       else {
-        d3.interrupt(this);
+        bundle.interrupt(this);
       }
     });
   }
