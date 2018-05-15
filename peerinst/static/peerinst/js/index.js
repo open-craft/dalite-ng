@@ -48,6 +48,14 @@ export {
 } from 'd3';
 
 
+// Popmotion
+import * as pop from 'popmotion';
+
+export {
+  pop,
+};
+
+
 // Custom functions
 
 /** Underline h1 with svg
