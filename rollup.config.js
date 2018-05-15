@@ -1,8 +1,8 @@
-import babel from 'rollup-plugin-babel'
-import eslint from 'rollup-plugin-eslint'
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
-import uglify from 'rollup-plugin-uglify'
+import babel from 'rollup-plugin-babel';
+import eslint from 'rollup-plugin-eslint';
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import uglify from 'rollup-plugin-uglify';
 
 export default {
   input: 'peerinst/static/peerinst/js/index.js',
@@ -18,11 +18,7 @@ export default {
       main: true,
       browser: true,
     }),
-    commonjs({
-      namedExports: {
-        'node_modules/@material/auto-init/index.js': [ 'mdcAutoInit' ],
-      }
-    }),
+    commonjs(),
     eslint({
       exclude: [
         '**.css',

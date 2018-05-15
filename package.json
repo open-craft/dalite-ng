@@ -25,6 +25,7 @@
     "d3": "^4.13.0",
     "eslint-config-google": "^0.9.1",
     "material-components-web": "^0.34.1",
+    "popmotion": "^8.1.24",
     "rollup": "^0.58.2",
     "rollup-plugin-babel": "^3.0.4",
     "rollup-plugin-commonjs": "^9.1.3",
