@@ -164,6 +164,9 @@
 <div class="admin-link">
   <a href="{% url 'teacher-groups' teacher.id %}">{% trans 'Manage groups' %}</a>
 </div>
+{% if not object.groups.all %}
+<p>{% blocktrans %}You are not currently following any student groups.{% endblocktrans %}</p>
+{% endif %}
 <ul class="mdc-list mdc-list--two-line">
   {% for g in object.groups.all %}
   <li role="separator" class="mdc-list-divider"></li>
