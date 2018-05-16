@@ -999,7 +999,9 @@ class TeacherDetailView(TeacherBase,DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(TeacherDetailView,self).get_context_data(**kwargs)
-        context['LTI_key'] = str(settings.LTI_CLIENT_KEY)+":"+str(settings.LTI_CLIENT_SECRET)
+        context['LTI_key'] = str(settings.LTI_CLIENT_KEY)
+        context['LTI_secret'] = str(settings.LTI_CLIENT_SECRET)
+        context['LTI_launch_url'] = str('https://'+self.request.get_host()+'/lti/')
 
         return context
 
