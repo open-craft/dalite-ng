@@ -11,3 +11,4 @@ locust*
 /sent_emails
 /node_modules
 /CACHE
+partner*.png
