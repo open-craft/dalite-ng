@@ -58,10 +58,12 @@
 <div class="admin-link">
   <a href="{% url 'blinkAssignment-create' %}">{% trans 'Add script' %}</a>
 </div>
+<p style="margin-bottom:10pt;">{% trans 'Student link' %}: <span class="bold">{{ request.get_host}}{% url 'blink-get-current' object.user.username %}</span></p>
+
 {% if not object.blinkassignment_set.all %}
 <p>{% blocktrans %}A blink script is a series of blink questions strung together into one activity.  You do not have any blink scripts.{% endblocktrans %}</p>
 {% endif %}
-<p>{% trans 'Student link' %}: <span class="bold">{{ request.get_host}}{% url 'blink-get-current' object.user.username %}</span></p>
+
 
 <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
   {% for a in object.blinkassignment_set.all %}
