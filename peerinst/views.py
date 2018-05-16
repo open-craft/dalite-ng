@@ -997,6 +997,12 @@ class TeacherDetailView(TeacherBase,DetailView):
 
     model = Teacher
 
+    def get_context_data(self, **kwargs):
+        context = super(TeacherDetailView,self).get_context_data(**kwargs)
+        context['LTI_key'] = str(settings.LTI_CLIENT_KEY)+":"+str(settings.LTI_CLIENT_SECRET)
+
+        return context
+
 
 class TeacherUpdate(TeacherBase,UpdateView):
 

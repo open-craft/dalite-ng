@@ -263,6 +263,9 @@ input[type="submit"].thumbs-down {
 .mdc-form-field > label {
   padding-left: 2px;
 }
+.mdc-dialog__body--scrollable {
+  max-height: 450px;
+}
 .material-icons.md-18 { font-size: 18px; }
 .material-icons.md-24 { font-size: 24px; }
 .material-icons.md-32 { font-size: 32px; }
@@ -278,6 +281,11 @@ input[type="submit"].thumbs-down {
   width: 100%;
 }
 
+@media (max-height: 650px) {
+  .mdc-dialog__body--scrollable {
+    max-height: 350px;
+  }
+}
 
 @media (max-width: 450px) {
   section {
