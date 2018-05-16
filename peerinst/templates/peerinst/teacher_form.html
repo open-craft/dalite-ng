@@ -23,13 +23,13 @@ form label {
 
 <main>
 <section>
-  <h1 class="mdc-typography--display3" style="position:sticky;">Identity
+  <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'Identity' %}
     <svg class="underline" width=150 height=4></svg>
   </h1>
 
-  <h2 class="mdc-typography--display1 mdc-theme--secondary">Edit discipline and institution</h2>
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Edit discipline and institution' %}</h2>
 
-  <p>Select content disciplines and the institutions where you teach.  You can select multiple choices using the shift button.</p>
+  <p>{% blocktrans %}Select content disciplines and the institutions where you teach.  You can select multiple choices using the shift button.{% endblocktrans %}</p>
 
   {{ form.non_field_errors }}
 

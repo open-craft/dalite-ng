@@ -15,7 +15,7 @@
 
   <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Current' %}</h2>
   {% if not teacher.groups.all %}
-    <p>You are not currently following any student groups.  You can select groups to follow from the lists below.</p>
+  <p>{% blocktrans %}You are not currently following any student groups.  You can select groups to follow from the lists below.{% endblocktrans %}</p>
   {% endif %}
 
   <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
@@ -47,8 +47,6 @@
     {% endfor %}
     <li role="separator" class="mdc-list-divider"></li>
   </ul>
-
-
 
   <!-- Not implemented yet
   <h2 class="mdc-typography--display1 mdc-theme--secondary">Suggested</h2>
