@@ -17,12 +17,14 @@
   }
 </style>
 
-<h1>My Blink Questions</h1>
-<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher' teacher.id %}">Back to My Account</a></div>
+<h1>{% trans 'My Blink Questions' %}</h1>
+<div class="admin-link" style="margin-bottom:0pt;"><a href="{% url 'teacher' teacher.id %}">{% trans 'Back to My Account' %}</a></div>
 <h2>Your current blinks</h2>
 {% if not teacher.blinkquestion_set.all %}
+{% blocktrans %}
 You do not have any blink questions.  You can select and modify an existing blink question from the list below or create a new one.
-{% endif %} 
+{% endblocktrans %}
+{% endif %}
 <ol>
 {% for g in teacher.blinkquestion_set.all %}
  {% if g.current %}
@@ -46,7 +48,7 @@ You do not have any blink questions.  You can select and modify an existing blin
 </ol>
 
 
-<h2>All your blinks</h2>
+<h2>{% trans 'All your blinks' %}</h2>
 <ol>
 {% for g in teacher.blinkquestion_set.all %}
   {% if not g.current %}
@@ -70,7 +72,7 @@ You do not have any blink questions.  You can select and modify an existing blin
 </ol>
 
 
-<h2>All questions in discipline</h2>
+<h2>{% trans 'All questions in discipline' %}</h2>
 <ol>
 {% for g in suggested_questions %}
   <li>{{g.text|safe}}

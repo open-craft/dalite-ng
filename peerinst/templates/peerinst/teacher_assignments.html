@@ -38,9 +38,10 @@
 
   <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Current' %}</h2>
 
-  <p>These are the assignments for which reports will be available (based on your selected groups).</p>
+  <p>{% blocktrans %} These are the assignments for which reports will be available (based on your selected groups).{% endblocktrans %}</p>
+  
   {% if not teacher.groups.all %}
-    <p>You do not have any assignments.  You can select and modify an existing assignment from the list below or create a new one.</p>
+  <p>{% blocktrans %} You do not have any assignments.  You can select and modify an existing assignment from the list below or create a new one.{% endblocktrans %}</p>
   {% endif %}
 
   <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">

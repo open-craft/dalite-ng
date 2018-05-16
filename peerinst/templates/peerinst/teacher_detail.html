@@ -5,10 +5,10 @@
 {% block body %}
 <main>
 <section>
-<h1 class="mdc-typography--display3" style="position:sticky;">My Account
+<h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'My Account' %}
   <svg class="underline" width=150 height=4></svg>
 </h1>
-<h2 class="mdc-typography--display1 mdc-theme--secondary">Identity</h2>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Identity' %}</h2>
 <ul class="mdc-list mdc-list--two-line">
   <li role="separator" class="mdc-list-divider"></li>
   <li class="mdc-list-item" onclick="edit_user()">
@@ -54,15 +54,14 @@
 </ul>
 
 
-<h2 class="mdc-typography--display1 mdc-theme--secondary">Blink scripts</h2>
+<h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Blink scripts' %}</h2>
 <div class="admin-link">
-  <a href="{% url 'blinkAssignment-create' %}">Add script</a>
+  <a href="{% url 'blinkAssignment-create' %}">{% trans 'Add script' %}</a>
 </div>
 {% if not object.blinkassignment_set.all %}
-<p>A blink script is a series of blink questions strung together into one activity.  You do not have any blink scripts.</p>
+<p>{% blocktrans %}A blink script is a series of blink questions strung together into one activity.  You do not have any blink scripts.{% endblocktrans %}</p>
 {% endif %}
-<p>Student link: <span class="bold">{{ request.get_host}}{% url 'blink-get-current' object.user.username %}</span></p>
-
+<p>{% trans 'Student link' %}: <span class="bold">{{ request.get_host}}{% url 'blink-get-current' object.user.username %}</span></p>
 
 <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
   {% for a in object.blinkassignment_set.all %}
@@ -95,13 +94,12 @@
 </ul>
 
 
-
 <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Assignments' %}</h2>
 <div class="admin-link">
-  <a href="{% url 'teacher-assignments' teacher.id %}">Manage assignments</a>
+  <a href="{% url 'teacher-assignments' teacher.id %}">{% trans 'Manage assignments' %}</a>
 </div>
 {% if not object.assignments.all %}
-<p>You do not have any assignments.</p>
+<p>{% blocktrans %}You do not have any assignments.{% endblocktrans %}</p>
 {% endif %}
 <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
   {% for a in object.assignments.all %}
@@ -119,11 +117,44 @@
       </span>
     </span>
     <span class="mdc-list-item__meta">
+      <i id="activate-dialog-{{a.pk|slugify}}" class="material-icons md-24 mdc-ripple-surface icon-list">help</i>
       <a href="{% url 'assignment-update' a.pk %}">
         <i class="material-icons md-24 mdc-ripple-surface icon-list">mode_edit</i>
       </a>
     </span>
   </li>
+
+  <aside id="dialog-{{a.pk|slugify}}"
+    class="mdc-dialog"
+    role="alertdialog"
+    aria-labelledby="assignment-parameters-label"
+    aria-describedby="assignment-parameters-description">
+    <div class="mdc-dialog__surface">
+      <header class="mdc-dialog__header">
+        <h2 id="assignment-parameters-label" class="mdc-dialog__header__title">
+          {% trans 'Assignment LTI parameters' %}
+        </h2>
+      </header>
+      <section id="assignment-parameters-description" class="mdc-dialog__body mdc-dialog__body--scrollable">
+        <p class="mdc-typography--body1">{% blocktrans %}Import each question using the parameters listed below{% endblocktrans %}:</p>
+        <ul>
+        {% for q in a.questions.all %}
+          <li><span class="bold">{% trans 'Question' %} {{ forloop.counter }}:</span>
+            <ul>
+              <li>{% trans 'LTI key' %}: {{ LTI_key }}</li>
+              <li>{% trans 'Assignment id' %}: {{ a.identifier }}</li>
+              <li>{% trans 'Question id' %}: {{ q.id }}</li>
+            </ul>
+        {% endfor %}
+        </ul>
+      </section>
+      <footer class="mdc-dialog__footer">
+        <button type="button" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--accept">Ok</button>
+      </footer>
+    </div>
+    <div class="mdc-dialog__backdrop"></div>
+  </aside>
+
   {% endfor %}
   <li role="separator" class="mdc-list-divider"></li>
 </ul>
@@ -154,6 +185,7 @@
   {% endfor %}
   <li role="separator" class="mdc-list-divider"></li>
 </ul>
+
 </section>
 </main>
 {% endblock %}
@@ -161,13 +193,22 @@
 {% block scripts %}
 {% compress js inline %}
 <script>
+document.querySelectorAll("[id^=dialog]").forEach(
+  (el,i,list) => {
+    const dialog = bundle.dialog.MDCDialog.attachTo(el);
+    document.querySelector("#activate-"+el.id).onclick = () => {
+      dialog.show();
+    }
+  }
+);
+
 // This needs to be fix to activate JS part of ripple
 document.querySelectorAll('.ripple-icon').forEach(
-  (el,i,list)=>{
+  (el,i,list) => {
   //  const ripple = bundle.ripple.MDCRipple.attachTo(el);
   //  ripple.unbounded = true;
   }
-)
+);
 function edit_user() {
   location="{% url 'password_change' %}";
 }
