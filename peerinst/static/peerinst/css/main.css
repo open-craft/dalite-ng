@@ -280,6 +280,9 @@ input[type="submit"].thumbs-down {
 #id_rationale {
   width: 100%;
 }
+.mdc-list-item__text {
+  max-width: 300px;
+}
 
 @media (max-height: 650px) {
   .mdc-dialog__body--scrollable {
@@ -310,5 +313,11 @@ input[type="submit"].thumbs-down {
   }
   .mdc-typography--display1 {
     font-size: 20pt;
+  }
+  .mdc-list-item__text {
+    max-width: 130px;
+  }
+  .icon-list {
+    margin:0pt;
   }
 }

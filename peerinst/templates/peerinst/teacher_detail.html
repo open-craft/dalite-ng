@@ -11,7 +11,7 @@
 <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Identity' %}</h2>
 <ul class="mdc-list mdc-list--two-line">
   <li role="separator" class="mdc-list-divider"></li>
-  <li class="mdc-list-item" onclick="edit_user()">
+  <li class="mdc-list-item" onclick="edit_user()" style="cursor:pointer;">
     <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">account_circle</i></span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {{ object.user.username }}
@@ -25,7 +25,7 @@
     <span class="mdc-list-item__meta"><i class="material-icons md-24">lock</i></span>
   </li>
   <li role="separator" class="mdc-list-divider"></li>
-  <li class="mdc-list-item" onclick="edit_identity()">
+  <li class="mdc-list-item" onclick="edit_identity()" style="cursor:pointer;">
     <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">book</i></span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {% for d in object.disciplines.all %}
@@ -38,7 +38,7 @@
     <span class="mdc-list-item__meta"><i class="material-icons md-24">settings</i></span>
   </li>
   <li role="separator" class="mdc-list-divider"></li>
-  <li class="mdc-list-item" onclick="edit_identity()">
+  <li class="mdc-list-item" onclick="edit_identity()" style="cursor:pointer;">
     <span class="mdc-list-item__graphic mdc-theme--primary"><i class="material-icons md-48">school</i></span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">
       {% for i in object.institutions.all %}
@@ -108,7 +108,7 @@
   <li role="separator" class="mdc-list-divider"></li>
   <li class="mdc-list-item">
     <span class="mdc-list-item__graphic mdc-theme--primary">
-        <a href="" style="transform:translateY(4pt);">
+        <a href="{% url 'question-list' a.pk %}" style="transform:translateY(4pt);">
           <i class="mdc-theme--primary material-icons md-48">assignment</i>
         </a>
     </span>
@@ -119,6 +119,9 @@
       </span>
     </span>
     <span class="mdc-list-item__meta">
+      <a href="">
+        <i class="material-icons md-24 mdc-ripple-surface icon-list">bar_chart</i>
+      </a>
       <i id="activate-dialog-{{a.pk|slugify}}" class="material-icons md-24 mdc-ripple-surface icon-list">info</i>
       <a href="{% url 'assignment-update' a.pk %}">
         <i class="material-icons md-24 mdc-ripple-surface icon-list">mode_edit</i>
@@ -174,10 +177,10 @@
 {% if not object.groups.all %}
 <p>{% blocktrans %}You are not currently following any student groups.{% endblocktrans %}</p>
 {% endif %}
-<ul class="mdc-list mdc-list--two-line">
+<ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
   {% for g in object.groups.all %}
   <li role="separator" class="mdc-list-divider"></li>
-  <li class="mdc-list-item" onclick="edit_groups()">
+  <li class="mdc-list-item">
     <span class="mdc-list-item__graphic mdc-theme--primary">
       <i class="mdc-theme--primary material-icons md-48">group</i>
     </span>
@@ -190,7 +193,14 @@
         {% trans "Students: " %} {{ g.student_set.count  }}
       </span>
     </span>
-    <span class="mdc-list-item__meta"><i class="material-icons md-24">info</i></span>
+    <span class="mdc-list-item__meta">
+      <a href="">
+        <i class="material-icons md-24 mdc-ripple-surface icon-list">bar_chart</i>
+      </a>
+      <a href="{% url 'teacher-groups' teacher.id %}">
+      <i class="material-icons md-24 mdc-ripple-surface icon-list">info</i>
+      </a>
+    </span>
   </li>
   {% endfor %}
   <li role="separator" class="mdc-list-divider"></li>
@@ -224,9 +234,6 @@ function edit_user() {
 }
 function edit_identity() {
   location="{% url 'teacher-update' teacher.id %}";
-}
-function edit_groups() {
-  location="{% url 'teacher-groups' teacher.id %}";
 }
 </script>
 
