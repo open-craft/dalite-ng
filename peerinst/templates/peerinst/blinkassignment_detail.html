@@ -188,6 +188,10 @@
         </div>
       </div>
     </div>
+    {% empty %}
+    <ul>
+      <li><strong>Note:</strong> {% blocktrans %}You have selected all available questions for this discipline{% endblocktrans %}.</li>
+    </ul>
     {% endfor %}
 
   </section>
