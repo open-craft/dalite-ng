@@ -18,8 +18,10 @@ $mdc-typography-font-family: 'Montserrat';
 $mdc-theme-primary: #54c0db;
 $mdc-theme-secondary: #004266;
 $mdc-theme-background: #f4f4f4;
+$radius: 10px;
 
 @import '@material/button/mdc-button';
+@import '@material/card/mdc-card';
 @import '@material/checkbox/mdc-checkbox';
 @import '@material/chips/mdc-chips';
 @import '@material/dialog/mdc-dialog';
@@ -36,6 +38,10 @@ $mdc-theme-background: #f4f4f4;
 @import '@material/theme/mdc-theme';
 @import '@material/toolbar/mdc-toolbar';
 @import '@material/typography/mdc-typography';
+
+.mdc-card {
+  @include mdc-card-corner-radius($radius);
+}
 
 .ripple-icon {
   @include mdc-ripple-surface;

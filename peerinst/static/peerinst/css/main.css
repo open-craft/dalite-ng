@@ -1,15 +1,22 @@
 body {
+  background-color: var(--mdc-theme-background);
   color: var(--mdc-theme-secondary);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 12pt;
   margin: 0pt;
 }
 header {
-  background-color: black;
+  background-image: linear-gradient(90deg,var(--mdc-theme-primary) 0%, var(--mdc-theme-secondary) 100%);
   color: white;
   padding:4pt;
   font-size: 18pt;
 }
 header a {
   color: white;
+}
+footer {
+  background-image: linear-gradient(0deg,var(--mdc-theme-secondary) 0%, var(--mdc-theme-secondary) 90%, var(--mdc-theme-primary) 90%);
 }
 main {
   max-width: 900px;
@@ -18,6 +25,9 @@ main {
 section {
   padding-left: 5px;
   padding-right: 20px;
+}
+h1 {
+  color: var(--mdc-theme-primary);
 }
 p {
   margin: 0.25em 0;
@@ -266,6 +276,10 @@ input[type="submit"].thumbs-down {
 .mdc-dialog__body--scrollable {
   max-height: 450px;
 }
+.mdc-card {
+  padding:10px;
+  margin-bottom:10px;
+}
 .material-icons.md-18 { font-size: 18px; }
 .material-icons.md-24 { font-size: 24px; }
 .material-icons.md-32 { font-size: 32px; }
@@ -282,6 +296,21 @@ input[type="submit"].thumbs-down {
 }
 .mdc-list-item__text {
   max-width: 300px;
+}
+#check {
+  color:  var(--mdc-theme-primary);
+}
+.blink_rect {
+  fill: var(--mdc-theme-primary);
+}
+#timer-bg {
+  fill:  var(--mdc-theme-primary);
+}
+.mdc-button {
+  color: white !important;
+}
+div.input-ripple-wrapper input {
+  color: grey !important;
 }
 
 @media (max-height: 650px) {

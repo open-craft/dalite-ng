@@ -4,114 +4,132 @@
 
 {% block body %}
 <main>
-<section>
-  <h1 class="mdc-typography--display3" style="position:sticky;">Update Script
-    <svg class="underline" width=150 height=4></svg>
-  </h1>
-  <div class="admin-link">
-    <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
-  </div>
-  <h2 class="mdc-typography--display1 mdc-theme--secondary">{{object.title}}</h2>
-  {% if not object.blinkassignmentquestion_set.all %}
-  <ul>
-    <li><strong>Note:</strong> There are currently no blink questions in this script.  You can add them from the list below.</li>
-  </ul>
-  {% endif %}
-  <ol>
-  {% for a in object.blinkassignmentquestion_set.all %}
-    <li class="dense-list">{{a.blinkquestion.question.text|safe}}
-      <br>
-      <div class="mdc-typography--caption">
-        {{a.blinkquestion.question.title|safe}}:
-        {% for c in a.blinkquestion.question.category.all %}
+  <section>
+    <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'Update Script' %}
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
+
+    <div class="admin-link">
+      <a href="{% url 'teacher' teacher.id %}">{% trans 'Back to My Account' %}</a>
+    </div>
+
+    <h2 class="mdc-typography--display1 mdc-theme--secondary">{{object.title}}</h2>
+    {% if not object.blinkassignmentquestion_set.all %}
+    <ul>
+      <li><strong>Note:</strong> There are currently no blink questions in this script.  You can add them from the list below.</li>
+    </ul>
+    {% endif %}
+    <ol>
+      {% for a in object.blinkassignmentquestion_set.all %}
+      <li class="dense-list">{{a.blinkquestion.question.text|safe}}
+        <br>
+        <div class="mdc-typography--caption">
+          {{a.blinkquestion.question.title|safe}}:
+          {% for c in a.blinkquestion.question.category.all %}
           {{c.title|safe}}
-        {% empty %}
+          {% empty %}
           {% trans 'Uncategorized' %}
-        {% endfor %}
-      </div>
-      <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
+          {% endfor %}
+        </div>
+        <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
           {% csrf_token %}
           <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
           <input type="hidden" name="rank" value="clear" />
           <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear"/>
-      </form>
-      {% if forloop.counter > 1 %}
-      <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
+        </form>
+        {% if forloop.counter > 1 %}
+        <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
           {% csrf_token %}
           <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
           <input type="hidden" name="rank" value="up" />
           <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="arrow_upward" />
-      </form>
-      {% endif %}
-      {% if not forloop.last %}
-      <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
+        </form>
+        {% endif %}
+        {% if not forloop.last %}
+        <form style="display:inline;" action="{% url 'blinkAssignment-update' object.pk %}" method="post">
           {% csrf_token %}
           <input type="hidden" name="q" value="{{a.blinkquestion.key}}" />
           <input type="hidden" name="rank" value="down" />
           <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="arrow_downward" />
-      </form>
-      {% endif %}
-    </li>
-  {% endfor %}
-  </ol>
+        </form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
 
-  <h2 class="mdc-typography--headline  mdc-theme--secondary">All your blinks</h2>
-  <ol>
-  {% for g in teacher.blinkquestion_set.all %}
+    <h2 class="mdc-typography--headline  mdc-theme--secondary">{% trans 'All your blinks' %}</h2>
+
+    {% for g in teacher.blinkquestion_set.all %}
     {% if not g in object.blinkquestions.all %}
-    <li>{{g.question.text|safe}}
-      <br>
-      <div class="mdc-typography--caption">
-        {{g.question.title|safe}}:
-        {% for c in g.question.category.all %}
-          {{c.title|safe}}
-        {% endfor %}
-      </div>
-      <form style="display:inline" action="" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="blink" value="{{g.pk}}" />
-          <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
-      </form>
-      {% if g.question.image %}
-      <div>
-        <img class="question-image" src="{{ g.question.image.url }}" alt="g.question.image_alt_text">
-      </div>
-      {% endif %}
-    </li>
-    {% endif %}
-  {% endfor %}
-  </ol>
 
-  <h2 class="mdc-typography--headline  mdc-theme--secondary">All questions in discipline</h2>
-  {% if not suggested_questions %}
-  <ul>
-    <li><strong>Note:</strong> You have selected all available questions for this discipline.</li>
-  </ul>
-  {% endif %}
-  <ol>
-  {% for g in suggested_questions %}
-    <li>{{g.text|safe}}
-      <br>
+    <div class="mdc-card">
+      <div class="mdc-typography--title">
+        {{g.question.title|safe}}
+      </div>
+
+      <div class="mdc-typography--body1">
+        {{g.question.text|safe}}
+      </div>
+
+      {% if g.question.image %}
+        <img class="question-image" src="{{ g.question.image.url }}" alt="g.question.image_alt_text">
+      {% endif %}
+
       <div class="mdc-typography--caption">
-        {{g.title|safe}}:
-        {% for c in g.category.all %}
-          {{c.title|safe}}
+        {% for c in g.question.category.all %}
+        {{c.title|safe}}
+        {% empty %}
+        {% trans 'Uncategorized' %}
         {% endfor %}
       </div>
-      <form action="" method="post">
+
+      <div class="mdc-card__actions">
+        <div class="mdc-card__action-buttons">
+          <form style="display:inline" action="" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="blink" value="{{g.pk}}" />
+            <input class="material-icons small-button mdc-button mdc-card__action mdc-card__action--button mdc-button--raised" type="submit" value="add" />
+          </form>
+        </div>
+        <div class="mdc-card__action-icons">
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+    {% endfor %}
+
+
+    <h2 class="mdc-typography--headline  mdc-theme--secondary">{% trans 'All questions in discipline' %}</h2>
+    {% if not suggested_questions %}
+    <ul>
+      <li><strong>Note:</strong> You have selected all available questions for this discipline.</li>
+    </ul>
+    {% endif %}
+    <ol>
+      {% for g in suggested_questions %}
+      <li>{{g.text|safe}}
+        <br>
+        <div class="mdc-typography--caption">
+          {{g.title|safe}}:
+          {% for c in g.category.all %}
+          {{c.title|safe}}
+          {% endfor %}
+        </div>
+        <form action="" method="post">
           {% csrf_token %}
           <input type="hidden" name="new_blink" value="{{g.pk}}" />
           <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="add" />
-      </form>
-      {% if g.image %}
-      <div>
-        <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text">
-      </div>
-      {% endif %}
-    </li>
-  {% endfor %}
-  </ol>
-</section>
+        </form>
+        {% if g.image %}
+        <div>
+          <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text">
+        </div>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
 </main>
 
 {% endblock %}
