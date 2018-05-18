@@ -240,75 +240,11 @@
 
   </section>
 </main>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.querySelectorAll('.toggle-images').forEach(
-  (el,i,list) => {
-    const toggle = bundle.iconToggle.MDCIconToggle.attachTo(el);
-    if (sessionStorage.images){
-      if (sessionStorage.images == "block") {
-        toggle.on = true;
-      }
-      else {
-        toggle.on = false;
-      }
-      document.querySelectorAll('.question-image').forEach(
-        (el,i,list) => {
-          el.style.display = sessionStorage.images;
-        }
-      )
-    }
-    el.addEventListener('MDCIconToggle:change', ({detail}) => {
-      document.querySelectorAll('.question-image').forEach(
-        (el,i,list) => {
-          if (detail.isOn) {
-            el.style.display = "block";
-          }
-          else {
-            el.style.display = "none";
-          }
-          sessionStorage.images = el.style.display;
-        }
-      )
-    });
-  }
-);
-
-document.querySelectorAll('.toggle-answers').forEach(
-  (el,i,list) => {
-    const toggle = bundle.iconToggle.MDCIconToggle.attachTo(el);
-    if (sessionStorage.answers){
-      if (sessionStorage.answers == "block") {
-        toggle.on = true;
-      }
-      else {
-        toggle.on = false;
-      }
-      document.querySelectorAll('.question-answers').forEach(
-        (el,i,list) => {
-          el.style.display = sessionStorage.answers;
-        }
-      )
-    }
-    el.addEventListener('MDCIconToggle:change', ({detail}) => {
-      document.querySelectorAll('.question-answers').forEach(
-        (el,i,list) => {
-          if (detail.isOn) {
-            el.style.display = "block";
-
-          }
-          else {
-            el.style.display = "none";
-          }
-          sessionStorage.answers = el.style.display;
-        }
-      )
-    });
-  }
-);
-
+bundle.toggleImages();
+bundle.toggleAnswers();
 </script>
 {% endblock %}
