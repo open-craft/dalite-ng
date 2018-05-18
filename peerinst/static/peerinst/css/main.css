@@ -277,8 +277,9 @@ input[type="submit"].thumbs-down {
   max-height: 450px;
 }
 .mdc-card {
-  padding:10px;
+  padding:20px 20px 12px;
   margin-bottom:10px;
+  background-color: white;
 }
 .material-icons.md-18 { font-size: 18px; }
 .material-icons.md-24 { font-size: 24px; }
