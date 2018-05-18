@@ -13,6 +13,26 @@
       <a href="{% url 'teacher' teacher.id %}">{% trans 'Back to My Account' %}</a>
     </div>
 
+    <div class="mdc-form-field">
+      <span class="mdc-theme--secondary">Show images</span>
+      <i class="mdc-icon-toggle material-icons toggle-images mdc-theme--secondary" role="button" aria-pressed="true"
+         aria-label="Toggle images" tabindex="0"
+         data-toggle-on='{"label": "Hide images", "content": "check_box"}'
+         data-toggle-off='{"label": "Show images", "content": "check_box_outline_blank"}'>
+        check_box
+      </i>
+    </div>
+
+    <div class="mdc-form-field">
+      <span class="mdc-theme--secondary">Show answers</span>
+      <i class="mdc-icon-toggle material-icons toggle-answers mdc-theme--secondary" role="button" aria-pressed="false"
+         aria-label="Toggle answers" tabindex="0"
+         data-toggle-on='{"label": "Hide images", "content": "check_box"}'
+         data-toggle-off='{"label": "Show images", "content": "check_box_outline_blank"}'>
+        check_box
+      </i>
+    </div>
+
     <h2 class="mdc-typography--display1 mdc-theme--secondary">{{object.title}}</h2>
 
     {% for g in object.blinkassignmentquestion_set.all %}
@@ -28,6 +48,14 @@
       {% if g.blinkquestion.question.image %}
         <img class="question-image" src="{{ g.blinkquestion.question.image.url }}" alt="g.blinkquestion.question.image_alt_text">
       {% endif %}
+
+      <div class="question-answers" style="display:none;">
+        <ul>
+          {% for label, choice in g.blinkquestion.question.get_choices %}
+          <li class="mdc-typography--body1">{{ label }}. {{ choice|safe }}</li>
+          {% endfor %}
+        <ul>
+      </div>
 
       <div class="mdc-card__actions">
 
@@ -102,6 +130,14 @@
         <img class="question-image" src="{{ g.question.image.url }}" alt="g.question.image_alt_text">
       {% endif %}
 
+      <div class="question-answers" style="display:none;">
+        <ul>
+          {% for label, choice in g.question.get_choices %}
+          <li class="mdc-typography--body1">{{ label }}. {{ choice|safe }}</li>
+          {% endfor %}
+        <ul>
+      </div>
+
       <div class="mdc-card__actions">
 
         <div class="mdc-card__action-buttons" style="color:grey;">
@@ -158,6 +194,14 @@
         <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text">
       {% endif %}
 
+      <div class="question-answers" style="display:none;">
+        <ul>
+          {% for label, choice in g.get_choices %}
+          <li class="mdc-typography--body1">{{ label }}. {{ choice|safe }}</li>
+          {% endfor %}
+        <ul>
+      </div>
+
       <div class="mdc-card__actions">
 
         <div class="mdc-card__action-buttons" style="color:grey;">
@@ -197,4 +241,44 @@
   </section>
 </main>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.toggle-images').forEach(
+  (el,i,list) => {
+    const toggle = bundle.iconToggle.MDCIconToggle.attachTo(el);
+    el.addEventListener('MDCIconToggle:change', ({detail}) => {
+      document.querySelectorAll('.question-image').forEach(
+        (el,i,list) => {
+          if (detail.isOn) {
+            el.style.display = "block";
+          }
+          else {
+            el.style.display = "none";
+          }
+        }
+      )
+    });
+  }
+);
+
+document.querySelectorAll('.toggle-answers').forEach(
+  (el,i,list) => {
+    const toggle = bundle.iconToggle.MDCIconToggle.attachTo(el);
+    el.addEventListener('MDCIconToggle:change', ({detail}) => {
+      document.querySelectorAll('.question-answers').forEach(
+        (el,i,list) => {
+          if (detail.isOn) {
+            el.style.display = "block";
+          }
+          else {
+            el.style.display = "none";
+          }
+        }
+      )
+    });
+  }
+);
+</script>
 {% endblock %}

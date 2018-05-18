@@ -2,6 +2,7 @@
 import autoInit from '@material/auto-init/index';
 import * as chips from '@material/chips/index';
 import * as dialog from '@material/dialog/index';
+import * as iconToggle from '@material/icon-toggle/index';
 import * as radio from '@material/radio/index';
 import * as ripple from '@material/ripple/index';
 import * as textField from '@material/textfield/index';
@@ -10,6 +11,7 @@ import * as toolbar from '@material/toolbar/index';
 autoInit.register('MDCChip', chips.MDCChip);
 autoInit.register('MDCChipSet', chips.MDCChipSet);
 autoInit.register('MDCDialog', dialog.MDCDialog);
+autoInit.register('MDCIconToggle', iconToggle.MDCIconToggle);
 autoInit.register('MDCRadio', radio.MDCRadio);
 autoInit.register('MDCRipple', ripple.MDCRipple);
 autoInit.register('MDCTextField', textField.MDCTextField);
@@ -19,6 +21,7 @@ export {
   autoInit,
   chips,
   dialog,
+  iconToggle,
   radio,
   ripple,
   textField,
