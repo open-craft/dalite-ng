@@ -240,7 +240,7 @@ function processResponse(text, status, obj) {
 const search = document.getElementById('search-bar');
 search.onchange = function() {
   console.info('Searching: '+search.value);
-  $('#search_results').load("{% url 'question-search' 'blink' %}", "search_string="+search.value, processResponse);
+  $('#search_results').load("{% url 'question-search' %}", "search_string="+search.value+"&type=blink&id="+{{ object.id }}, processResponse);
 }
 </script>
 {% endblock %}

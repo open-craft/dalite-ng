@@ -29,7 +29,7 @@ urlpatterns = [
         ])),
         url(r'^update/$',views.AssignmentUpdateView.as_view(),name='assignment-update')
     ])),
-    url(r'^question-search/(?P<type>[^/]+)/$', views.question_search, name='question-search'),
+    url(r'^question-search/$', views.question_search, name='question-search'),
     url(r'^heartbeat/$', views.HeartBeatUrl.as_view(), name='heartbeat'),
 
     # Admin

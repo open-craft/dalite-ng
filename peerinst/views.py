@@ -1413,14 +1413,19 @@ def blink_get_current(request,username):
 
 # AJAX functions
 @login_required
-def question_search(request,type):
-
-    print(type)
+def question_search(request):
 
     if request.method == "GET" and request.user.teacher:
-        search_string = request.GET['search_string']
+        type = request.GET.get('type',default=None)
+        id = request.GET.get('id',default=None)
+        search_string = request.GET.get('search_string',default="")
+
+        # All matching questions
         query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string))
-        # TODO: add search on categories
+            # TODO: add search on categories
+
+        # Exclusions based on type of search
+        
 
         return TemplateResponse(
             request,
