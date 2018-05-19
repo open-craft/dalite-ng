@@ -1,6 +1,8 @@
 {% load i18n %}
 
 {% for g in search_results %}
+{{g.blinkquestion_set.all}}
+{{request.user.teacher.blinkquestion_set.all }}
 <div class="mdc-card">
   <div class="mdc-typography--title bold" style="margin-bottom:5px;">
     {{g.title|safe}}

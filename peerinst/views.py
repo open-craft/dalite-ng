@@ -1418,7 +1418,6 @@ def question_search(request):
     if request.method == "GET" and request.user.teacher:
         search_string = request.GET['search_string']
         query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string))
-        # TODO: remove questions that are already part of teacher's blinks
         # TODO: add search on categories
 
         return TemplateResponse(
