@@ -1421,16 +1421,17 @@ def question_search(request):
         search_string = request.GET.get('search_string',default="")
         limit_search = request.GET.get('limit_search',default="false")
 
+        # Exclusions based on type of search
+        if type == 'blink':
+            bq_qs = BlinkAssignment.objects.get(id=id).blinkquestions.all()
+            q_qs = [bq.question.id for bq in bq_qs]
+
         # All matching questions
         # TODO: add search on categories
         if limit_search == "true":
-            query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string)).filter(discipline__in=request.user.teacher.disciplines.all())
+            query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string)).filter(discipline__in=request.user.teacher.disciplines.all()).exclude(id__in=q_qs)
         else:
-            query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string))
-
-        # Exclusions based on type of search
-        if type == "blink":
-            pass
+            query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string)).exclude(id__in=q_qs)
 
         if query.count() > 50:
             return TemplateResponse(
