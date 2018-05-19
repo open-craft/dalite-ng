@@ -13,13 +13,15 @@
       <a href="{% url 'teacher' teacher.id %}">{% trans 'Back to My Account' %}</a>
     </div>
 
+    <h2 class="mdc-typography--display1 mdc-theme--secondary">{{object.title}}</h2>
+
     <div class="mdc-form-field">
       <span class="mdc-theme--secondary">Show images</span>
-      <i class="mdc-icon-toggle material-icons toggle-images mdc-theme--secondary" role="button" aria-pressed="true"
+      <i class="mdc-icon-toggle material-icons toggle-images mdc-theme--secondary" role="button" aria-pressed="false"
          aria-label="Toggle images" tabindex="0"
          data-toggle-on='{"label": "Hide images", "content": "check_box"}'
          data-toggle-off='{"label": "Show images", "content": "check_box_outline_blank"}'>
-        check_box
+        check_box_outline_blank
       </i>
     </div>
 
@@ -29,11 +31,9 @@
          aria-label="Toggle answers" tabindex="0"
          data-toggle-on='{"label": "Hide images", "content": "check_box"}'
          data-toggle-off='{"label": "Show images", "content": "check_box_outline_blank"}'>
-        check_box
+        check_box_outline_blank
       </i>
     </div>
-
-    <h2 class="mdc-typography--display1 mdc-theme--secondary">{{object.title}}</h2>
 
     {% for g in object.blinkassignmentquestion_set.all %}
     <div class="mdc-card">
@@ -114,10 +114,26 @@
 
     <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'All your blinks' %}</h2>
 
+    <div class="search">
+      <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+        <label class="mdc-floating-label" for="search-bar">{% trans 'Filter' %}</label>
+        <input class="mdc-text-field__input" id="search-bar" oninput="search('.searchable')">
+        <div class="mdc-notched-outline">
+          <svg>
+            <path class="mdc-notched-outline__path"/>
+          </svg>
+        </div>
+        <div class="mdc-notched-outline__idle"></div>
+      </div>
+      <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+        The list will be filtered to retain entries with content that contains the above string.
+      </p>
+    </div>
+
     {% for g in teacher.blinkquestion_set.all %}
     {% if not g in object.blinkquestions.all %}
 
-    <div class="mdc-card">
+    <div class="mdc-card searchable">
       <div class="mdc-typography--title bold" style="margin-bottom:5px;">
         {{g.question.title|safe}}
       </div>
@@ -178,7 +194,9 @@
     {% endfor %}
 
 
-  <h2 class="mdc-typography--display1  mdc-theme--secondary">{% trans 'All questions in discipline' %}</h2>
+  <h2 class="mdc-typography--display1  mdc-theme--secondary">{% trans 'Search questions in discipline' %}</h2>
+
+
 
     {% for g in suggested_questions %}
     <div class="mdc-card">
@@ -246,5 +264,19 @@
 <script>
 bundle.toggleImages();
 bundle.toggleAnswers();
+
+var search_string = document.getElementById('search-bar');
+
+function search(className){
+  var items = document.querySelectorAll(className);
+  for (var i=0; i<items.length; i++) {
+    if (items[i].innerText.toLowerCase().indexOf(search_string.value.toLowerCase()) < 0) {
+      items[i].style.display = "none";
+    } else {
+      items[i].style.display = "block";
+    }
+  }
+  return;
+}
 </script>
 {% endblock %}
