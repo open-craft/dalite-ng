@@ -1425,13 +1425,20 @@ def question_search(request):
             # TODO: add search on categories
 
         # Exclusions based on type of search
-        
 
-        return TemplateResponse(
-            request,
-            'peerinst/question_search_results.html',
-            context={'search_results':query,}
-            )
+
+        if query.count() > 50:
+            return TemplateResponse(
+                request,
+                'peerinst/question_search_error.html',
+                context={'count':query.count(),}
+                )
+        else:
+            return TemplateResponse(
+                request,
+                'peerinst/question_search_results.html',
+                context={'search_results':query,}
+                )
     else:
         return HttpResponseRedirect(reverse('access_denied'))
 
