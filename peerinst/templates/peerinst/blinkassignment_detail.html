@@ -195,21 +195,41 @@
 
 
   <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Search questions in discipline' %}</h2>
-
-  <div class="search">
-    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
-      <label class="mdc-floating-label" for="search-bar">{% trans 'Search' %}</label>
-      <input class="mdc-text-field__input" id="search-bar">
-      <div class="mdc-notched-outline">
-        <svg>
-          <path class="mdc-notched-outline__path"/>
+  <div class="mdc-form-field">
+    <div class="mdc-checkbox">
+      <input type="checkbox"
+             class="mdc-checkbox__native-control"
+             id="limit-search"
+             checked />
+      <div class="mdc-checkbox__background">
+        <svg class="mdc-checkbox__checkmark"
+             viewBox="0 0 24 24">
+          <path class="mdc-checkbox__checkmark-path"
+                fill="none"
+                stroke="white"
+                d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
         </svg>
+        <div class="mdc-checkbox__mixedmark"></div>
       </div>
-      <div class="mdc-notched-outline__idle"></div>
     </div>
-    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
-      Search database for questions containing above string within your discipline(s).
-    </p>
+    <label class="mdc-theme--secondary" for="limit-search">{% trans 'Limit search to your discipline(s) (recommended)' %}</label>
+  </div>
+  <br>
+  <div class="search">
+      <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+        <label class="mdc-floating-label" for="search-bar">{% trans 'Search' %}</label>
+        <input class="mdc-text-field__input" id="search-bar">
+        <div class="mdc-notched-outline">
+          <svg>
+            <path class="mdc-notched-outline__path"/>
+          </svg>
+        </div>
+        <div class="mdc-notched-outline__idle"></div>
+      </div>
+      <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+        {% trans 'Search database for questions containing above string within your discipline(s).' %}'
+      </p>
+
   </div>
 
   <div id="search_results"></div>
@@ -222,6 +242,8 @@
 <script>
 bundle.toggleImages();
 bundle.toggleAnswers();
+const limitSearch = document.querySelector('#limit-search');
+bundle.iconToggle.MDCIconToggle.attachTo(limitSearch);
 
 const filterBar = document.getElementById('filter-bar');
 filterBar.oninput = function() {
@@ -232,15 +254,18 @@ function processResponse(text, status, obj) {
   console.info(text);
   console.info(status);
   console.info(obj);
-  location.href = "#search-bar";
+  location.href = "#limit-search";
   bundle.toggleImages();
   bundle.toggleAnswers();
+  search.value = "";
+  search.focus();
 }
 
 const search = document.getElementById('search-bar');
 search.onchange = function() {
+  console.info('Limit search: '+limitSearch.checked);
   console.info('Searching: '+search.value);
-  $('#search_results').load("{% url 'question-search' %}", "search_string="+search.value+"&type=blink&id="+{{ object.id }}, processResponse);
+  $('#search_results').load("{% url 'question-search' %}", "search_string="+search.value+"&type=blink&id="+{{ object.id }}+"&limit_search="+limitSearch.checked, processResponse);
 }
 </script>
 {% endblock %}

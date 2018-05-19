@@ -1419,13 +1419,18 @@ def question_search(request):
         type = request.GET.get('type',default=None)
         id = request.GET.get('id',default=None)
         search_string = request.GET.get('search_string',default="")
+        limit_search = request.GET.get('limit_search',default="false")
 
         # All matching questions
-        query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string))
-            # TODO: add search on categories
+        # TODO: add search on categories
+        if limit_search == "true":
+            query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string)).filter(discipline__in=request.user.teacher.disciplines.all())
+        else:
+            query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string))
 
         # Exclusions based on type of search
-
+        if type == "blink":
+            pass
 
         if query.count() > 50:
             return TemplateResponse(
