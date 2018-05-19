@@ -1413,7 +1413,9 @@ def blink_get_current(request,username):
 
 # AJAX functions
 @login_required
-def question_search(request):
+def question_search(request,type):
+
+    print(type)
 
     if request.method == "GET" and request.user.teacher:
         search_string = request.GET['search_string']
