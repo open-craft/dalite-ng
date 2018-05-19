@@ -117,7 +117,7 @@
     <div class="search">
       <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
         <label class="mdc-floating-label" for="search-bar">{% trans 'Filter' %}</label>
-        <input class="mdc-text-field__input" id="search-bar" oninput="search('.searchable')">
+        <input class="mdc-text-field__input" id="search-bar">
         <div class="mdc-notched-outline">
           <svg>
             <path class="mdc-notched-outline__path"/>
@@ -264,19 +264,9 @@
 <script>
 bundle.toggleImages();
 bundle.toggleAnswers();
-
-var search_string = document.getElementById('search-bar');
-
-function search(className){
-  var items = document.querySelectorAll(className);
-  for (var i=0; i<items.length; i++) {
-    if (items[i].innerText.toLowerCase().indexOf(search_string.value.toLowerCase()) < 0) {
-      items[i].style.display = "none";
-    } else {
-      items[i].style.display = "block";
-    }
-  }
-  return;
+const searchBar = document.getElementById('search-bar');
+searchBar.oninput = () => {
+  bundle.search('.searchable', searchBar);
 }
 </script>
 {% endblock %}

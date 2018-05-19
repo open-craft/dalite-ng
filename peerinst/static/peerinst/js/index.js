@@ -361,6 +361,25 @@ return d.key;
 }
 
 
+/** Search function
+*  @param {String} className
+*  @param {Object} searchBar
+*  @function
+*/
+export function search(className, searchBar) {
+  let items = document.querySelectorAll(className);
+  for (let i=0; i<items.length; i++) {
+    if (items[i].innerText.toLowerCase().indexOf(searchBar.value.toLowerCase())
+      < 0) {
+      items[i].style.display = 'none';
+    } else {
+      items[i].style.display = 'block';
+    }
+  }
+  return;
+}
+
+
 /** Toggle image visibility
 *  @function
 */

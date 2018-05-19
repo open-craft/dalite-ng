@@ -30,7 +30,7 @@
 
   <ul>
   {% for obj in object_list %}
-    <li class="dense-list" id="{{ obj.title }}" name="item">
+    <li class="dense-list searchable">
       {{ forloop.counter }}. <a href="{% url 'question-list' assignment_id=obj.pk %}">
       {{ obj.title }}</a>
     </li>
@@ -39,21 +39,15 @@
   {% endfor %}
   </ul>
 
-  <script>
-  var search_string = document.getElementById('search-bar');
-  search_string.focus();
-  function search(){
-    var items = document.getElementsByName('item');
-    for (var i=0; i<items.length; i++) {
-      if (items[i].id.toLowerCase().indexOf(search_string.value.toLowerCase()) < 0) {
-        items[i].style.display = "none";
-      } else {
-        items[i].style.display = "block";
-      }
-    }
-    return;
-  }
-  </script>
 </section>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const searchBar = document.getElementById('search-bar');
+searchBar.oninput = () => {
+  bundle.search('.searchable', searchBar);
+}
+</script>
 {% endblock %}
