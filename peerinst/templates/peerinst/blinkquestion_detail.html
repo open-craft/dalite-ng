@@ -5,9 +5,6 @@
 {% block body %}
 
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js">
-// Help with cookie handling as per django docs
-// https://docs.djangoproject.com/en/1.8/ref/csrf/
-// MIT licensed
 </script>
 
 <main>
@@ -144,7 +141,7 @@ function changeQuestionState(url,state,callback) {
       callback(request);
     }
   };
-  // Need to implement this: https://docs.djangoproject.com/en/1.8/ref/csrf/
+  // Need to implement this?: https://docs.djangoproject.com/en/1.8/ref/csrf/
   request.setRequestHeader("X-CSRFToken", csrftoken);
   request.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
   if (state == false){

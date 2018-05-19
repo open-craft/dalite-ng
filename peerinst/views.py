@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
 from django.core.mail import mail_admins, send_mail
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render, render_to_response, redirect
 from django.template import loader
 from django.template.response import TemplateResponse
@@ -1411,6 +1412,23 @@ def blink_get_current(request,username):
 
 
 # AJAX functions
+@login_required
+def question_search(request):
+
+    if request.method == "GET" and request.user.teacher:
+        search_string = request.GET['search_string']
+        query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string))
+        # TODO: remove questions that are already part of teacher's blinks
+        # TODO: add search on categories
+
+        return TemplateResponse(
+            request,
+            'peerinst/question_search_results.html',
+            context={'search_results':query,}
+            )
+    else:
+        return HttpResponseRedirect(reverse('access_denied'))
+
 
 def blink_get_current_url(request,username):
     """View to check current question url for teacher."""
@@ -1541,7 +1559,7 @@ class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
 
         teacher_blink_questions = [bk.question for bk in context['teacher'].blinkquestion_set.all()]
         # Send as context questions not already part of teacher's blinks
-        context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
+        #context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
 
         return context
 

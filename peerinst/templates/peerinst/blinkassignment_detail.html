@@ -116,8 +116,8 @@
 
     <div class="search">
       <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
-        <label class="mdc-floating-label" for="search-bar">{% trans 'Filter' %}</label>
-        <input class="mdc-text-field__input" id="search-bar">
+        <label class="mdc-floating-label" for="filter-bar">{% trans 'Filter' %}</label>
+        <input class="mdc-text-field__input" id="filter-bar">
         <div class="mdc-notched-outline">
           <svg>
             <path class="mdc-notched-outline__path"/>
@@ -194,67 +194,25 @@
     {% endfor %}
 
 
-  <h2 class="mdc-typography--display1  mdc-theme--secondary">{% trans 'Search questions in discipline' %}</h2>
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Search questions in discipline' %}</h2>
 
-
-
-    {% for g in suggested_questions %}
-    <div class="mdc-card">
-      <div class="mdc-typography--title bold" style="margin-bottom:5px;">
-        {{g.title|safe}}
+  <div class="search">
+    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+      <label class="mdc-floating-label" for="search-bar">{% trans 'Search' %}</label>
+      <input class="mdc-text-field__input" id="search-bar">
+      <div class="mdc-notched-outline">
+        <svg>
+          <path class="mdc-notched-outline__path"/>
+        </svg>
       </div>
-
-      <div class="mdc-typography--body1">
-        {{g.text|safe}}
-      </div>
-
-      {% if g.image %}
-        <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text">
-      {% endif %}
-
-      <div class="question-answers" style="display:none;">
-        <ul>
-          {% for label, choice in g.get_choices %}
-          <li class="mdc-typography--body1">{{ label }}. {{ choice|safe }}</li>
-          {% endfor %}
-        <ul>
-      </div>
-
-      <div class="mdc-card__actions">
-
-        <div class="mdc-card__action-buttons" style="color:grey;">
-          <div class="mdc-typography--caption">
-            <div style="margin-bottom:0pt;">
-            {% trans 'Categories' %}:
-            {% for c in g.category.all %}
-            {{ c.title|safe }}{% if not forloop.last %}, {% endif %}
-            {% empty %}
-            {% trans 'Uncategorized' %}
-            {% endfor %}
-            </div>
-            <div>
-            {% trans 'Popularity' %}:
-            </div>
-            <div>
-            {% trans 'Difficulty' %}:
-            </div>
-          </div>
-        </div>
-
-        <div class="mdc-card__action-icons">
-          <form style="display:inline" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="new_blink" value="{{g.pk}}" />
-            <input class="material-icons small-button mdc-button mdc-card__action mdc-card__action--button mdc-button--raised" type="submit" value="add" />
-          </form>
-        </div>
-      </div>
+      <div class="mdc-notched-outline__idle"></div>
     </div>
-    {% empty %}
-    <ul>
-      <li><strong>Note:</strong> {% blocktrans %}You have selected all available questions for this discipline{% endblocktrans %}.</li>
-    </ul>
-    {% endfor %}
+    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+      Search database for questions containing above string within your discipline(s).
+    </p>
+  </div>
+
+  <div id="search_results"></div>
 
   </section>
 </main>
@@ -264,9 +222,25 @@
 <script>
 bundle.toggleImages();
 bundle.toggleAnswers();
-const searchBar = document.getElementById('search-bar');
-searchBar.oninput = () => {
-  bundle.search('.searchable', searchBar);
+
+const filterBar = document.getElementById('filter-bar');
+filterBar.oninput = () => {
+  bundle.search('.searchable', filterBar);
+}
+
+function processResponse(text, status, obj) {
+  console.info(text);
+  console.info(status);
+  console.info(obj);
+  location.href = "#search-bar";
+  bundle.toggleImages();
+  bundle.toggleAnswers();
+}
+
+const search = document.getElementById('search-bar');
+search.onchange = () => {
+  console.info('Searching: '+search.value);
+  $('#search_results').load("{% url 'question-search' %}", "search_string="+search.value, processResponse);
 }
 </script>
 {% endblock %}
