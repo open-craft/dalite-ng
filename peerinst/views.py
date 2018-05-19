@@ -1418,12 +1418,13 @@ def question_search(request):
     if request.method == "GET" and request.user.teacher:
         type = request.GET.get('type',default=None)
         id = request.GET.get('id',default=None)
+
         search_string = request.GET.get('search_string',default="")
         limit_search = request.GET.get('limit_search',default="false")
 
         # Exclusions based on type of search
         if type == 'blink':
-            bq_qs = BlinkAssignment.objects.get(id=id).blinkquestions.all()
+            bq_qs = request.user.teacher.blinkquestion_set.all()
             q_qs = [bq.question.id for bq in bq_qs]
 
         # All matching questions
