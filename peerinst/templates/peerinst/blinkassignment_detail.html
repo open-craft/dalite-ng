@@ -224,7 +224,7 @@ bundle.toggleImages();
 bundle.toggleAnswers();
 
 const filterBar = document.getElementById('filter-bar');
-filterBar.oninput = () => {
+filterBar.oninput = function() {
   bundle.search('.searchable', filterBar);
 }
 
@@ -238,7 +238,7 @@ function processResponse(text, status, obj) {
 }
 
 const search = document.getElementById('search-bar');
-search.onchange = () => {
+search.onchange = function() {
   console.info('Searching: '+search.value);
   $('#search_results').load("{% url 'question-search' %}", "search_string="+search.value, processResponse);
 }
