@@ -1418,10 +1418,18 @@ def question_search(request):
     if request.method == "GET" and request.user.teacher:
         type = request.GET.get('type',default=None)
         id = request.GET.get('id',default=None)
+
         search_string = request.GET.get('search_string',default="")
 
+        if type == 'blink':
+            bq_qs = BlinkAssignment.objects.get(id=id).blinkquestions.all()
+            q_qs = [bq.question.id for bq in bq_qs]
+
         # All matching questions
-        query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string))
+        query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string))\
+        .exclude(id__in=q_qs)
+        
+
             # TODO: add search on categories
 
         # Exclusions based on type of search
