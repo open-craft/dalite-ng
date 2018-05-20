@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% for g in search_results %}
-<div class="mdc-card">
+<div class="mdc-card" id={{g.id|slugify}}>
   <div class="mdc-typography--title bold" style="margin-bottom:5px;">
     {{g.title|safe}}
   </div>
@@ -44,7 +44,7 @@
     </div>
 
     <div class="mdc-card__action-icons">
-      <form style="display:inline" method="post">
+      <form style="display:inline" method="post" action="#{{g.id|slugify}}">
         {% csrf_token %}
         <input type="hidden" name="new_blink" value="{{g.pk}}" />
         <input class="material-icons small-button mdc-button mdc-card__action mdc-card__action--button mdc-button--raised" type="submit" value="add" />

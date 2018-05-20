@@ -36,7 +36,7 @@
 </div>
 
 {% for g in object.blinkassignmentquestion_set.all %}
-<div class="mdc-card">
+<div class="mdc-card" id={{g.blinkquestion.question.id|slugify}}>
   <div class="mdc-typography--title bold" style="margin-bottom:5px;">
     {{g.blinkquestion.question.title|safe}}
   </div>
@@ -79,14 +79,14 @@
     </div>
 
     <div class="mdc-card__action-icons">
-      <form style="display:inline;" method="post">
+      <form style="display:inline;" method="post" action="#">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{g.blinkquestion.key}}" />
         <input type="hidden" name="rank" value="clear" />
         <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear"/>
       </form>
       {% if forloop.counter > 1 %}
-      <form style="display:inline;" method="post">
+      <form style="display:inline;" method="post" action="#{{g.blinkquestion.question.id|slugify}}">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{g.blinkquestion.key}}" />
         <input type="hidden" name="rank" value="up" />
@@ -94,7 +94,7 @@
       </form>
       {% endif %}
       {% if not forloop.last %}
-      <form style="display:inline;" method="post">
+      <form style="display:inline;" method="post" action="#{{g.blinkquestion.question.id|slugify}}">
         {% csrf_token %}
         <input type="hidden" name="q" value="{{g.blinkquestion.key}}" />
         <input type="hidden" name="rank" value="down" />
@@ -133,7 +133,7 @@
 {% for g in teacher.blinkquestion_set.all %}
 {% if not g in object.blinkquestions.all %}
 
-<div class="mdc-card searchable">
+<div class="mdc-card searchable" id={{g.question.id|slugify}}>
   <div class="mdc-typography--title bold" style="margin-bottom:5px;">
     {{g.question.title|safe}}
   </div>
@@ -176,7 +176,7 @@
         </div>
 
         <div class="mdc-card__action-icons">
-          <form style="display:inline" method="post">
+          <form style="display:inline" method="post" action="#{{g.question.id|slugify}}">
             {% csrf_token %}
             <input type="hidden" name="blink" value="{{g.pk}}" />
             <input class="material-icons small-button mdc-button mdc-card__action mdc-card__action--button mdc-button--raised" type="submit" value="add" />
