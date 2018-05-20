@@ -380,11 +380,26 @@ export function search(className, searchBar) {
 }
 
 
+/** Add dialog box to ids containing string dialog
+*  @function
+*/
+export function addDialog() {
+  [].forEach.call(document.querySelectorAll('[id^=dialog]'),
+    (el) => {
+      const dialog = bundle.dialog.MDCDialog.attachTo(el);
+      document.querySelector('#activate-'+el.id).onclick = () => {
+        dialog.show();
+      };
+    }
+  );
+}
+
+
 /** Toggle image visibility
 *  @function
 */
 export function toggleImages() {
-  document.querySelectorAll('.toggle-images').forEach(
+  [].forEach.call(document.querySelectorAll('.toggle-images'),
     (el) => {
       const toggle = bundle.iconToggle.MDCIconToggle.attachTo(el);
       if (sessionStorage.images) {
@@ -393,14 +408,14 @@ export function toggleImages() {
         } else {
           toggle.on = false;
         }
-        document.querySelectorAll('.question-image').forEach(
+        [].forEach.call(document.querySelectorAll('.question-image'),
           (el) => {
             el.style.display = sessionStorage.images;
           }
         );
       }
       el.addEventListener('MDCIconToggle:change', ({detail}) => {
-        document.querySelectorAll('.question-image').forEach(
+        [].forEach.call(document.querySelectorAll('.question-image'),
           (el) => {
             if (detail.isOn) {
               el.style.display = 'block';
@@ -419,7 +434,7 @@ export function toggleImages() {
 *  @function
 */
 export function toggleAnswers() {
-  document.querySelectorAll('.toggle-answers').forEach(
+  [].forEach.call(document.querySelectorAll('.toggle-answers'),
     (el) => {
       const toggle = bundle.iconToggle.MDCIconToggle.attachTo(el);
       if (sessionStorage.answers) {
@@ -428,14 +443,14 @@ export function toggleAnswers() {
         } else {
           toggle.on = false;
         }
-        document.querySelectorAll('.question-answers').forEach(
+        [].forEach.call(document.querySelectorAll('.question-answers'),
           (el) => {
             el.style.display = sessionStorage.answers;
           }
         );
       }
       el.addEventListener('MDCIconToggle:change', ({detail}) => {
-        document.querySelectorAll('.question-answers').forEach(
+        [].forEach.call(document.querySelectorAll('.question-answers'),
           (el) => {
             if (detail.isOn) {
               el.style.display = 'block';

@@ -8,15 +8,6 @@
 header {
   padding-right: 0px;
 }
-footer {
-  color: white;
-  padding-top: 5px;
-  padding-bottom:5px;
-}
-footer a {
-  color: white;
-  padding-left:10px;
-}
 .site-content {
   margin-bottom: 80pt;
 }
@@ -52,7 +43,6 @@ footer a {
 .mdc-typography--display3 {
   padding-top:70px;
   padding-bottom:10px;
-  position:sticky;
   top:70px;
   z-index: 2;
 }
@@ -251,7 +241,7 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 var toolbar = bundle.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
 toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
 
-const arrow = document.getElementById('scrollprompt');
+var arrow = document.getElementById('scrollprompt');
 var flexibleExpansionRatio = 1.0;
 toolbar.listen('MDCToolbar:change', function(evt) {
   flexibleExpansionRatio = evt.detail.flexibleExpansionRatio;
@@ -514,13 +504,13 @@ window.addEventListener("resize", logo);
 <script>
 data = {{ json|safe }};
 labels = bundle.keys(data['All']);
-svg = [];
-width = [];
-height = [];
+var svg = [];
+var width = [];
+var height = [];
 
 var g = [];
 var text = [];
-for (var i in labels){
+for (var i=0; i<labels.length; i++){
   svg[i] =  bundle.select("#"+labels[i]);
   width[i] = +svg[i].attr('width');
   height[i] = +svg[i].attr('height');
@@ -586,7 +576,6 @@ for (var i in labels){
 }
 
 function counts(dataset) {
-  'use strict';
 
   // Update counts for new discipline
   bundle.selectAll(".count").interrupt();
@@ -594,30 +583,34 @@ function counts(dataset) {
   var delta = [];
   var set = [];
 
-  for (let i in labels){
-    set[i] = false;
+  for (var i = 0; i<labels.length; i++){
+    // Use an iife to simulate block scope (let not available)
+    (function(){
+      var j = i;
+      set[j] = false;
 
-    text[i].transition()
-    .duration(10)
-    .on("start", function repeat() {
-      if (set[i] == false) {
-        delta[i] = 0.01*((+this.getAttribute("c")) - (+dataset[labels[i]]));
-        set[i] = true;
-      }
-      if (Math.abs((+this.getAttribute("c")) - (+dataset[labels[i]])) >= Math.abs(0.9*delta[i])){
-        this.setAttribute("c",(+this.getAttribute("c")) - delta[i]);
-        if (+this.getAttribute("c") < 0) {
-          this.setAttribute("c",Math.abs(+this.getAttribute("c")));
+      text[j].transition()
+      .duration(10)
+      .on("start", function repeat() {
+        if (set[j] == false) {
+          delta[j] = 0.01*((+this.getAttribute("c")) - (+dataset[labels[j]]));
+          set[j] = true;
         }
-        bundle.active(this)
-        .text((+this.getAttribute("c")).toFixed(0))
-        .transition()
-        .on("start", repeat);
-      }
-      else {
-        bundle.interrupt(this);
-      }
-    });
+        if (Math.abs((+this.getAttribute("c")) - (+dataset[labels[j]])) >= Math.abs(0.9*delta[j])){
+          this.setAttribute("c",(+this.getAttribute("c")) - delta[j]);
+          if (+this.getAttribute("c") < 0) {
+            this.setAttribute("c",Math.abs(+this.getAttribute("c")));
+          }
+          bundle.active(this)
+          .text((+this.getAttribute("c")).toFixed(0))
+          .transition()
+          .on("start", repeat);
+        }
+        else {
+          bundle.interrupt(this);
+        }
+      });
+    })();
   }
 }
 
@@ -635,8 +628,8 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
-let w = Math.min(560,document.querySelector("section").offsetWidth-25);
-let h = 315/560*w;
+var w = Math.min(560,document.querySelector("section").offsetWidth-25);
+var h = 315/560*w;
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
     height: h,

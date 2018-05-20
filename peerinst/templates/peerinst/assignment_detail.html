@@ -146,9 +146,9 @@
 <script>
 bundle.toggleImages();
 bundle.toggleAnswers();
-const limitSearch = document.querySelector('#limit-search');
+var limitSearch = document.querySelector('#limit-search');
 bundle.iconToggle.MDCIconToggle.attachTo(limitSearch);
-const search = document.getElementById('search-bar');
+var search = document.getElementById('search-bar');
 
 function processResponse(text, status, obj) {
   console.info(text);

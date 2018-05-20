@@ -5,9 +5,10 @@
 {% block body %}
 <main>
 <section>
-<h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'My Account' %}
+<h1 class="mdc-typography--display3">{% trans 'My Account' %}
   <svg class="underline" width=150 height=4></svg>
 </h1>
+
 <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Identity' %}</h2>
 <ul class="mdc-list mdc-list--two-line">
   <li role="separator" class="mdc-list-divider"></li>
@@ -213,43 +214,15 @@
 {% block scripts %}
 {% compress js inline %}
 <script>
-document.querySelectorAll("[id^=dialog]").forEach(
-  (el,i,list) => {
-    const dialog = bundle.dialog.MDCDialog.attachTo(el);
-    document.querySelector("#activate-"+el.id).onclick = () => {
-      dialog.show();
-    }
-  }
-);
+bundle.addDialog();
 
-// This needs to be fix to activate JS part of ripple
-document.querySelectorAll('.ripple-icon').forEach(
-  (el,i,list) => {
-  //  const ripple = bundle.ripple.MDCRipple.attachTo(el);
-  //  ripple.unbounded = true;
-  }
-);
 function edit_user() {
   location="{% url 'password_change' %}";
 }
+
 function edit_identity() {
   location="{% url 'teacher-update' teacher.id %}";
 }
 </script>
-
-{% for a in object.blinkassignment_set.all %}
-<script>
-// Bind onclick
-/*document.getElementById('edit-blink-{{a.pk}}').onclick=function() {
-  location="{% url 'blinkAssignment-update' a.pk %}";
-}*/
-/*document.querySelectorAll('.blink').forEach(
-  (el,i,list)=>{
-    el.onclick=function() {
-      location="";
-    }
-  });*/
-</script>
-{% endfor %}
 {% endcompress %}
 {% endblock %}
