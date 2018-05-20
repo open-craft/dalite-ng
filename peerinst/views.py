@@ -1418,7 +1418,6 @@ def question_search(request):
     if request.method == "GET" and request.user.teacher:
         type = request.GET.get('type',default=None)
         id = request.GET.get('id',default=None)
-
         search_string = request.GET.get('search_string',default="")
         limit_search = request.GET.get('limit_search',default="false")
 
