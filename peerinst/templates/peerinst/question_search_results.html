@@ -26,7 +26,10 @@
 
     <div class="mdc-card__action-buttons" style="color:grey;">
       <div class="mdc-typography--caption">
-        <div style="margin-bottom:0pt;">
+        <div>
+          {% trans 'Discipline' %}: {{g.discipline}}
+        </div>
+        <div>
         {% trans 'Categories' %}:
         {% for c in g.category.all %}
         {{ c.title|safe }}{% if not forloop.last %}, {% endif %}
@@ -35,10 +38,7 @@
         {% endfor %}
         </div>
         <div>
-        {% trans 'Popularity' %}: --
-        </div>
-        <div>
-        {% trans 'Difficulty' %}: --
+        {% trans 'Difficulty' %}: 
         </div>
       </div>
     </div>
