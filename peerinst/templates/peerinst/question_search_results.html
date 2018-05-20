@@ -38,7 +38,7 @@
         {% endfor %}
         </div>
         <div>
-        {% trans 'Difficulty' %}: 
+        {% trans 'Difficulty' %}:
         </div>
       </div>
     </div>
@@ -46,7 +46,7 @@
     <div class="mdc-card__action-icons">
       <form style="display:inline" method="post" action="#{{g.id|slugify}}">
         {% csrf_token %}
-        <input type="hidden" name="new_blink" value="{{g.pk}}" />
+        <input type="hidden" name="{{form_field_name}}" value="{{g.pk}}" />
         <input class="material-icons small-button mdc-button mdc-card__action mdc-card__action--button mdc-button--raised" type="submit" value="add" />
       </form>
     </div>
