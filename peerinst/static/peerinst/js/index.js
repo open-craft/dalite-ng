@@ -380,7 +380,7 @@ export function search(className, searchBar) {
 }
 
 
-/** Add dialog box to ids containing string dialog
+/** Add dialog box to ids containing string dialog using #activate-id
 *  @function
 */
 export function addDialog() {

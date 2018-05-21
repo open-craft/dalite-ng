@@ -1,3 +1,42 @@
+$mdc-typography-font-family: 'Montserrat';
+$mdc-theme-primary: #54c0db;
+$mdc-theme-secondary: #004266;
+$mdc-theme-background: #f4f4f4;
+$radius: 10px;
+
+@import '@material/button/mdc-button';
+@import '@material/card/mdc-card';
+@import '@material/checkbox/mdc-checkbox';
+@import '@material/chips/mdc-chips';
+@import '@material/dialog/mdc-dialog';
+@import '@material/elevation/mdc-elevation';
+@import '@material/form-field/mdc-form-field';
+@import '@material/icon-toggle/mdc-icon-toggle';
+@import '@material/layout-grid/mdc-layout-grid';
+@import '@material/line-ripple/mdc-line-ripple';
+@import '@material/list/mdc-list';
+@import '@material/notched-outline/mdc-notched-outline';
+@import '@material/radio/mdc-radio';
+@import '@material/ripple/mdc-ripple';
+@import '@material/textfield/mdc-text-field';
+@import '@material/theme/mdc-theme';
+@import '@material/toolbar/mdc-toolbar';
+@import '@material/typography/mdc-typography';
+
+.mdc-card {
+  @include mdc-card-corner-radius($radius);
+}
+
+.ripple-icon {
+  @include mdc-ripple-surface;
+  @include mdc-ripple-radius-unbounded;
+  @include mdc-states($mdc-theme-primary);
+}
+
+.mdc-text-field--textarea .mdc-floating-label {
+  background-color: $mdc-theme-background;
+}
+
 body {
   background-color: var(--mdc-theme-background);
   color: var(--mdc-theme-secondary);

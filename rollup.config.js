@@ -25,7 +25,9 @@ export default {
       ],
     }),
     babel({
-      exclude: 'node_modules/d3/**',
+      exclude: [
+        'node_modules/d3/**',
+      ],
     }),
     uglify(),
   ],

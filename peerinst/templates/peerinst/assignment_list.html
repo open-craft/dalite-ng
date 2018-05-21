@@ -5,9 +5,10 @@
 {% block body %}
 <main>
 <section>
-  <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'Browse Assignments' %}
+  <h1 class="mdc-typography--display3">{% trans 'Browse Assignments' %}
     <svg class="underline" width=150 height=4></svg>
   </h1>
+
   {% if user.is_staff %}
     <div class="admin-link"><a href="{% url 'admin_index_wrapper' %}">Click here to add or edit content</a></div>
   {% endif %}
@@ -46,7 +47,7 @@
 {% block scripts %}
 <script>
 const searchBar = document.getElementById('search-bar');
-searchBar.oninput = () => {
+searchBar.oninput = function() {
   bundle.search('.searchable', searchBar);
 }
 </script>

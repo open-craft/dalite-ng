@@ -5,7 +5,7 @@
 {% block body %}
 <main>
   <section>
-    <h1 class="mdc-typography--display3" style="position:sticky;"> {{assignment.title}}
+    <h1 class="mdc-typography--display3"> {{assignment.title}}
       <svg class="underline" width=150 height=4></svg>
     </h1>
 
@@ -79,7 +79,7 @@
 {% block scripts %}
 {% compress js inline %}
 <script>
-document.querySelectorAll('.ripple-icon').forEach(
+[].forEach.call(document.querySelectorAll('.ripple-icon'),
   function(x,i,a) {
     const ripple = bundle.ripple.MDCRipple.attachTo(x);
     ripple.unbounded = true;
@@ -98,21 +98,21 @@ if (items[i].id == id){
 return;
 }
 function showAnalytics(id){
-var items = document.getElementsByName('analytics');
-showItems(items,id);
-bundle.selectAll("#first_choice-"+id).transition().duration(1000).attr("x",function(d){return bundle.select(this).attr("finalx");}).attr("width",function(d){return bundle.select(this).attr("finalwidth");});
-bundle.selectAll("#second_choice-"+id).transition().delay(1000).duration(1000).attr("width",function(d){return bundle.select(this).attr("finalwidth");});
-return;
+  var items = document.getElementsByName('analytics');
+  showItems(items,id);
+  bundle.selectAll("#first_choice-"+id).transition().duration(1000).attr("x",function(d){return bundle.select(this).attr("finalx");}).attr("width",function(d){return bundle.select(this).attr("finalwidth");});
+  bundle.selectAll("#second_choice-"+id).transition().delay(1000).duration(1000).attr("width",function(d){return bundle.select(this).attr("finalwidth");});
+  return;
 }
 function showAssignments(id){
-var items = document.getElementsByName('assignment');
-showItems(items,id);
-return;
+  var items = document.getElementsByName('assignment');
+  showItems(items,id);
+  return;
 }
 function showRationales(id){
-var items = document.getElementsByName('rationale');
-showItems(items,id);
-return;
+  var items = document.getElementsByName('rationale');
+  showItems(items,id);
+  return;
 }
 </script>
 {% for obj in object_list %}
