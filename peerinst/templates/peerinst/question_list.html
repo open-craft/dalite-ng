@@ -5,7 +5,7 @@
 {% block body %}
 <main>
   <section>
-    <h1 class="mdc-typography--display3"> {{assignment.title}}
+    <h1 class="mdc-typography--display3">{{assignment.title}}
       <svg class="underline" width=150 height=4></svg>
     </h1>
 
@@ -17,101 +17,160 @@
 
     <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Questions' %}</h2>
 
-    <ol>
-    {% for obj in object_list %}
-      <li class="dense-list mdc-typography--body1"> {{ obj.text|safe }}
-
-      <div class="mdc-typography--caption">
-        <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}">{{ obj.title|safe }}</a>:
-        {% for c in obj.category.all %}
-          {{ c.title|safe }}
-        {% empty %}
-          {% trans 'Uncategorized' %}
-        {% endfor %}
+    {% for g in object_list %}
+    <div class="mdc-card">
+      <div class="mdc-typography--title bold" style="margin-bottom:5px;">
+        {{g.title|safe}}
       </div>
 
-      <div id="stats-{{obj.id}}" class="stats">
-        <i class="material-icons analytics-tags" onclick="showAssignments({{ obj.id }})">description</i>{{ obj.assignment_set.all.count }}
-        <i class="material-icons analytics-tags" onclick="showRationales({{ obj.id }})">chat</i>{{ obj.answer_set.all.count }}
-        <i class="material-icons analytics-tags" onclick="showAnalytics({{ obj.id }})">assessment</i>
-        <span id="rating-{{obj.id}}"></span>
-        <a href="{% url 'question' assignment_id=assignment.pk question_id=obj.pk %}"><i style="overflow:visible;transform: translateY(8px);" class="material-icons analytics-tags ripple-icon mdc-theme--primary mdc-ripple-surface--primary md-32">play_arrow</i></a>
+      <div class="mdc-typography--body1">
+        {{g.text|safe}}
       </div>
 
-      {% if obj.image %}
-      <img class="question-image" src="{{ obj.image.url }}"
-        width=200 alt="obj.image_alt_text">
+      {% if g.image %}
+      <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text">
       {% endif %}
-      <div style="clear:both;"></div>
-      <div>
-        <span id="{{ obj.id }}" name="analytics" class="items-for-question"><b>Analytics:</b></span>
-        <div id="{{ obj.id }}" name="analytics" class="items-for-question">
-          <svg id="first-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
-          <svg id="matrix-{{ obj.id }}" width="60" height="60" style="vertical-align:middle"></svg>
-          <svg id="second-frequency-{{ obj.id }}" width="300" height="80" style="vertical-align:middle"></svg>
+
+      <div class="mdc-card__actions">
+        <div class="mdc-card__action-buttons" style="color:grey;">
+          <div class="mdc-typography--caption">
+            <div>
+              {% trans 'Discipline' %}: {{g.discipline}}
+            </div>
+            <div>
+              {% trans 'Categories' %}:
+              {% for c in g.category.all %}
+              {{ c.title|safe }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+              {% trans 'Uncategorized' %}
+              {% endfor %}
+            </div>
+            <div>
+              {% trans 'Difficulty' %}:
+            </div>
+          </div>
+        </div>
+
+        <div class="mdc-card__action-icons">
+          <div id="stats-{{g.id}}" class="stats">
+            <i id="activate-dialog-assignments-{{g.id}}" class="material-icons md-24 analytics-tags">description</i>{{ g.assignment_set.all.count }}
+            <i id="activate-dialog-rationales-{{g.id}}" class="material-icons md-24 analytics-tags">chat</i>{{ g.answer_set.all.count }}
+            <i id="activate-dialog-analytics-{{g.id}}"
+            ref_id="{{g.id}}" class="material-icons md-24 analytics-tags">assessment</i>
+            <span id="rating-{{g.id}}"></span>
+          </div>
+          <a href="{% url 'question' assignment_id=assignment.pk question_id=g.pk %}">
+            <i style="overflow:visible;" class="material-icons md-36 analytics-tags ripple-icon mdc-theme--primary mdc-ripple-surface--primary md-32">play_arrow</i>
+          </a>
         </div>
       </div>
-      <div>
-        <span id="{{ obj.id }}" name="assignment" class="items-for-question"><b>Assignments:</b></span>
-        <ul>
-          {% for assignment in obj.assignment_set.all %}
-          <li id="{{ obj.id }}" name="assignment" class="items-for-question"><a href="{% url 'question-list' assignment_id=assignment.pk %}">{{ assignment.title }}</a></li>
-          {% endfor %}
-        </ul>
+    </div>
+
+    <aside id="dialog-assignments-{{g.id}}"
+      class="mdc-dialog"
+      role="alertdialog"
+      aria-labelledby="label"
+      aria-describedby="description">
+      <div class="mdc-dialog__surface">
+        <header class="mdc-dialog__header">
+          <h2 id="label" class="mdc-dialog__header__title">
+            {% trans 'Assignments' %}
+          </h2>
+        </header>
+        <section id="description" class="mdc-dialog__body mdc-dialog__body--scrollable">
+          <ul>
+            {% for assignment in g.assignment_set.all %}
+            <li id="{{ g.id }}" name="assignment" class="items-for-question"><a href="{% url 'question-list' assignment_id=assignment.pk %}">{{ assignment.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </section>
+        <footer class="mdc-dialog__footer">
+          <button type="button" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--accept">Ok</button>
+        </footer>
       </div>
-      <div>
-        <span id="{{ obj.id }}" name="rationale" class="items-for-question"><b>Rationales:</b></span>
-        <ul>
-          {% for answer in obj.answer_set.all %}
-          <li id="{{ obj.id }}" name="rationale" class="items-for-question">{{ answer.rationale|safe|striptags  }}</li>
-          {% endfor %}
-        </ul>
+      <div class="mdc-dialog__backdrop"></div>
+    </aside>
+
+    <aside id="dialog-rationales-{{g.id}}"
+      class="mdc-dialog"
+      role="alertdialog"
+      aria-labelledby="label"
+      aria-describedby="description">
+      <div class="mdc-dialog__surface">
+        <header class="mdc-dialog__header">
+          <h2 id="label" class="mdc-dialog__header__title">
+            {% trans 'Student rationales' %}
+          </h2>
+        </header>
+        <section id="description" class="mdc-dialog__body mdc-dialog__body--scrollable">
+          <ul>
+            {% for answer in g.answer_set.all %}
+            <li id="{{ g.id }}" name="rationale" class="items-for-question">{{ answer.rationale|safe|striptags  }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+        <footer class="mdc-dialog__footer">
+          <button type="button" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--accept">Ok</button>
+        </footer>
       </div>
-      </li>
-      {% empty %}
-      <li>{% trans 'No questions available.' %}</li>
-      {% endfor %}
-    </ol>
-</section>
+      <div class="mdc-dialog__backdrop"></div>
+    </aside>
+
+    <aside id="dialog-analytics-{{g.id}}"
+      class="mdc-dialog"
+      role="alertdialog"
+      aria-labelledby="label"
+      aria-describedby="description">
+      <div class="mdc-dialog__surface">
+        <header class="mdc-dialog__header">
+          <h2 id="label" class="mdc-dialog__header__title">
+            {% trans 'Analytics' %}
+          </h2>
+        </header>
+        <section id="description" class="mdc-dialog__body">
+          <div id="{{ g.id }}" name="analytics" class="items-for-question">
+            <svg id="first-frequency-{{ g.id }}" width="300" height="80" style="vertical-align:middle"></svg>
+            <svg id="matrix-{{ g.id }}" width="60" height="60" style="vertical-align:middle"></svg>
+            <svg id="second-frequency-{{ g.id }}" width="300" height="80" style="vertical-align:middle"></svg>
+          </div>
+        </section>
+        <footer class="mdc-dialog__footer">
+          <button type="button" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--accept">Ok</button>
+        </footer>
+      </div>
+      <div class="mdc-dialog__backdrop"></div>
+    </aside>
+    {% empty %}
+    <ul>
+      <li><strong>Note:</strong>{% trans 'There are currently no questions in this assignment' %}.</li>
+    </ul>
+    {% endfor %}
+  </section>
 </main>
 {% endblock %}
 
 {% block scripts %}
 {% compress js inline %}
 <script>
+bundle.addDialog();
+
+[].forEach.call(document.querySelectorAll('.analytics-tags'),
+  function(el,i,list) {
+    el.addEventListener('click', function() {
+      showAnalytics(el.getAttribute('ref_id'));
+    }, false);
+  }
+);
+
 [].forEach.call(document.querySelectorAll('.ripple-icon'),
-  function(x,i,a) {
-    const ripple = bundle.ripple.MDCRipple.attachTo(x);
+  function(el) {
+    const ripple = bundle.ripple.MDCRipple.attachTo(el);
     ripple.unbounded = true;
   }
 )
-function showItems(items,id){
-for (var i=0; i<items.length; i++){
-if (items[i].id == id){
-  if (items[i].style.display != "block"){
-    items[i].style.display = "block";
-  } else {
-    items[i].style.display = "none";
-  }
-}
-}
-return;
-}
 function showAnalytics(id){
-  var items = document.getElementsByName('analytics');
-  showItems(items,id);
   bundle.selectAll("#first_choice-"+id).transition().duration(1000).attr("x",function(d){return bundle.select(this).attr("finalx");}).attr("width",function(d){return bundle.select(this).attr("finalwidth");});
   bundle.selectAll("#second_choice-"+id).transition().delay(1000).duration(1000).attr("width",function(d){return bundle.select(this).attr("finalwidth");});
-  return;
-}
-function showAssignments(id){
-  var items = document.getElementsByName('assignment');
-  showItems(items,id);
-  return;
-}
-function showRationales(id){
-  var items = document.getElementsByName('rationale');
-  showItems(items,id);
   return;
 }
 </script>
