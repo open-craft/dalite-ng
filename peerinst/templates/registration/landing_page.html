@@ -1,6 +1,6 @@
 {% extends "peerinst/base.html" %}
 
-{% load staticfiles compress %}
+{% load staticfiles compress i18n %}
 
 {% block stylesheets %}
 {% compress css inline %}
@@ -60,13 +60,14 @@ header {
   margin-left:20px;
   margin-right:20px;
 }
-.navleft {
+.navtopright {
   position:absolute;
   font-size:11pt;
-  bottom:4px;
-  left:20px;
+  top:4px;
+  right:2px;
+  text-align: right;
 }
-.navleft a {
+.navtopright a {
   padding-right:20px;
   color: white;
 }
@@ -109,16 +110,18 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 </script>
 
 <header class="mdc-toolbar mdc-toolbar--fixed mdc-toolbar--flexible mdc-toolbar--waterfall">
-  <div class="mdc-toolbar__row">
+  <div class="mdc-toolbar__row" style="padding-top:20px;">
     <svg id="animation" width=800 height=80></svg>
     <i id="scrollprompt" class="icon ion-arrow-down-b"></i>
-    <span class="navleft">
-      <a href="{% url 'login' %}">Login</a>
-      <a href="{% url 'sign_up' %}">Signup</a>
+    <span class="navtopright">
+      <a href="{% url 'login' %}">{% trans 'Login' %}</a>
+      <a href="{% url 'sign_up' %}">{% trans 'Signup' %}</a>
     </span>
+    <!--
     <span class="navright">
       <a href="">EN</a>
     </span>
+    -->
   </div>
 </header>
 

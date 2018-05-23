@@ -18,7 +18,7 @@
 
     <div class="mdc-form-field">
       <span class="mdc-theme--secondary">Show images</span>
-      <i class="mdc-icon-toggle material-icons toggle-images mdc-theme--secondary" role="button"        aria-pressed="false"
+      <i class="mdc-icon-toggle material-icons toggle-images mdc-theme--secondary" role="button" aria-pressed="false"
       aria-label="Toggle images" tabindex="0"
       data-toggle-on='{"label": "Hide images", "content": "check_box"}'
       data-toggle-off='{"label": "Show images", "content": "check_box_outline_blank"}'>
@@ -47,7 +47,7 @@
       </div>
 
       {% if g.image %}
-      <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text">
+      <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text" style="display:none;">
       {% endif %}
 
       <div class="question-answers" style="display:none;">

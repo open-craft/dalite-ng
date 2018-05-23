@@ -399,10 +399,12 @@ export function addDialog() {
 *  @function
 */
 export function toggleImages() {
+  console.info('Hi');
   [].forEach.call(document.querySelectorAll('.toggle-images'),
     (el) => {
+      console.info(sessionStorage.images);
       const toggle = bundle.iconToggle.MDCIconToggle.attachTo(el);
-      if (sessionStorage.images) {
+      if (sessionStorage.images !== undefined) {
         if (sessionStorage.images == 'block') {
           toggle.on = true;
         } else {
@@ -410,7 +412,11 @@ export function toggleImages() {
         }
         [].forEach.call(document.querySelectorAll('.question-image'),
           (el) => {
-            el.style.display = sessionStorage.images;
+            if (sessionStorage.images == 'block') {
+              el.style.display = 'block';
+            } else {
+              el.style.display = 'none';
+            }
           }
         );
       }
