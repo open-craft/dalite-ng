@@ -5,7 +5,6 @@
 /log
 /media
 /static
-logo.png
 src
 locust*
 /sent_emails

@@ -69,7 +69,7 @@ def landing_page(request):
     disciplines[str('All')][str('students')] = Student.objects.count()
     disciplines[str('All')][str('teachers')] = Teacher.objects.count()
 
-    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]:
+    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:3]:
         disciplines[str(d.title)] = {}
         disciplines[str(d.title)][str('questions')] = Question.objects.filter(discipline=d).count()
         disciplines[str(d.title)][str('rationales')] = Answer.objects.filter(question__discipline=d).count()
@@ -102,7 +102,7 @@ def landing_page(request):
 
     disciplines_array.append(d2)
 
-    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:5]:
+    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:3]:
         d2 = {}
         d2[str('name')] = str(d.title)
         d2[str('questions')] = Question.objects.filter(discipline=d).count()

@@ -11,9 +11,6 @@ header {
 .site-content {
   margin-bottom: 80pt;
 }
-.image-list {
-  margin-top: 20pt;
-}
 .icon {
   font-size:24pt;
 }
@@ -64,12 +61,12 @@ header {
   position:absolute;
   font-size:11pt;
   top:4px;
-  right:2px;
+  right:5px;
   text-align: right;
+  color: white;
 }
 .navtopright a {
-  padding-right:20px;
-  color: white;
+  padding-right:10px;
 }
 .navright {
   position:absolute;
@@ -85,9 +82,23 @@ header {
 .count {
   font-size: 32pt;
 }
+.school-logo {
+  width:100%;
+  filter: grayscale(1);
+  max-width:200px;
+  display: block;
+  margin: auto;
+  padding: 20px;
+  cursor: pointer;
+}
+.school-logo:hover {
+  filter: grayscale(0);
+  transition: filter 500ms;
+}
 #scrollprompt {
   color: white;
   position:absolute;
+  cursor: pointer;
   bottom:0px;
   left:50%;
 }
@@ -95,6 +106,22 @@ header {
   display:block;
   margin:auto;
   overflow:visible;
+}
+@media (max-width:450px) {
+  .mdc-typography--display3 {
+    padding-top:40px;
+  }
+  .mdc-typography--caption {
+    margin-top: 10px;
+    font-size:14px;
+  }
+  .navtopright {
+    font-size:10pt;
+    right:0px;
+  }
+  .count {
+    font-size: 20pt;
+  }
 }
 </style>
 {% endcompress %}
@@ -110,14 +137,14 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 </script>
 
 <header class="mdc-toolbar mdc-toolbar--fixed mdc-toolbar--flexible mdc-toolbar--waterfall">
-  <div class="mdc-toolbar__row" style="padding-top:20px;">
+  <div class="mdc-toolbar__row" style="padding-top:30px;">
     <svg id="animation" width=800 height=80></svg>
     <i id="scrollprompt" class="icon ion-arrow-down-b"></i>
     <span class="navtopright">
       <a href="{% url 'login' %}">{% trans 'Login' %}</a>
       <a href="{% url 'sign_up' %}">{% trans 'Signup' %}</a>
     </span>
-    <!--
+    <!-- Language selector
     <span class="navright">
       <a href="">EN</a>
     </span>
@@ -127,12 +154,17 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 
 <main class="mdc-toolbar-fixed-adjust">
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background">Features
+    <h1 id="Features" class="mdc-typography--display3 mdc-theme--background">Features
       <svg class="underline" width=150 height=4></svg>
     </h1>
+
+    <p class="mdc-typography--body1">
+      myDALITE is a free open-source web-based platform that promotes <strong>deep learning</strong>. Its pedagogical foundations are guided by social learning and based on learning principles and practical know-how. It engages students in cognitive tasks that include written self-explanation, comparison and evaluation of explanations produced by peers, and reflection.
+    </p>
+
     <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
     <p class="mdc-typography--body1">
-      Teachers can use the same questions in-class in "polling-mode", or assign those items to students for out-of-class work through their LMS. Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
+      <strong>Peer instruction</strong> is an active learning strategy popularized by Eric Mazur from Harvard University. It is a strategy that involves a sequence of steps that promote deep thinking and discussion around the selection of the answers for multiple choice conceptual questions – <em>i.e.</em> <strong>think</strong>, <strong>vote</strong>, <strong>discuss and reflect</strong>, <strong>revote</strong>.  Teachers can use the same questions <strong>in-class</strong> in "polling mode", or assign those items to students for <strong>out-of-class</strong> work through their learning management system (LMS). Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
     </p>
     <h2 class="mdc-typography--headline">Most active disciplines</h2>
     <p class="mdc-typography--body1">
@@ -142,8 +174,8 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
       <div class="mdc-layout-grid__inner">
         {% for l in disciplines|first %}
         {% if l != "name" %}
-        <div class="mdc-layout-grid__cell--span-4-phone mdc-layout-grid__cell--span-4-tablet mdc-layout-grid__cell--span-3-desktop">
-          <svg class="stats" id="{{ l }}" width=150 height=150></svg>
+        <div class="mdc-layout-grid__cell--span-2-phone mdc-layout-grid__cell--span-4-tablet mdc-layout-grid__cell--span-3-desktop">
+          <svg class="stats" id="{{ l }}" width=150 height=150 style="overflow:visible;"></svg>
           <div class="mdc-typography--caption mdc-theme--primary">{{ l|capfirst }}</div>
         </div>
         {% endif %}
@@ -178,12 +210,29 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
     </h1>
     <h2 class="mdc-typography--headline">History</h2>
     <p class="mdc-typography--body1">
+      The Distributed Active Learning and Interactive Technology Environment (myDALITE) is the product of a design-based experiment that consisted of five iterative phases carried out over a nine-year period:</p>
+      <ul>
+        <li> the initial co-design development,</li>
+        <li> a research phase,</li>
+        <li> reformulation as an LTI-complaint tool for use in OpenEdX (and other learning management systems),</li>
+        <li> preparation for use by practitioners.</li>
+      </ul>
+      <p class="mdc-typography--body1">
+        myDALITE owes its start to funding from Dawson College and support from colleagues at the University of Toronto, OISE (Prof. James Slotta and graduate students). The research phase was funded by the Entente Canada Quebec grant ALPIC. The study on the use and implementation of DALITE was funded courtesy of a grant from the Programme d'aide à la recherche sur l'enseignement et l'apprentissage (PAREA; Using Collective Conceptual Networks for Learning: Linking school science to the real world with the aid of new IT tools- PA2011-06), and involved a collaboration between faculty from Dawson, John Abbott, and Vanier Colleges.</p>
+
+        <blockquote>This research showed DALITE to be an effective tool for supporting deep learning.</blockquote>
+
+      <p class="mdc-typography--body1">
+        The next iteration of DALITE, expansion, took it beyond the walls of our local colleges.  HarvardX, a founding member of the edX consortium, financed the development of DALITE into an open source, LTI-compliant tool, making it available through most major Learning Management Systems including: Moodle, OpenEdx, and Canvas. Since 2015, the SALTISE/S4 instance of DALITE, known as myDALITE.org, has been used in several Massive Open Online Courses (MOOCs) on the HarvardX and MITx platforms for courses in Physics, Exercise Science, and Ethics and Morality.
+      </p>
+
+      <h2 class="mdc-typography--headline">The Next Generation</h2>
+      <p class="mdc-typography--body1">
+         The current design iteration is focused on providing an improved interface for practitioners that makes myDALITE more than just an asynchronous peer instruction tool.   and puts its use in the hands of the instructor. In essence, myDALITE is now ready for primetime!
+      </p>
+
+
       Peer Instruction, popularized by Eric Mazur of Harvard University, is one of the most prevalent classroom activities today. Something fascinating happens during these peer discussions, whereby students can convince each other of the correct thinking. But what about instances when the class size is too small for diversity of answers, or the teacher wants to have students prepare for class using a similar approach? This is where DALITE was born!
-    </p>
-    <h2 class="mdc-typography--headline">The Next Generation</h2>
-    <p class="mdc-typography--body1">
-      HarvardX, a founding member of the edX consortium, financed the development of DALITE into an open source, LTI compliant tool, making it available through most major Learning Management Systems, including Moodle, OpenEdx and Canvas. Since 2015, the SALTISE/S4 instance of DALITE, known as myDALITE.org, has been used in several Massive Open Online Classroom (MOOCs) on the edX platform, including Physics, Exercise Science, and Ethics and Morality.
-    </p>
   </section>
 
   <section>
@@ -204,20 +253,23 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
     <h1 class="mdc-typography--display3 mdc-theme--background">Partners
       <svg class="underline" width=150 height=4></svg>
     </h1>
-    <h2 class="mdc-typography--headline">Paragraph title</h2>
-    <p class="mdc-typography--body1">
-      {% lorem %}
-    </p>
-    <div class="image-list">
-      <ul class="mdc-image-list mdc-image-list--masonry partner-list">
-        <li class="mdc-image-list__item">
-          <img class="mdc-image-list__image" style="width:200px" src="{% static 'peerinst/img/dawson_logo.png' %}">
-        </li>
-        <li class="mdc-image-list__item">
-          <img class="mdc-image-list__image" style="width:200px" src="{% static 'peerinst/img/mcgill_logo_big.png' %}">
-        </li>
-      </ul>
-    </div>
+
+    <ul class="mdc-image-list partner-list">
+      <li class="mdc-image-list__item">
+        <a href="http://www.dawsoncollege.qc.ca"><img class="mdc-image-list__image school-logo" src="{% static 'peerinst/img/Dawson-logo.png' %}"></a>
+      </li>
+      <li class="mdc-image-list__item">
+        <a href="http://www.johnabbott.qc.ca"><img class="mdc-image-list__image school-logo" src="{% static 'peerinst/img/JAC-logo.png' %}"></a>
+      </li>
+      <li class="mdc-image-list__item">
+        <a href="http://www.vaniercollege.qc.ca"><img class="mdc-image-list__image school-logo" src="{% static 'peerinst/img/Vanier-logo.png' %}"></a>
+      </li>
+
+      <li class="mdc-image-list__item">
+        <a href="http://http://www.education.gouv.qc.ca/ministere-de-leducation-et-de-lenseignement-superieur/"><img class="mdc-image-list__image school-logo" src="{% static 'peerinst/img/MESR-logo.png' %}"></a>
+      </li>
+    </ul>
+
   </section>
 </main>
 {% endblock %}
@@ -251,6 +303,9 @@ toolbar.listen('MDCToolbar:change', function(evt) {
   flexibleExpansionRatio = evt.detail.flexibleExpansionRatio;
   arrow.style.opacity = flexibleExpansionRatio;
 });
+arrow.onclick = function() {
+  document.querySelector("#Features").scrollIntoView({block: "center", inline: "center", behavior: "smooth"});
+}
 </script>
 
 <script>
@@ -281,7 +336,13 @@ function logo(){
   var xPoints = bundle.range(0,2*Math.PI+0.01,(2*Math.PI/5));
 
   function f(v,x,t,a) {
-    return Math.min(Math.max(10*flexibleExpansionRatio,2),4)*a*Math.sin(x-0.5*v*t);
+    var factor;
+    if(window.matchMedia("(min-width:450px)").matches){
+      factor = Math.min(Math.max(10*flexibleExpansionRatio,2),4);
+    } else {
+      factor = 1;
+    }
+    return factor*a*Math.sin(x-0.5*v*t);
   }
 
   function animation() {
@@ -341,7 +402,7 @@ function logo(){
     .y1(line3.y())
     .curve(bundle.curveNatural);
 
-    g.append("path")
+    var one = g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
     .attr("fill",bundle.rgb(244,244,244,0.3))
@@ -349,30 +410,33 @@ function logo(){
     .attr("d",intersection1)
     .transition()
     .duration(1000)
-    .attr("opacity",1)
-    .transition()
-    .duration(50)
-    .on("start", function repeat() {
-      if (offset1 == null) {
-        offset1 = bundle.now()-t0;
-      }
-      if (flexibleExpansionRatio>0.01) {
-        t = bundle.now();
-        bundle.active(this)
-        .attr("d",intersection1)
-        .transition()
-        .on("start", repeat);
-      }
-      else {
-        dt += bundle.now() - t;
-        t = bundle.now();
-        bundle.active(this)
-        .transition()
-        .on("start", repeat);
-      }
-    });
+    .attr("opacity",1);
 
-    g.append("path")
+    if (window.matchMedia("(min-width: 450px)").matches) {
+      one.transition()
+      .duration(50)
+      .on("start", function repeat() {
+        if (offset1 == null) {
+          offset1 = bundle.now()-t0;
+        }
+        if (flexibleExpansionRatio>0.01) {
+          t = bundle.now();
+          bundle.active(this)
+          .attr("d",intersection1)
+          .transition()
+          .on("start", repeat);
+        }
+        else {
+          dt += bundle.now() - t;
+          t = bundle.now();
+          bundle.active(this)
+          .transition()
+          .on("start", repeat);
+        }
+      });
+    }
+
+    var two = g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
     .attr("fill",bundle.rgb(244,244,244,0.5))
@@ -380,27 +444,30 @@ function logo(){
     .attr("d",intersection2)
     .transition()
     .duration(1000)
-    .attr("opacity",1)
-    .transition()
-    .duration(50)
-    .on("start", function repeat() {
-      if (offset2 == null) {
-        offset2 = bundle.now()-t0;
-      }
-      if (flexibleExpansionRatio>0.01) {
-        bundle.active(this)
-        .attr("d",intersection2)
-        .transition()
-        .on("start", repeat);
-      }
-      else {
-        bundle.active(this)
-        .transition()
-        .on("start", repeat);
-      }
-    });
+    .attr("opacity",1);
 
-    g.append("path")
+    if (window.matchMedia("(min-width: 450px)").matches) {
+      two.transition()
+      .duration(50)
+      .on("start", function repeat() {
+        if (offset2 == null) {
+          offset2 = bundle.now()-t0;
+        }
+        if (flexibleExpansionRatio>0.01) {
+          bundle.active(this)
+          .attr("d",intersection2)
+          .transition()
+          .on("start", repeat);
+        }
+        else {
+          bundle.active(this)
+          .transition()
+          .on("start", repeat);
+        }
+      });
+    }
+
+    var three = g.append("path")
     .datum(xPoints)
     .attr("class","intersection")
     .attr("fill",bundle.rgb(0,66,102,0.5))
@@ -408,25 +475,28 @@ function logo(){
     .attr("d",intersection3)
     .transition()
     .duration(1000)
-    .attr("opacity",1)
-    .transition()
-    .duration(50)
-    .on("start", function repeat() {
-      if (offset3 == null) {
-        offset3 = bundle.now()-t0;
-      }
-      if (flexibleExpansionRatio>0.01) {
-        bundle.active(this)
-        .attr("d",intersection3)
-        .transition()
-        .on("start", repeat);
-      }
-      else {
-        bundle.active(this)
-        .transition()
-        .on("start", repeat);
-      }
-    });
+    .attr("opacity",1);
+
+    if (window.matchMedia("(min-width: 450px)").matches) {
+      three.transition()
+      .duration(50)
+      .on("start", function repeat() {
+        if (offset3 == null) {
+          offset3 = bundle.now()-t0;
+        }
+        if (flexibleExpansionRatio>0.01) {
+          bundle.active(this)
+          .attr("d",intersection3)
+          .transition()
+          .on("start", repeat);
+        }
+        else {
+          bundle.active(this)
+          .transition()
+          .on("start", repeat);
+        }
+      });
+    }
 
     title();
   }
@@ -466,11 +536,16 @@ function logo(){
       window.location="{% url 'login' %}"
     });
 
+    var dx = 0;
+    if (!window.matchMedia("(min-width:350px)").matches) {
+      dx = -20;
+    }
+
     g.append("text")
     .attr("class","title")
     .attr("x",margin.left+innerWidth/2+175)
     .attr("y",y(0))
-    .attr("dx",-110)
+    .attr("dx",-110+dx)
     .attr("dy","16pt")
     .attr("fill","white")
     .attr("text-anchor","end")
@@ -481,7 +556,7 @@ function logo(){
 
     g.append("text")
     .attr("class","title")
-    .attr("x",margin.left+innerWidth/2+145)
+    .attr("x",margin.left+innerWidth/2+145+dx)
     .attr("y",y(0))
     .attr("dx","20pt")
     .attr("dy","16pt")
@@ -511,73 +586,94 @@ labels = bundle.keys(data['All']);
 var svg = [];
 var width = [];
 var height = [];
-
 var g = [];
 var text = [];
-for (var i=0; i<labels.length; i++){
-  svg[i] =  bundle.select("#"+labels[i]);
-  width[i] = +svg[i].attr('width');
-  height[i] = +svg[i].attr('height');
 
-  g[i] = svg[i].append("g")
-  .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
+function drawCounts() {
+  bundle.selectAll(".count-background").remove();
+  bundle.selectAll(".count").remove();
 
-  /*let gradientR = g[i].append("radialGradient")
-  .attr("id",'radialGradient')
-  .attr('x1',0)
-  .attr('x2',1)
-  .attr('y1',0)
-  .attr('y2',0);
+  for (var i=0; i<labels.length; i++){
+    svg[i] =  bundle.select("#"+labels[i]);
 
-  gradientR.append("stop")
-  .attr("offset",'0%')
-  .attr('stop-color','rgba(255,255,255,0.1)');
+    var dy;
+    if (window.matchMedia("(max-width:450px)").matches) {
+      svg[i].attr('width',90);
+      svg[i].attr('height',90);
+      dy = 12;
+    } else {
+      svg[i].attr('width',140);
+      svg[i].attr('height',140);
+      dy = 20;
+    }
 
-  gradientR.append("stop")
-  .attr("offset",'100%')
-  .attr('stop-color','var(--mdc-theme-primary)');*/
+    width[i] = +svg[i].attr('width');
+    height[i] = +svg[i].attr('height');
 
-  g[i].append("circle")
-  .attr("class","count-background")
-  .attr("cx",0)
-  .attr("cy",0)
-  .attr("r",70)
-  .attr("fill","white");
+    g[i] = svg[i].append("g")
+    .attr("transform","translate(" + width[i]/2 + "," + height[i]/2 + ")");
 
-  g[i].append("circle")
-  .attr("class","count-background")
-  .attr("cx",0)
-  .attr("cy",0)
-  .attr("r",70)
-  .attr("opacity",0.2)
-  .attr("fill","var(--mdc-theme-primary)");
+    /*let gradientR = g[i].append("radialGradient")
+    .attr("id",'radialGradient')
+    .attr('x1',0)
+    .attr('x2',1)
+    .attr('y1',0)
+    .attr('y2',0);
 
-  g[i].append("circle")
-  .attr("class","count-background")
-  .attr("cx",0)
-  .attr("cy",0)
-  .attr("r",70)
-  .attr("stroke","var(--mdc-theme-primary)")
-  .attr("stroke-width",1.5)
-  .attr("fill",'none');
+    gradientR.append("stop")
+    .attr("offset",'0%')
+    .attr('stop-color','rgba(255,255,255,0.1)');
 
-  /*g[i].append("circle")
-  .attr("class","count-background")
-  .attr("cx",0)
-  .attr("cy",0)
-  .attr("r",80)
-  .attr("fill","url(#radialGradient)");*/
+    gradientR.append("stop")
+    .attr("offset",'100%')
+    .attr('stop-color','var(--mdc-theme-primary)');*/
 
-  text[i] = g[i].append("text")
-  .attr("class","count")
-  .attr("c",data['All'][labels[i]])
-  .attr("x",0)
-  .attr("y",0)
-  .attr("dy",20)
-  .attr("text-anchor","middle")
-  .attr("fill","var(--mdc-theme-primary)")
-  .text(data['All'][labels[i]]);
+    g[i].append("circle")
+    .attr("class","count-background")
+    .attr("cx",0)
+    .attr("cy",0)
+    .attr("r",width[i]/2)
+    .attr("fill","white");
+
+    g[i].append("circle")
+    .attr("class","count-background")
+    .attr("cx",0)
+    .attr("cy",0)
+    .attr("r",width[i]/2)
+    .attr("opacity",0.2)
+    .attr("fill","var(--mdc-theme-primary)");
+
+    g[i].append("circle")
+    .attr("class","count-background")
+    .attr("cx",0)
+    .attr("cy",0)
+    .attr("r",width[i]/2)
+    .attr("stroke","var(--mdc-theme-primary)")
+    .attr("stroke-width",1.5)
+    .attr("fill",'none');
+
+    /*g[i].append("circle")
+    .attr("class","count-background")
+    .attr("cx",0)
+    .attr("cy",0)
+    .attr("r",80)
+    .attr("fill","url(#radialGradient)");*/
+
+    text[i] = g[i].append("text")
+    .attr("class","count")
+    .attr("c",data['All'][labels[i]])
+    .attr("x",0)
+    .attr("y",0)
+    .attr("dy",dy)
+    .attr("text-anchor","middle")
+    .attr("fill","var(--mdc-theme-primary)")
+    .text(data['All'][labels[i]]);
+  }
 }
+
+drawCounts();
+
+window.addEventListener("resize", drawCounts);
 
 function counts(dataset) {
 
@@ -632,7 +728,7 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
-var w = Math.min(560,document.querySelector("section").offsetWidth-25);
+var w = Math.min(700,document.querySelector("section").offsetWidth-25);
 var h = 315/560*w;
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
@@ -641,6 +737,12 @@ function onYouTubeIframeAPIReady() {
     videoId: 'uW2r0jGNp8I',
   });
 }
+window.addEventListener("resize", function() {
+  var yt = document.querySelector('#player');
+  var w = Math.min(700,document.querySelector("section").offsetWidth-25);
+  yt.setAttribute("width",w);
+  yt.setAttribute("height",315/560*w);
+})
 </script>
 {% endcompress %}
 
