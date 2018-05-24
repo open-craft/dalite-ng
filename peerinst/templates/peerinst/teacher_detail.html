@@ -65,16 +65,15 @@
 <p>{% blocktrans %}A blink script is a series of blink questions strung together into one activity.  You do not have any blink scripts.{% endblocktrans %}</p>
 {% endif %}
 
-
 <ul class="mdc-list mdc-list--two-line mdc-list--non-interactive">
   {% for a in object.blinkassignment_set.all %}
   <li role="separator" class="mdc-list-divider"></li>
   <li class="mdc-list-item blink" id="edit-blink-{{a.pk}}">
     <span class="mdc-list-item__graphic mdc-theme--primary">
       {% if a.blinkassignmentquestion_set.all|length > 0 %}
-        <a href="{% url 'blinkAssignment-start' a.key %}" style="transform:translateY(4pt);">
-          <i class="mdc-theme--primary material-icons md-48">play_circle_filled</i>
-        </a>
+      <a href="{% url 'blink-waiting' username=object.user.username assignment=a.key %}" style="transform:translateY(4pt);">
+        <i class="mdc-theme--primary material-icons md-48">play_circle_filled</i>
+      </a>
       {% endif %}
     </span>
     <span class="mdc-list-item__text mdc-theme--secondary bold">

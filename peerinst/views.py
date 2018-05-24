@@ -994,6 +994,23 @@ class TeacherDetailView(TeacherBase,DetailView):
         context['LTI_secret'] = str(settings.LTI_CLIENT_SECRET)
         context['LTI_launch_url'] = str('https://'+self.request.get_host()+'/lti/')
 
+        # Set all blink assignments, questions, and rounds for this teacher to inactive
+        for a in self.get_object().blinkassignment_set.all():
+            if a.active:
+                a.active = False
+                a.save()
+
+        for b in self.get_object().blinkquestion_set.all():
+            if b.active:
+                b.active = False
+                b.save()
+
+                open_rounds = BlinkRound.objects.filter(question=b).filter(deactivate_time__isnull=True)
+
+                for open_round in open_rounds:
+                    open_round.deactivate_time = timezone.now()
+                    open_round.save()
+
         return context
 
 
@@ -1397,8 +1414,29 @@ def blink_get_current(request,username):
             return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
     except:
         # Else, redirect to summary for last active question
-        latest_round = BlinkRound.objects.filter(question__in=teacher.blinkquestion_set.all()).latest('activate_time')
-        return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
+        #latest_round = BlinkRound.objects.filter(question__in=teacher.blinkquestion_set.all()).latest('activate_time')
+        #return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
+
+        # Else, redirect to waiting room
+        return HttpResponseRedirect(reverse('blink-waiting', kwargs={'username' : teacher.user.username }))
+
+
+def blink_waiting(request,username,assignment=''):
+
+    try:
+        teacher = Teacher.objects.get(user__username=username)
+    except:
+        return HttpResponse('Error')
+
+    return TemplateResponse(
+        request,
+        'peerinst/blink_waiting.html',
+        context=
+            {
+                'assignment' : assignment,
+                'teacher' : teacher,
+            },
+        )
 
 
 # AJAX functions

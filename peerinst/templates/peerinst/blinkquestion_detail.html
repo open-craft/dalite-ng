@@ -197,6 +197,8 @@ function update_time(){
                 }
                 if (response == "stop") {
                   clearInterval(checkURLID);
+                  // Back to waiting room
+                  location = "{% url 'blink-waiting' username=teacher %}"
                 }
                 return;
               }
