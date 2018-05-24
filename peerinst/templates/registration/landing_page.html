@@ -154,21 +154,21 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 
 <main class="mdc-toolbar-fixed-adjust">
   <section>
-    <h1 id="Features" class="mdc-typography--display3 mdc-theme--background">Features
+    <h1 id="Features" class="mdc-typography--display3 mdc-theme--background">{% trans "Features" %}
       <svg class="underline" width=150 height=4></svg>
     </h1>
 
     <p class="mdc-typography--body1">
-      myDALITE is a free open-source web-based platform that promotes <strong>deep learning</strong>. Its pedagogical foundations are guided by social learning and based on learning principles and practical know-how. It engages students in cognitive tasks that include written self-explanation, comparison and evaluation of explanations produced by peers, and reflection.
+      {% blocktrans %} myDALITE is a free open-source web-based platform that promotes <strong>deep learning</strong>. Its pedagogical foundations are guided by social learning and based on learning principles and practical know-how. It engages students in cognitive tasks that include written self-explanation, comparison and evaluation of explanations produced by peers, and reflection. {% endblocktrans %}
     </p>
 
-    <h2 class="mdc-typography--headline">Peer Instruction: In-Class, At-Home, or in MOOCs</h2>
+    <h2 class="mdc-typography--headline">{% trans "Peer Instruction: In-Class, At-Home, or in MOOCs" %}</h2>
     <p class="mdc-typography--body1">
-      <strong>Peer instruction</strong> is an active learning strategy popularized by Eric Mazur from Harvard University. It is a strategy that involves a sequence of steps that promote deep thinking and discussion around the selection of the answers for multiple choice conceptual questions – <em>i.e.</em> <strong>think</strong>, <strong>vote</strong>, <strong>discuss and reflect</strong>, <strong>revote</strong>.  Teachers can use the same questions <strong>in-class</strong> in "polling mode", or assign those items to students for <strong>out-of-class</strong> work through their learning management system (LMS). Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time.
+      {% blocktrans %} <strong>Peer instruction</strong>is an active learning strategy popularized by Eric Mazur from Harvard University. It is a strategy that involves a sequence of steps that promote deep thinking and discussion around the selection of the answers for multiple choice conceptual questions – <em>i.e.</em> <strong>think</strong>, <strong>vote</strong>, <strong>discuss and reflect</strong>, <strong>revote</strong>. Teachers can use the same questions <strong>in-class</strong> in polling mode, or assign those items to students for<strong> out-of-class</strong> work through their learning management system (LMS). Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time. {% endblocktrans %}
     </p>
-    <h2 class="mdc-typography--headline">Most active disciplines</h2>
+    <h2 class="mdc-typography--headline">{% trans "Most active disciplines" %}</h2>
     <p class="mdc-typography--body1">
-      {% lorem %}
+      {% blocktrans %} myDALITE.org is a free, hosted service, where teachers can reuse the growing database of questions spanning subjects in science and the humanities. Funded by the SALTISE/S4 grant, the project aims to be the home of an open source community of quality, higher-order learning resources, built for Teachers, by Teachers. If you don't find the type of content you are looking for, you can make new question items of your own and contribute to the community. {% endblocktrans %}  
     </p>
     <div class="mdc-layout-grid">
       <div class="mdc-layout-grid__inner">
@@ -205,52 +205,48 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3  mdc-theme--background">Development
+    <h1 class="mdc-typography--display3  mdc-theme--background">{% trans "History" %}
       <svg class="underline" width=150 height=4></svg>
     </h1>
-    <h2 class="mdc-typography--headline">History</h2>
     <p class="mdc-typography--body1">
-      The Distributed Active Learning and Interactive Technology Environment (myDALITE) is the product of a design-based experiment that consisted of five iterative phases carried out over a nine-year period:</p>
+      {% blocktrans %} The Distributed Active Learning and Interactive Technology Environment (myDALITE) is the product of a design-based experiment that consisted of five iterative phases carried out over a nine-year period:</p>
       <ul>
-        <li> the initial co-design development,</li>
-        <li> a research phase,</li>
-        <li> reformulation as an LTI-complaint tool for use in OpenEdX (and other learning management systems),</li>
-        <li> preparation for use by practitioners.</li>
+        <li> - the initial co-design development, where teachers worked with researchers to design the tool</li>
+        <li> - a research phase, wherein several studies showed the<a href="https://dspacecdc-test.inlibro.net/xmlui/bitstream/handle/11515/34789/CHARLES-E-et-coll_2015_Affiche.pdf?sequence=1&isAllowed=y">benefits</a> and <a href="https://files.eric.ed.gov/fulltext/ED560883.pdf">power</a> of <a href="http://www.professeurs.polymtl.ca/michel.desmarais/Publications-Michel/EC-TEL_2016_paper_201.pdf">extending</a> Peer Instruction in <a href="https://www.isls.org/cscl2015/papers/MC-0280-FullPaper-Charles.pdf">this way</a></li>
+        <li> - a reformulation as an LTI-complaint tool for use in Learning Management Systems, with successful integrations now in OpenEdx, Moodle, and eConcordia, which brought the research idea to a technical maturity ready for scale</li>
+        <li> - the preparation for use by practitioners, such that the tool now has many of the UX/UI components teachers expect of a modern, stable web based product: one that can count on to help regularly engage their students with higher order learning tasks</li> {% endblocktrans %}
       </ul>
-      <p class="mdc-typography--body1">
-        myDALITE owes its start to funding from Dawson College and support from colleagues at the University of Toronto, OISE (Prof. James Slotta and graduate students). The research phase was funded by the Entente Canada Quebec grant ALPIC. The study on the use and implementation of DALITE was funded courtesy of a grant from the Programme d'aide à la recherche sur l'enseignement et l'apprentissage (PAREA; Using Collective Conceptual Networks for Learning: Linking school science to the real world with the aid of new IT tools- PA2011-06), and involved a collaboration between faculty from Dawson, John Abbott, and Vanier Colleges.</p>
 
-        <blockquote>This research showed DALITE to be an effective tool for supporting deep learning.</blockquote>
+        <blockquote>{% trans "This research showed DALITE to be an effective tool for supporting deep learning." %}</blockquote>
 
+      <h2 class="mdc-typography--headline">{% trans "The Next Generation" %}</h2>
       <p class="mdc-typography--body1">
-        The next iteration of DALITE, expansion, took it beyond the walls of our local colleges.  HarvardX, a founding member of the edX consortium, financed the development of DALITE into an open source, LTI-compliant tool, making it available through most major Learning Management Systems including: Moodle, OpenEdx, and Canvas. Since 2015, the SALTISE/S4 instance of DALITE, known as myDALITE.org, has been used in several Massive Open Online Courses (MOOCs) on the HarvardX and MITx platforms for courses in Physics, Exercise Science, and Ethics and Morality.
+         {% trans "Sign up for myDALITE.org and become a member of a growing community of teachers who are helping one anotherby sharing and making the most of the quality content and strategies we produce for our students." %} 
       </p>
 
-      <h2 class="mdc-typography--headline">The Next Generation</h2>
-      <p class="mdc-typography--body1">
-         The current design iteration is focused on providing an improved interface for practitioners that makes myDALITE more than just an asynchronous peer instruction tool.   and puts its use in the hands of the instructor. In essence, myDALITE is now ready for primetime!
-      </p>
-
-
-      Peer Instruction, popularized by Eric Mazur of Harvard University, is one of the most prevalent classroom activities today. Something fascinating happens during these peer discussions, whereby students can convince each other of the correct thinking. But what about instances when the class size is too small for diversity of answers, or the teacher wants to have students prepare for class using a similar approach? This is where DALITE was born!
   </section>
 
   <section>
     <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4
       <svg class="underline" width=150 height=4></svg>
     </h1>
-    <h2 class="mdc-typography--headline">Vision</h2>
+    <h2 class="mdc-typography--headline">{% trans "Vision" %}</h2>
     <p class="mdc-typography--body1">
-      SALTISE is a learning community that fosters the development and research of tools and resources for pedagogical innovations as well as bringing together educators (researchers and practitioners) and professional development personnel across the province of Quebec, as well as welcoming national and international partnerships.
+      {% trans "SALTISE is a learning community that fosters the development and research of tools and resources for pedagogical innovations as well as bringing together educators (researchers and practitioners) and professional development personnel across the province of Quebec, as well as welcoming national and international partnerships." %}
     </p>
-    <h2 class="mdc-typography--headline">The S4 project</h2>
+    <h2 class="mdc-typography--headline">{% trans "The S4 project" %}</h2>
     <p class="mdc-typography--body1">
-      {% lorem %}
+      {% blocktrans %} The SALTISE/S4 project is a major 5-year multi-institution infrastructure grant hosted at Dawson College. The madate is to develop a data-driven platform founded on three pillars:
+      <ul>
+        <li> - Teachers: a place where where the pedagogical strategies and artefacts teachers produce can be hosted and showcased to a network of colleagues, and that can be iteratively improved based on the data associated with the different contexts there are used in</li>
+        <li> - Researchers: a platform that enables learning science researchers to engage directly with practitionners in a seamless way, collaborating to ask new questions about effective pedagogical practices and learning proceesses, and ultimately bring their expertise to the field faster</li>
+        <li> - Students: putting students in the research-design loop as we build novel learning resources, while providing them with a persistent place to monitor how their knowldge evolves not just over one semester, but across the years. {% endblocktrans %}</li>
+      </ul>
     </p>
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3 mdc-theme--background">Partners
+    <h1 class="mdc-typography--display3 mdc-theme--background">{% trans "Partners" %}
       <svg class="underline" width=150 height=4></svg>
     </h1>
 

@@ -86,9 +86,6 @@ def landing_page(request):
 
     disciplines_json = json.dumps(disciplines)
 
-    print(disciplines)
-    print(json.dumps(disciplines,indent=4, separators=(',', ': ')))
-
 
     ### try again, with re-ordering
     disciplines_array = []
@@ -119,8 +116,6 @@ def landing_page(request):
         d2[str('teachers')] = d.teacher_set.count()
 
         disciplines_array.append(d2)
-
-    print(disciplines_array)
 
     return TemplateResponse(
         request,
