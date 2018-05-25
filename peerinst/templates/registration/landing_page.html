@@ -107,7 +107,24 @@ header {
   margin:auto;
   overflow:visible;
 }
+.blurb {
+  margin-bottom:30pt;
+  text-align:justify;
+}
+.balloon {
+  float:left;
+  padding-top:10px;
+  margin-right:12px;
+}
+.mdc-typography--headline {
+  font-size: 1.3rem;
+  line-height: 2rem;
+}
 @media (max-width:450px) {
+  .mdc-typography--headline {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
   .mdc-typography--display3 {
     padding-top:40px;
   }
@@ -158,18 +175,41 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
       <svg class="underline" width=150 height=4></svg>
     </h1>
 
-    <p class="mdc-typography--body1">
-      {% blocktrans %} myDALITE is a free open-source web-based platform that promotes <strong>deep learning</strong>. Its pedagogical foundations are guided by social learning and based on learning principles and practical know-how. It engages students in cognitive tasks that include written self-explanation, comparison and evaluation of explanations produced by peers, and reflection. {% endblocktrans %}
-    </p>
+    <div class="blurb">
+      <div class="balloon">
+          <svg class="lightbulb" width=80 height=80></svg>
+      </div>
+      <p class="mdc-typography--headline">
+        {% blocktrans %} <span style="font-family: 'Cardo', serif;font-style:italic;">my</span>DALITE is a free open-source web-based platform that promotes <strong>deep learning</strong>. Its pedagogical foundations are guided by social learning and based on learning principles and practical know-how. It engages students in cognitive tasks that include written self-explanation, comparison and evaluation of explanations produced by peers, and reflection. {% endblocktrans %}
+      </p>
+    </div>
 
-    <h2 class="mdc-typography--headline">{% trans "Peer Instruction: In-Class, At-Home, or in MOOCs" %}</h2>
-    <p class="mdc-typography--body1">
-      {% blocktrans %} <strong>Peer instruction</strong>is an active learning strategy popularized by Eric Mazur from Harvard University. It is a strategy that involves a sequence of steps that promote deep thinking and discussion around the selection of the answers for multiple choice conceptual questions – <em>i.e.</em> <strong>think</strong>, <strong>vote</strong>, <strong>discuss and reflect</strong>, <strong>revote</strong>. Teachers can use the same questions <strong>in-class</strong> in polling mode, or assign those items to students for<strong> out-of-class</strong> work through their learning management system (LMS). Instructional designers can access the same server for MOOCs for thousands of students. Teachers can peruse content based on analytics, and get reports for how their students are doing over time. {% endblocktrans %}
-    </p>
-    <h2 class="mdc-typography--headline">{% trans "Most active disciplines" %}</h2>
-    <p class="mdc-typography--body1">
-      {% blocktrans %} myDALITE.org is a free, hosted service, where teachers can reuse the growing database of questions spanning subjects in science and the humanities. Funded by the SALTISE/S4 grant, the project aims to be the home of an open source community of quality, higher-order learning resources, built for Teachers, by Teachers. If you don't find the type of content you are looking for, you can make new question items of your own and contribute to the community. {% endblocktrans %}  
-    </p>
+    <div class="blurb">
+      <div class="balloon">
+          <svg class="peerinst" width=80 height=80></svg>
+      </div>
+      <p class="mdc-typography--headline">
+        {% blocktrans %} <strong>Peer instruction</strong> is an active learning strategy popularized by Eric Mazur from Harvard University. It involves a sequence of steps that promotes critical thinking and discussion through the use of multiple choice conceptual questions.  It encourages students to first <strong>reflect</strong> on a conceptually challenging idea, <strong>vote</strong>, <strong>discuss with peers</strong>, and <strong>revote</strong>. {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="blurb">
+      <div class="balloon">
+          <svg class="school" width=80 height=80></svg>
+      </div>
+      <p class="mdc-typography--headline">
+        {% blocktrans %} With <span style="font-family: 'Cardo', serif;font-style:italic;">my</span>DALITE, teachers can use the same questions <strong>in class</strong> in polling mode, or assign questions as <strong>out-of-class</strong> homework through any learning management system.  Teachers can peruse content based on analytics and get reports for how their students are doing over time. {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="blurb" style="margin-bottom:0px;">
+      <div class="balloon">
+          <svg class="activity" width=80 height=80></svg>
+      </div>
+      <p class="mdc-typography--headline">
+        {% blocktrans %} <span style="font-family: 'Cardo', serif;font-style:italic;">my</span>DALITE has a <strong>growing database</strong> of questions in subjects ranging from chemistry to the humanities. It is funded by the SALTISE/S4 grant and aims to be the home of an open-source community offering high-impact high-quality learning resources <strong>built for teachers by teachers</strong>. If you don't find the type of content you are looking for, you can author new question items and contribute to the ever-growing community!  The current top disciplines are:{% endblocktrans %}
+      </p>
+    </div>
     <div class="mdc-layout-grid">
       <div class="mdc-layout-grid__inner">
         {% for l in disciplines|first %}
@@ -221,7 +261,7 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 
       <h2 class="mdc-typography--headline">{% trans "The Next Generation" %}</h2>
       <p class="mdc-typography--body1">
-         {% trans "Sign up for myDALITE.org and become a member of a growing community of teachers who are helping one anotherby sharing and making the most of the quality content and strategies we produce for our students." %} 
+         {% trans "Sign up for myDALITE.org and become a member of a growing community of teachers who are helping one anotherby sharing and making the most of the quality content and strategies we produce for our students." %}
       </p>
 
   </section>
@@ -714,6 +754,114 @@ function update(t,e) {
   counts(data[t.id]);
   return;
 }
+</script>
+
+<script>
+var peerinst = bundle.select('.peerinst');
+
+var g = peerinst.append("g")
+.attr("transform","translate(" + peerinst.attr('width')/2 + "," + peerinst.attr('height')/2 + ")");
+
+g.append('circle')
+  .attr('cx', 0)
+  .attr('cy', 0)
+  .attr('r', 40)
+  .attr('fill', 'var(--mdc-theme-primary)');
+
+g.append('text')
+  .attr('class', 'material-icons md-36')
+  .attr('x', 0)
+  .attr('dx', -10)
+  .attr('y', 0)
+  .attr('text-anchor', 'middle')
+  .attr('baseline-shift', '-40%')
+  .attr('fill', 'white')
+  .text('chat_bubble_outline');
+
+g.append('text')
+  .attr('class', 'material-icons md-36')
+  .attr('x', 0)
+  .attr('dx', -10)
+  .attr('y', 0)
+  .attr('transform', 'scale(-1,1)')
+  .attr('text-anchor', 'middle')
+  .attr('baseline-shift', '-60%')
+  .attr('fill', 'white')
+  .text('chat_bubble_outline');
+
+
+  var school = bundle.select('.school');
+
+  var g = school.append("g")
+  .attr("transform","translate(" + school.attr('width')/2 + "," + school.attr('height')/2 + ")");
+
+  g.append('circle')
+    .attr('cx', 0)
+    .attr('cy', 0)
+    .attr('r', 40)
+    .attr('fill', 'var(--mdc-theme-primary)');
+
+  g.append('text')
+    .attr('class', 'material-icons md-36')
+    .attr('x', 0)
+    .attr('dx', -15)
+    .attr('y', 0)
+    .attr('text-anchor', 'middle')
+    .attr('baseline-shift', '-30%')
+    .attr('fill', 'white')
+    .text('school');
+
+  g.append('text')
+    .attr('class', 'material-icons md-36')
+    .attr('x', 0)
+    .attr('dx', -15)
+    .attr('y', 0)
+    .attr('transform', 'scale(-1,1)')
+    .attr('text-anchor', 'middle')
+    .attr('baseline-shift', '-70%')
+    .attr('fill', 'white')
+    .text('home');
+
+var lightbulb = bundle.select('.lightbulb');
+
+var g = lightbulb.append("g")
+.attr("transform","translate(" + lightbulb.attr('width')/2 + "," + lightbulb.attr('height')/2 + ")");
+
+g.append('circle')
+  .attr('cx', 0)
+  .attr('cy', 0)
+  .attr('r', 40)
+  .attr('fill', 'var(--mdc-theme-primary)');
+
+g.append('text')
+  .attr('class', 'material-icons md-48')
+  .attr('x', 0)
+  .attr('y', 0)
+  .attr('text-anchor', 'middle')
+  .attr('baseline-shift', '-50%')
+  .attr('fill', 'white')
+  .text('lightbulb_outline');
+
+  var activity = bundle.select('.activity');
+
+  var g = activity.append("g")
+  .attr("transform","translate(" + activity.attr('width')/2 + "," + activity.attr('height')/2 + ")");
+
+  g.append('circle')
+    .attr('cx', 0)
+    .attr('cy', 0)
+    .attr('r', 40)
+    .attr('fill', 'var(--mdc-theme-primary)');
+
+  g.append('text')
+    .attr('class', 'material-icons md-60')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('text-anchor', 'middle')
+    .attr('baseline-shift', '-50%')
+    .attr('fill', 'white')
+    .text('trending_up');
+
 </script>
 
 <script>
