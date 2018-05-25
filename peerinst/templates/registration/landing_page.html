@@ -189,7 +189,7 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
           <svg class="peerinst" width=80 height=80></svg>
       </div>
       <p class="mdc-typography--headline">
-        {% blocktrans %} <strong>Peer instruction</strong> is an active learning strategy popularized by Eric Mazur from Harvard University. It involves a sequence of steps that promotes critical thinking and discussion through the use of multiple choice conceptual questions.  It encourages students to first <strong>reflect</strong> on a conceptually challenging idea, <strong>vote</strong>, <strong>discuss with peers</strong>, and <strong>revote</strong>. {% endblocktrans %}
+        {% blocktrans %} <strong>Peer instruction</strong> is an active learning strategy popularized by Eric Mazur from Harvard University. It involves a sequence of steps that promotes critical thinking and discussion through the use of multiple choice conceptual questions.  It encourages students to first reflect on a conceptually challenging idea, vote, <strong>discuss with peers</strong>, and revote. {% endblocktrans %}
       </p>
     </div>
 
@@ -770,16 +770,35 @@ g.append('circle')
 
 g.append('text')
   .attr('class', 'material-icons md-36')
+  .attr('id', 'chat_right')
   .attr('x', 0)
   .attr('dx', -10)
   .attr('y', 0)
   .attr('text-anchor', 'middle')
   .attr('baseline-shift', '-40%')
   .attr('fill', 'white')
-  .text('chat_bubble_outline');
+  .style('opacity', 0)
+  .text('chat_bubble_outline')
+  .transition()
+  .duration(1000)
+  .delay(Math.random()*500+500)
+  .on('start', function repeat() {
+    bundle.active(this)
+    .style('opacity', function() {
+      if (this.style.opacity > 0) {
+        return 0;
+      } else {
+        return 1;
+      }
+    })
+    .transition()
+    .delay(Math.random()*500+500)
+    .on("start", repeat);
+  });
 
 g.append('text')
   .attr('class', 'material-icons md-36')
+  .attr('id', 'chat_left')
   .attr('x', 0)
   .attr('dx', -10)
   .attr('y', 0)
@@ -787,7 +806,24 @@ g.append('text')
   .attr('text-anchor', 'middle')
   .attr('baseline-shift', '-60%')
   .attr('fill', 'white')
-  .text('chat_bubble_outline');
+  .style('opacity', 0)
+  .text('chat_bubble_outline')
+  .transition()
+  .duration(1000)
+  .delay(Math.random()*500+200)
+  .on('start', function repeat() {
+    bundle.active(this)
+    .style('opacity', function() {
+      if (this.style.opacity > 0) {
+        return 0;
+      } else {
+        return 1;
+      }
+    })
+    .transition()
+    .delay(Math.random()*500+200)
+    .on("start", repeat);
+  });
 
 
   var school = bundle.select('.school');
