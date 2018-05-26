@@ -1074,7 +1074,8 @@ function timeline() {
 
     bundle.selectAll('.timelineLabel').filter(function(d){return this.getAttribute('id') == exclude})
     .transition()
-    .duration(100)
+    .duration(500)
+    .style('opacity', 1)
     .style('font-size', '11pt');
 
     bundle.select(this)
