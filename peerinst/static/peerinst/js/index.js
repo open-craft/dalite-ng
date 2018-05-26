@@ -39,6 +39,7 @@ export {
   axisLeft,
   curveNatural,
   entries,
+  format,
   interrupt,
   keys,
   line,

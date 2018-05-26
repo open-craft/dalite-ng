@@ -143,6 +143,22 @@ header {
   font-style: italic;
   text-align:left;
 }
+blockquote {
+  font-family: 'Cardo', serif;
+  font-size:20pt;
+  font-style:italic;
+}
+.timeline-axis line{
+  stroke: var(--mdc-theme-secondary);
+}
+.timeline-axis text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11pt;
+  fill: var(--mdc-theme-secondary);
+}
+.timeline-axis path {
+  stroke: var(--mdc-theme-secondary);
+}
 @media (max-width:450px) {
   .mdc-typography--body1 {
     font-size: 0.8rem;
@@ -262,7 +278,12 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
       </div>
       {% endfor %}
     </div>
+
+
   </section>
+
+
+
 
   <section>
     <h1 class="mdc-typography--display3 mdc-theme--background">{{ 'A guided tour'|title }}
@@ -275,21 +296,20 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
     <h1 class="mdc-typography--display3  mdc-theme--background">{% trans "History" %}
       <svg class="underline" width=150 height=4></svg>
     </h1>
-    <p class="mdc-typography--body1">
-      {% blocktrans %} The Distributed Active Learning and Interactive Technology Environment (myDALITE) is the product of a design-based experiment that consisted of five iterative phases carried out over a nine-year period:</p>
-      <ul>
-        <li> - the initial co-design development, where teachers worked with researchers to design the tool</li>
-        <li> - a research phase, wherein several studies showed the<a href="https://dspacecdc-test.inlibro.net/xmlui/bitstream/handle/11515/34789/CHARLES-E-et-coll_2015_Affiche.pdf?sequence=1&isAllowed=y">benefits</a> and <a href="https://files.eric.ed.gov/fulltext/ED560883.pdf">power</a> of <a href="http://www.professeurs.polymtl.ca/michel.desmarais/Publications-Michel/EC-TEL_2016_paper_201.pdf">extending</a> Peer Instruction in <a href="https://www.isls.org/cscl2015/papers/MC-0280-FullPaper-Charles.pdf">this way</a></li>
-        <li> - a reformulation as an LTI-complaint tool for use in Learning Management Systems, with successful integrations now in OpenEdx, Moodle, and eConcordia, which brought the research idea to a technical maturity ready for scale</li>
-        <li> - the preparation for use by practitioners, such that the tool now has many of the UX/UI components teachers expect of a modern, stable web based product: one that can count on to help regularly engage their students with higher order learning tasks</li> {% endblocktrans %}
-      </ul>
 
-        <blockquote>{% trans "This research showed DALITE to be an effective tool for supporting deep learning." %}</blockquote>
-
-      <h2 class="mdc-typography--headline">{% trans "The Next Generation" %}</h2>
-      <p class="mdc-typography--body1">
-         {% trans "Sign up for myDALITE.org and become a member of a growing community of teachers who are helping one anotherby sharing and making the most of the quality content and strategies we produce for our students." %}
+    <div class="blurb">
+      <p class="mdc-typography--headline">
+        {% blocktrans %}
+        The Distributed Active Learning and Interactive Technology Environment is the product of a iterative design-based experiment carried out over a nine-year period:
+        {% endblocktrans %}
       </p>
+    </div>
+    <div class="blurb">
+      <svg id="history" width=350 height=350 style="overflow:visible;"></svg>
+    </div>
+
+    <blockquote class="mdc-theme--primary">{% blocktrans %}This research has shown my<span style="font-family: 'Montserrat', sans-serif;font-style:normal;">DALITE</span> to be an effective tool for supporting deep learning.{% endblocktrans %}</blockquote>
+
 
   </section>
 
@@ -376,6 +396,7 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 {% block scripts %}
 {% compress js inline %}
 <script>
+// MDC binds
 var toolbar = bundle.toolbar.MDCToolbar.attachTo(document.querySelector('.mdc-toolbar'));
 toolbar.fixedAdjustElement = document.querySelector('.mdc-toolbar-fixed-adjust');
 
@@ -391,10 +412,11 @@ arrow.onclick = function() {
 </script>
 
 <script>
+// Animations
 function logo(){
   'use strict';
 
-  // Animate waves
+  // Waves
   var svg = bundle.select("#animation");
   svg.attr("width",document.body.offsetWidth);
 
@@ -663,6 +685,7 @@ window.addEventListener("resize", logo);
 </script>
 
 <script>
+// Counts
 data = {{ json|safe }};
 labels = bundle.keys(data['All']);
 var svg = [];
@@ -803,6 +826,7 @@ function update(t,e) {
 </script>
 
 <script>
+// Draw icons for Features section
 var peerinst = bundle.select('.peerinst');
 
 var g = peerinst.append("g")
@@ -871,7 +895,6 @@ g.append('text')
     .delay(Math.random()*500+200)
     .on("start", repeat);
   });
-
 
   var school = bundle.select('.school');
 
@@ -950,6 +973,7 @@ g.append('text')
 </script>
 
 <script>
+// Hide/show pillar text
 [].forEach.call(document.querySelectorAll(".pillars"),
   function(el) {
     var d = document.querySelector("#for-"+el.id)
@@ -960,6 +984,104 @@ g.append('text')
       d.style.display = 'none';
     }
 })
+</script>
+
+<script>
+// History
+function timeline() {
+  'use strict';
+
+  var timelineData = {
+    "events" : [
+      { "year" : "2010",
+        "shortDesc" : "Initial co-design development",
+        "note" : "Teachers worked with researchers to design the tool" },
+      { "year" : "2015",
+        "shortDesc" : "Publication",
+        "note" : "<a href='https://dspacecdc-test.inlibro.net/xmlui/bitstream/handle/11515/34789/CHARLES-E-et-coll_2015_Affiche.pdf?sequence=1&isAllowed=y'>The benefits of DALITE</a>" },
+      { "year" : "2015.33",
+        "shortDesc" : "Publication",
+        "note" : "<a href='https://files.eric.ed.gov/fulltext/ED560883.pdf'>The power of DALITE</a>" },
+      { "year" : "2015.67",
+        "shortDesc" : "Publication",
+        "note" : "<a href='https://www.isls.org/cscl2015/papers/MC-0280-FullPaper-Charles.pdf'>Uptake of new tools</a>"},
+      { "year" : "2016",
+        "shortDesc" : "Publication",
+        "note" : "<a href='http://www.professeurs.polymtl.ca/michel.desmarais/Publications-Michel/EC-TEL_2016_paper_201.pdf'>Extending peer instruction</a>"},
+      { "year" : "2018.0",
+        "shortDesc" : "Modern web app",
+        "note" : "Extension from an LTI tool to a modern stable web app in preparation for use by practitioners"},
+      { "year" : "2018.5",
+        "shortDesc" : "New features",
+        "note" : "Development of new features: Content authoring, better analytics, stand-alone functionality outside of an LTI environment"},
+  ]
+};
+
+  var svg = bundle.select("#history");
+
+  svg.attr("width",document.querySelector("section").offsetWidth);
+
+  var width = +svg.attr("width"),
+  height = +svg.attr("height"),
+  margin = {top:1,bottom:1,left:1,right:1};
+
+  var innerWidth = width-margin.left-margin.right,
+  innerHeight = height-margin.top-margin.bottom;
+
+  svg.selectAll("g").remove();
+
+  var g = svg.append("g").attr("transform","translate("+(margin.left+0.2*innerWidth)+","+(margin.top+innerHeight/2)+")");
+
+  var y = bundle.scaleLinear().domain([2010,2019]).range([-innerHeight/2,innerHeight/2]);
+
+  var yAxis = g.append("g")
+    .attr('class', 'timeline-axis')
+    .call(
+      bundle.axisLeft(y).tickFormat(bundle.format('.0f'))
+      );
+
+  var events = g.append('g')
+    .selectAll('circle')
+    .data(timelineData.events)
+    .enter().append('circle')
+    .attr('cx', 0)
+    .attr('cy', function(d) { return y(d.year); })
+    .attr('r', 5)
+    .attr('fill', 'white')
+    .attr('stroke', 'var(--mdc-theme-primary)');
+
+  var notes = g.append('g')
+    .selectAll('text')
+    .data(timelineData.events)
+    .enter().append('text')
+    .attr('x', 0)
+    .attr('dx', 20)
+    .attr('y', function(d) { return y(d.year); })
+    .attr('dy', 5)
+    .attr('text-anchor', 'start')
+    .style('font-size', '9pt')
+    .attr('fill', 'var(--mdc-theme-primary)')
+    .text(function(d) {return d.shortDesc});
+
+  events.on('mouseover', function(d) {
+    bundle.select(this)
+      .transition()
+      .duration(500)
+      .attr('r',10);
+  })
+
+  events.on('mouseout', function(d) {
+    bundle.select(this)
+    .transition()
+    .duration(200)
+    .attr('r',5);
+  })
+
+}
+
+timeline();
+
+window.addEventListener('resize', timeline);
 
 </script>
 
@@ -988,5 +1110,4 @@ window.addEventListener("resize", function() {
 })
 </script>
 {% endcompress %}
-
 {% endblock %}
