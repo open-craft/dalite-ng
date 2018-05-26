@@ -120,6 +120,14 @@ header {
   font-size: 1.3rem;
   line-height: 2rem;
 }
+.text-link {
+  text-decoration: underline;
+  text-decoration-color: var(--mdc-theme-primary);
+}
+.text-link:hover {
+  color: var(--mdc-theme-primary);
+  transition: color 500ms;
+}
 @media (max-width:450px) {
   .mdc-typography--headline {
     font-size: 1rem;
@@ -270,19 +278,26 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
     <h1 class="mdc-typography--display3 mdc-theme--background">SALTISE/S4
       <svg class="underline" width=150 height=4></svg>
     </h1>
-    <h2 class="mdc-typography--headline">{% trans "Vision" %}</h2>
-    <p class="mdc-typography--body1">
-      {% trans "SALTISE is a learning community that fosters the development and research of tools and resources for pedagogical innovations as well as bringing together educators (researchers and practitioners) and professional development personnel across the province of Quebec, as well as welcoming national and international partnerships." %}
-    </p>
-    <h2 class="mdc-typography--headline">{% trans "The S4 project" %}</h2>
-    <p class="mdc-typography--body1">
-      {% blocktrans %} The SALTISE/S4 project is a major 5-year multi-institution infrastructure grant hosted at Dawson College. The madate is to develop a data-driven platform founded on three pillars:
-      <ul>
-        <li> - Teachers: a place where where the pedagogical strategies and artefacts teachers produce can be hosted and showcased to a network of colleagues, and that can be iteratively improved based on the data associated with the different contexts there are used in</li>
-        <li> - Researchers: a platform that enables learning science researchers to engage directly with practitionners in a seamless way, collaborating to ask new questions about effective pedagogical practices and learning proceesses, and ultimately bring their expertise to the field faster</li>
-        <li> - Students: putting students in the research-design loop as we build novel learning resources, while providing them with a persistent place to monitor how their knowldge evolves not just over one semester, but across the years. {% endblocktrans %}</li>
-      </ul>
-    </p>
+
+    <div class="blurb">
+      <p class="mdc-typography--headline" style="text-align:justify;">
+        {% blocktrans %}
+        <a class="text-link" href="http://www.saltise.ca">SALTISE</a> is a learning community that fosters the research and development of tools and resources for <strong>pedagogical innovation</strong>.  It brings together educators (researchers and practitioners) and professional development personnel across the province of Quebec, and welcomes national and international partnerships.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="blurb">
+      <p class="mdc-typography--headline">
+        {% blocktrans %} The SALTISE/S4 project is a major five-year multi-institution infrastructure grant hosted at Dawson College. The mandate is to develop a data-driven platform founded on three pillars:
+      </p>
+      
+        <ul class="mdc-typography--body1">
+          <li><i class="material-icons md-24 ">looks_one</i>Teachers: a place where where the pedagogical strategies and artefacts teachers produce can be hosted and showcased to a network of colleagues, and that can be iteratively improved based on the data associated with the different contexts there are used in</li>
+          <li><i class="material-icons md-24">looks_two</i>Researchers: a platform that enables learning science researchers to engage directly with practitionners in a seamless way, collaborating to ask new questions about effective pedagogical practices and learning proceesses, and ultimately bring their expertise to the field faster</li>
+          <li><i class="material-icons md-24">looks_3</i>Students: putting students in the research-design loop as we build novel learning resources, while providing them with a persistent place to monitor how their knowldge evolves not just over one semester, but across the years. {% endblocktrans %}</li>
+        </ul>
+    </div>
   </section>
 
   <section>
@@ -903,6 +918,8 @@ g.append('text')
     .text('trending_up');
 
 </script>
+
+
 
 <script>
 // Async load video as per API
