@@ -1054,6 +1054,8 @@ function timeline() {
     .selectAll('text')
     .data(timelineData.events)
     .enter().append('text')
+    .attr('class', 'timelineLabel')
+    .attr('id', function(d) { return "label_"+d.year; })
     .attr('x', 0)
     .attr('dx', 20)
     .attr('y', function(d) { return y(d.year); })
@@ -1064,6 +1066,17 @@ function timeline() {
     .text(function(d) {return d.shortDesc});
 
   events.on('mouseover', function(d) {
+    var exclude = "label_"+d.year;
+    bundle.selectAll('.timelineLabel').filter(function(d){return this.getAttribute('id') != exclude})
+    .transition()
+    .duration(100)
+    .style('opacity', 0.2);
+
+    bundle.selectAll('.timelineLabel').filter(function(d){return this.getAttribute('id') == exclude})
+    .transition()
+    .duration(100)
+    .style('font-size', '11pt');
+
     bundle.select(this)
       .transition()
       .duration(500)
@@ -1071,10 +1084,17 @@ function timeline() {
   })
 
   events.on('mouseout', function(d) {
+    bundle.selectAll('.timelineLabel')
+    .transition()
+    .duration(100)
+    .style('font-size', '9pt')
+    .style('opacity', 1);
+
     bundle.select(this)
     .transition()
     .duration(200)
     .attr('r',5);
+
   })
 
 }
