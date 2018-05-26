@@ -128,6 +128,16 @@ header {
   color: var(--mdc-theme-primary);
   transition: color 500ms;
 }
+.fake-link {
+  color: gray;
+  cursor: default;
+}
+.pillar-text {
+  margin-left:50px;
+  margin-right:20px;
+  margin-top:10px;
+  display:none;"
+}
 @media (max-width:450px) {
   .mdc-typography--headline {
     font-size: 1rem;
@@ -289,14 +299,26 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
 
     <div class="blurb">
       <p class="mdc-typography--headline">
-        {% blocktrans %} The SALTISE/S4 project is a major five-year multi-institution infrastructure grant hosted at Dawson College. The mandate is to develop a data-driven platform founded on three pillars:
+        {% blocktrans %} The SALTISE/S4 project is a major five-year multi-institution infrastructure grant hosted at Dawson College. The mandate is to develop a <strong>data-driven platform</strong> founded on three pillars: {% endblocktrans %}
       </p>
-      
-        <ul class="mdc-typography--body1">
-          <li><i class="material-icons md-24 ">looks_one</i>Teachers: a place where where the pedagogical strategies and artefacts teachers produce can be hosted and showcased to a network of colleagues, and that can be iteratively improved based on the data associated with the different contexts there are used in</li>
-          <li><i class="material-icons md-24">looks_two</i>Researchers: a platform that enables learning science researchers to engage directly with practitionners in a seamless way, collaborating to ask new questions about effective pedagogical practices and learning proceesses, and ultimately bring their expertise to the field faster</li>
-          <li><i class="material-icons md-24">looks_3</i>Students: putting students in the research-design loop as we build novel learning resources, while providing them with a persistent place to monitor how their knowldge evolves not just over one semester, but across the years. {% endblocktrans %}</li>
-        </ul>
+
+      <ul class="mdc-typography--headline">
+        <li style="margin-bottom:10pt;"><i class="material-icons md-36 mdc-theme--primary" style="transform: translateY(7pt);">looks_one</i> <span id="teachers" class="text-link fake-link pillars">Teachers</span>
+        <div id="for-teachers" class="mdc-typography--body1 pillar-text">
+          {% trans 'A place where the pedagogical strategies and artefacts teachers produce can be hosted and showcased to a network of colleagues, and can be iteratively improved based on the data associated with the different contexts in which they are used.' %}
+        </div>
+        </li>
+        <li style="margin-bottom:10pt;"><i class="material-icons md-36 mdc-theme--primary" style="transform: translateY(7pt);">looks_two</i> <span id="researchers" class="text-link fake-link pillars">Researchers</span>
+          <div id="for-researchers" class="mdc-typography--body1 pillar-text">
+            {% trans 'The platform will enable learning science researchers to engage directly and seamlessly with practitioners to support the development of effective pedagogical practices and learning processes, and ultimately bring learning science to the classroom faster.' %}
+          </div>
+        </li>
+        <li style="margin-bottom:10pt;"><i class="material-icons md-36 mdc-theme--primary" style="transform: translateY(7pt);">looks_3</i> <span id="students" class="text-link fake-link pillars">Students</span>
+          <div id="for-students" class="mdc-typography--body1 pillar-text">
+            {% trans 'This cloud-hosted service will put students at the heart of the research-design loop.  As we build novel learning resources, we provide a persistent home where it is possible to monitor how student knowldge evolves across years, instead of one semester.' %}
+          </div>
+        </li>
+      </ul>
     </div>
   </section>
 
@@ -916,10 +938,21 @@ g.append('text')
     .attr('text-anchor', 'middle')
     .attr('fill', 'white')
     .text('trending_up');
-
 </script>
 
+<script>
+[].forEach.call(document.querySelectorAll(".pillars"),
+  function(el) {
+    var d = document.querySelector("#for-"+el.id)
+    el.onmouseover = function() {
+      d.style.display = 'block';
+    }
+    el.onmouseout = function() {
+      d.style.display = 'none';
+    }
+})
 
+</script>
 
 <script>
 // Async load video as per API
