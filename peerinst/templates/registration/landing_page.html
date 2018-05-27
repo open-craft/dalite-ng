@@ -991,31 +991,54 @@ g.append('text')
 function timeline() {
   'use strict';
 
+
   var timelineData = {
     "events" : [
-      { "year" : "2010",
+      { "year" : "2008",
         "shortDesc" : "Initial co-design development",
-        "note" : "Teachers worked with researchers to design the tool" },
+        "note" : "Teachers worked with researchers to design the tool, including collaboration with Jim Slotta and Ontario Institute of Studies in Education" },
+      { "year" : "2010",
+        "shortDesc" : "v0.1",
+        "note" : "Beta version of web-app for Asynchronous Peer Instruction (AsPI)" },
+      { "year" : "2013.7",
+        "shortDesc" : "First major study",
+        "note" : "Quasi-experimental study of effectiveness of AsPI with five physics teachers across three colleges" },
       { "year" : "2015",
         "shortDesc" : "ARC Conference",
         "note" : "<a href='https://dspacecdc-test.inlibro.net/xmlui/bitstream/handle/11515/34789/CHARLES-E-et-coll_2015_Affiche.pdf?sequence=1&isAllowed=y'>The benefits of DALITE</a>" },
-      { "year" : "2015.33",
+      { "year" : "2015.2",
+        "shortDesc" : "LTI tool for MOOCs",
+        "note" : "AsPI re-written by HarvardX as an open source LTI compliant tool" },
+      { "year" : "2015.4",
         "shortDesc" : "8th International Conference on Educational Data Mining",
         "note" : "<a href='https://files.eric.ed.gov/fulltext/ED560883.pdf'>The power of DALITE</a>" },
-      { "year" : "2015.67",
+      { "year" : "2015.6",
         "shortDesc" : "CSCL 2015 Conference",
         "note" : "<a href='https://www.isls.org/cscl2015/papers/MC-0280-FullPaper-Charles.pdf'>Uptake of new tools</a>"},
-      { "year" : "2016",
+      { "year" : "2015.8",
+        "shortDesc" : "AsPI used as part of MOOC version of one of Harvard's most popular courses",
+        "note" : "<a href='https://www.edx.org/course/justice-harvardx-er22-1x-2'>Justice</a>"},
+      { "year" : "2016.25",
+        "shortDesc" : "AsPI in MITx physics MOOC",
+        "note" : "<a href='https://www.edx.org/course/advanced-introductory-classical-mitx-8-mechcx-0'>Advanced Classical Mechanics</a>"},
+      { "year" : "2016.5",
         "shortDesc" : "EC-TEL 2016 Conference",
         "note" : "<a href='http://www.professeurs.polymtl.ca/michel.desmarais/Publications-Michel/EC-TEL_2016_paper_201.pdf'>Extending peer instruction</a>"},
+      { "year" : "2016.75",
+        "shortDesc" : "AsPI in McGillx MOOC on injury prevention",
+        "note" : "<a href='https://www.edx.org/course/body-matters-why-exercise-makes-you-mcgillx-body101x-0'>Body101x</a>"},
+      { "year" : "2017",
+        "shortDesc" : "AsPI in MOOC by CalTech on Quantum Cryptography",
+        "note" : "<a href='https://www.edx.org/course/quantum-cryptography-caltechx-delftx-qucryptox-0'>Quantum Cryptography</a>"},
       { "year" : "2018.0",
         "shortDesc" : "Modern web app",
-        "note" : "Extension from an LTI tool to a modern stable web app in preparation for use by practitioners"},
+        "note" : "Extension from an LTI tool to a modern stable web app in preparation for use by practitioners"},    
       { "year" : "2018.5",
         "shortDesc" : "New features",
         "note" : "Development of new features: Content authoring, better analytics, stand-alone functionality outside of an LTI environment"},
   ]
 };
+
 
   var svg = bundle.select("#history");
 
