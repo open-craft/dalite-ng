@@ -150,6 +150,7 @@ blockquote {
 }
 .timeline-axis line{
   stroke: gray;
+  stroke-width: 1.5px;
 }
 .timeline-axis text {
   font-family: 'Montserrat', sans-serif;
@@ -158,6 +159,13 @@ blockquote {
 }
 .timeline-axis path {
   stroke: gray;
+  stroke-width: 1.5px;
+}
+.tooltip {
+  position:absolute;
+  width:100px;
+  height:100px;
+  background-color: blue;
 }
 @media (max-width:450px) {
   .mdc-typography--body1 {
@@ -1002,7 +1010,8 @@ function timeline() {
         "type"  : "publication",
         "shortDesc" : "ARC Conference",
         "offset" : -23,
-        "note" : "<a href='https://dspacecdc-test.inlibro.net/xmlui/bitstream/handle/11515/34789/CHARLES-E-et-coll_2015_Affiche.pdf?sequence=1&isAllowed=y'>The benefits of DALITE</a>" },
+        "note" : "Full citation...",
+        "link" : "https://dspacecdc-test.inlibro.net/xmlui/bitstream/handle/11515/34789/CHARLES-E-et-coll_2015_Affiche.pdf?sequence=1&isAllowed=y" },
       { "year" : "2015.2",
         "type"  : "software",
         "shortDesc" : "Second major release",
@@ -1010,47 +1019,54 @@ function timeline() {
         "note" : "Completely re-written by HarvardX as an open-source LTI compliant tool" },
       { "year" : "2015.4",
         "type"  : "publication",
-        "shortDesc" : "8th International Conference on Educational Data Mining",
+        "shortDesc" : "8th International Conference on EDM",
         "offset" : -12,
-        "note" : "<a href='https://files.eric.ed.gov/fulltext/ED560883.pdf'>The power of DALITE</a>" },
+        "note" : "Full citation...",
+        "link" : "https://files.eric.ed.gov/fulltext/ED560883.pdf" },
       { "year" : "2015.6",
         "type"  : "publication",
         "shortDesc" : "CSCL 2015 Conference",
         "offset" : -6,
-        "note" : "<a href='https://www.isls.org/cscl2015/papers/MC-0280-FullPaper-Charles.pdf'>Uptake of new tools</a>"},
+        "note" : "Full citation...",
+        "link" : "https://www.isls.org/cscl2015/papers/MC-0280-FullPaper-Charles.pdf" },
       { "year" : "2015.8",
         "type"  : "use",
-        "shortDesc" : "AsPI used as part of MOOC version of one of Harvard's most popular courses",
-        "offset" : 0,
-        "note" : "<a href='https://www.edx.org/course/justice-harvardx-er22-1x-2'>Justice</a>"},
+        "shortDesc" : "HarvardX MOOC on Justice",
+        "offset" : 1,
+        "note" : "About the course",
+        "link" : "https://www.edx.org/course/justice-harvardx-er22-1x-2" },
       { "year" : "2016.25",
         "type"  : "use",
-        "shortDesc" : "AsPI in MITx physics MOOC",
+        "shortDesc" : "MITx physics MOOC",
         "offset" : -2,
-        "note" : "<a href='https://www.edx.org/course/advanced-introductory-classical-mitx-8-mechcx-0'>Advanced Classical Mechanics</a>"},
+        "note" : "About the course...",
+        "link" : "https://www.edx.org/course/advanced-introductory-classical-mitx-8-mechcx-0" },
       { "year" : "2016.5",
         "type"  : "publication",
         "shortDesc" : "EC-TEL 2016 Conference",
         "offset" : 3,
-        "note" : "<a href='http://www.professeurs.polymtl.ca/michel.desmarais/Publications-Michel/EC-TEL_2016_paper_201.pdf'>Extending peer instruction</a>"},
+        "note" : "Full citation...",
+        "link" : "http://www.professeurs.polymtl.ca/michel.desmarais/Publications-Michel/EC-TEL_2016_paper_201.pdf" },
       { "year" : "2016.75",
         "type"  : "use",
-        "shortDesc" : "AsPI in McGillx MOOC on injury prevention",
+        "shortDesc" : "McGillx MOOC on Injury Prevention",
         "offset" : 7,
-        "note" : "<a href='https://www.edx.org/course/body-matters-why-exercise-makes-you-mcgillx-body101x-0'>Body101x</a>"},
+        "note" : "About the course...",
+        "link" : "https://www.edx.org/course/body-matters-why-exercise-makes-you-mcgillx-body101x-0" },
       { "year" : "2017",
         "type"  : "use",
-        "shortDesc" : "AsPI in MOOC by CalTech on Quantum Cryptography",
+        "shortDesc" : "CalTech MOOC on Quantum Cryptography",
         "offset" : 11,
-        "note" : "<a href='https://www.edx.org/course/quantum-cryptography-caltechx-delftx-qucryptox-0'>Quantum Cryptography</a>"},
-      { "year" : "2018.0",
+        "note" : "About the course...",
+        "link" : "https://www.edx.org/course/quantum-cryptography-caltechx-delftx-qucryptox-0" },
+      { "year" : "2018.42",
         "type" : "software",
         "shortDesc" : "Third major release",
         "offset" : 0,
         "note" : "Extended from an LTI tool to a modern stable web app in preparation for use by practitioners"},
-      { "year" : "2018.5",
+      { "year" : "2018.75",
         "type" : "event",
-        "shortDesc" : "New feature development",
+        "shortDesc" : "New features",
         "offset" : 0,
         "note" : "Development of new features: Content authoring, better analytics, stand-alone functionality outside of an LTI environment"},
   ]
@@ -1082,6 +1098,8 @@ function timeline() {
       bundle.axisLeft(y).tickSize(15).tickFormat(bundle.format('.0f'))
       );
 
+
+
 g.append('text')
   .attr('x', 0)
   .attr('dx', 20)
@@ -1089,11 +1107,12 @@ g.append('text')
   .attr('dy', 3)
   .attr('font-size', '7pt')
   .attr('fill', 'gray')
-  .text('Click to expand');
+  .text('Click/hover to expand');
 
 g.append('path')
   .attr('stroke', 'gray')
   .attr('fill', 'none')
+  .attr('stroke-width', '0.5px')
   .attr('d', function(d) {
     var path = bundle.path();
     path.moveTo(17, y(2007.4));
@@ -1107,6 +1126,7 @@ g.append('path')
     .enter().append('path')
     .attr('class', 'links')
     .attr('stroke', 'gray')
+    .attr('stroke-width', '0.5px')
     .attr('fill', 'none')
     .attr('d', function(d) {
       var path = bundle.path();
@@ -1128,32 +1148,63 @@ g.append('path')
     .attr('stroke', function(d) { return c(d.type); });
 
   var notes = g.append('g')
-    .selectAll('text')
+    .selectAll('.timelineLabel')
     .data(timelineData.events)
     .enter().append('text')
     .attr('class', 'timelineLabel')
-    .attr('id', function(d) { return "label_"+d.year; })
+    .attr('id', function(d) { return "label_"+d.year.replace('.','_'); })
     .attr('x', 0)
     .attr('dx', 20)
     .attr('y', function(d) { return y(d.year); })
     .attr('dy', function(d) { return 5+d.offset; })
     .attr('text-anchor', 'start')
+    .style('cursor', function(d) { if (d.link) { return 'pointer'; } })
     .style('font-size', '9pt')
     .attr('fill', function(d) { return c(d.type); })
-    .text(function(d) {return d.shortDesc});
+    .text(function(d) {return d.shortDesc;});
+
+  notes.on('click', function(d) {
+    if (d.link) {
+      location = d.link;
+    }
+  })
+
+  var descriptions = g.append('g')
+    .selectAll('.description')
+    .data(timelineData.events)
+    .enter().append('text')
+    .attr('class', 'description')
+    .attr('id', function(d) { return "description_"+d.year.replace('.','_'); })
+    .attr('x', 0)
+    .attr('dx', 21)
+    .attr('y', function(d) { return y(d.year); })
+    .attr('dy', function(d) { return 25+d.offset; })
+    .attr('text-anchor', 'start')
+    .style('font-size', '10pt')
+    .style('opacity', 0)
+    .attr('fill', function(d) { return c(d.type); })
+    .text(function(d) {return d.note;});
+
 
   events.on('mouseover', function(d) {
-    var exclude = "label_"+d.year;
+    var exclude = "label_"+d.year.replace('.','_');
     bundle.selectAll('.timelineLabel').filter(function(d){return this.getAttribute('id') != exclude})
     .transition()
     .duration(100)
-    .style('opacity', 0.2);
+    .style('opacity', 0.05);
 
-    bundle.selectAll('.timelineLabel').filter(function(d){return this.getAttribute('id') == exclude})
+    bundle.select('#'+exclude)
     .transition()
     .duration(500)
     .style('opacity', 1)
-    .style('font-size', '12pt');
+    .style('font-size', '15pt');
+
+    var desc = "description_"+d.year.replace('.','_');
+    bundle.select('#'+desc)
+    .transition()
+    .duration(500)
+    .delay(150)
+    .style('opacity', 1);
 
     bundle.select(this)
       .transition()
@@ -1168,13 +1219,17 @@ g.append('path')
     .style('font-size', '9pt')
     .style('opacity', 1);
 
+    bundle.selectAll('.description')
+    .transition()
+    .duration(200)
+    .style('opacity', 0);
+
     bundle.select(this)
     .transition()
     .duration(200)
     .attr('r',5);
 
   })
-
 }
 
 timeline();
