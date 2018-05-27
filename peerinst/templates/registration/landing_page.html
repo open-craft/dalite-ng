@@ -149,15 +149,15 @@ blockquote {
   font-style:italic;
 }
 .timeline-axis line{
-  stroke: var(--mdc-theme-secondary);
+  stroke: gray;
 }
 .timeline-axis text {
   font-family: 'Montserrat', sans-serif;
   font-size: 11pt;
-  fill: var(--mdc-theme-secondary);
+  fill: gray;
 }
 .timeline-axis path {
-  stroke: var(--mdc-theme-secondary);
+  stroke: gray;
 }
 @media (max-width:450px) {
   .mdc-typography--body1 {
@@ -278,12 +278,7 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
       </div>
       {% endfor %}
     </div>
-
-
   </section>
-
-
-
 
   <section>
     <h1 class="mdc-typography--display3 mdc-theme--background">{{ 'A guided tour'|title }}
@@ -298,18 +293,12 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
     </h1>
 
     <div class="blurb">
-      <p class="mdc-typography--headline">
-        {% blocktrans %}
-        The Distributed Active Learning and Interactive Technology Environment is the product of a iterative design-based experiment carried out over a nine-year period:
-        {% endblocktrans %}
-      </p>
-    </div>
-    <div class="blurb">
-      <svg id="history" width=350 height=350 style="overflow:visible;"></svg>
+      <svg id="history" width=350 height=450 style="overflow:visible;"></svg>
     </div>
 
+    <!--
     <blockquote class="mdc-theme--primary">{% blocktrans %}This research has shown my<span style="font-family: 'Montserrat', sans-serif;font-style:normal;">DALITE</span> to be an effective tool for supporting deep learning.{% endblocktrans %}</blockquote>
-
+    -->
 
   </section>
 
@@ -995,46 +984,74 @@ function timeline() {
   var timelineData = {
     "events" : [
       { "year" : "2008",
+        "type"  : "milestone",
         "shortDesc" : "Initial co-design development",
+        "offset" : 0,
         "note" : "Teachers worked with researchers to design the tool, including collaboration with Jim Slotta and Ontario Institute of Studies in Education" },
       { "year" : "2010",
-        "shortDesc" : "v0.1",
-        "note" : "Beta version of web-app for Asynchronous Peer Instruction (AsPI)" },
+        "type"  : "software",
+        "shortDesc" : "First major release",
+        "offset" : 0,
+        "note" : "Beta version of php app for Asynchronous Peer Instruction (AsPI)" },
       { "year" : "2013.7",
+        "type"  : "publication",
         "shortDesc" : "First major study",
+        "offset" : 0,
         "note" : "Quasi-experimental study of effectiveness of AsPI with five physics teachers across three colleges" },
       { "year" : "2015",
+        "type"  : "publication",
         "shortDesc" : "ARC Conference",
+        "offset" : -23,
         "note" : "<a href='https://dspacecdc-test.inlibro.net/xmlui/bitstream/handle/11515/34789/CHARLES-E-et-coll_2015_Affiche.pdf?sequence=1&isAllowed=y'>The benefits of DALITE</a>" },
       { "year" : "2015.2",
-        "shortDesc" : "LTI tool for MOOCs",
-        "note" : "AsPI re-written by HarvardX as an open source LTI compliant tool" },
+        "type"  : "software",
+        "shortDesc" : "Second major release",
+        "offset" : -18,
+        "note" : "Completely re-written by HarvardX as an open-source LTI compliant tool" },
       { "year" : "2015.4",
+        "type"  : "publication",
         "shortDesc" : "8th International Conference on Educational Data Mining",
+        "offset" : -12,
         "note" : "<a href='https://files.eric.ed.gov/fulltext/ED560883.pdf'>The power of DALITE</a>" },
       { "year" : "2015.6",
+        "type"  : "publication",
         "shortDesc" : "CSCL 2015 Conference",
+        "offset" : -6,
         "note" : "<a href='https://www.isls.org/cscl2015/papers/MC-0280-FullPaper-Charles.pdf'>Uptake of new tools</a>"},
       { "year" : "2015.8",
+        "type"  : "use",
         "shortDesc" : "AsPI used as part of MOOC version of one of Harvard's most popular courses",
+        "offset" : 0,
         "note" : "<a href='https://www.edx.org/course/justice-harvardx-er22-1x-2'>Justice</a>"},
       { "year" : "2016.25",
+        "type"  : "use",
         "shortDesc" : "AsPI in MITx physics MOOC",
+        "offset" : -2,
         "note" : "<a href='https://www.edx.org/course/advanced-introductory-classical-mitx-8-mechcx-0'>Advanced Classical Mechanics</a>"},
       { "year" : "2016.5",
+        "type"  : "publication",
         "shortDesc" : "EC-TEL 2016 Conference",
+        "offset" : 3,
         "note" : "<a href='http://www.professeurs.polymtl.ca/michel.desmarais/Publications-Michel/EC-TEL_2016_paper_201.pdf'>Extending peer instruction</a>"},
       { "year" : "2016.75",
+        "type"  : "use",
         "shortDesc" : "AsPI in McGillx MOOC on injury prevention",
+        "offset" : 7,
         "note" : "<a href='https://www.edx.org/course/body-matters-why-exercise-makes-you-mcgillx-body101x-0'>Body101x</a>"},
       { "year" : "2017",
+        "type"  : "use",
         "shortDesc" : "AsPI in MOOC by CalTech on Quantum Cryptography",
+        "offset" : 11,
         "note" : "<a href='https://www.edx.org/course/quantum-cryptography-caltechx-delftx-qucryptox-0'>Quantum Cryptography</a>"},
       { "year" : "2018.0",
-        "shortDesc" : "Modern web app",
-        "note" : "Extension from an LTI tool to a modern stable web app in preparation for use by practitioners"},    
+        "type" : "software",
+        "shortDesc" : "Third major release",
+        "offset" : 0,
+        "note" : "Extended from an LTI tool to a modern stable web app in preparation for use by practitioners"},
       { "year" : "2018.5",
-        "shortDesc" : "New features",
+        "type" : "event",
+        "shortDesc" : "New feature development",
+        "offset" : 0,
         "note" : "Development of new features: Content authoring, better analytics, stand-alone functionality outside of an LTI environment"},
   ]
 };
@@ -1046,22 +1063,59 @@ function timeline() {
 
   var width = +svg.attr("width"),
   height = +svg.attr("height"),
-  margin = {top:1,bottom:1,left:1,right:1};
+  margin = {top:20,bottom:1,left:1,right:1};
 
   var innerWidth = width-margin.left-margin.right,
   innerHeight = height-margin.top-margin.bottom;
 
   svg.selectAll("g").remove();
 
-  var g = svg.append("g").attr("transform","translate("+(margin.left+0.2*innerWidth)+","+(margin.top+innerHeight/2)+")");
+  var g = svg.append("g").attr("transform","translate("+(margin.left+0.15*innerWidth)+","+(margin.top+innerHeight/2)+")");
 
-  var y = bundle.scaleLinear().domain([2010,2019]).range([-innerHeight/2,innerHeight/2]);
+  var y = bundle.scaleLinear().domain([2008,2019]).range([-innerHeight/2,innerHeight/2]);
+
+  var c = bundle.scaleOrdinal().domain(['milestone', 'software', 'use', 'publication']).range(['green','red','var(--mdc-theme-primary)','var(--mdc-theme-secondary)']);
 
   var yAxis = g.append("g")
     .attr('class', 'timeline-axis')
     .call(
-      bundle.axisLeft(y).tickFormat(bundle.format('.0f'))
+      bundle.axisLeft(y).tickSize(15).tickFormat(bundle.format('.0f'))
       );
+
+g.append('text')
+  .attr('x', 0)
+  .attr('dx', 20)
+  .attr('y', y(2007.4))
+  .attr('dy', 3)
+  .attr('font-size', '7pt')
+  .attr('fill', 'gray')
+  .text('Click to expand');
+
+g.append('path')
+  .attr('stroke', 'gray')
+  .attr('fill', 'none')
+  .attr('d', function(d) {
+    var path = bundle.path();
+    path.moveTo(17, y(2007.4));
+    path.quadraticCurveTo(2, y(2007.5), 0, y(2008));
+    return path;
+  });
+
+  var links = g.append('g')
+    .selectAll('.links')
+    .data(timelineData.events)
+    .enter().append('path')
+    .attr('class', 'links')
+    .attr('stroke', 'gray')
+    .attr('fill', 'none')
+    .attr('d', function(d) {
+      var path = bundle.path();
+      if (+d.offset != 0) {
+        path.moveTo(0, y(d.year));
+        path.lineTo(17, y(d.year)+d.offset);
+      }
+      return path;
+    });
 
   var events = g.append('g')
     .selectAll('circle')
@@ -1071,7 +1125,7 @@ function timeline() {
     .attr('cy', function(d) { return y(d.year); })
     .attr('r', 5)
     .attr('fill', 'white')
-    .attr('stroke', 'var(--mdc-theme-primary)');
+    .attr('stroke', function(d) { return c(d.type); });
 
   var notes = g.append('g')
     .selectAll('text')
@@ -1082,10 +1136,10 @@ function timeline() {
     .attr('x', 0)
     .attr('dx', 20)
     .attr('y', function(d) { return y(d.year); })
-    .attr('dy', 5)
+    .attr('dy', function(d) { return 5+d.offset; })
     .attr('text-anchor', 'start')
     .style('font-size', '9pt')
-    .attr('fill', 'var(--mdc-theme-primary)')
+    .attr('fill', function(d) { return c(d.type); })
     .text(function(d) {return d.shortDesc});
 
   events.on('mouseover', function(d) {
@@ -1099,7 +1153,7 @@ function timeline() {
     .transition()
     .duration(500)
     .style('opacity', 1)
-    .style('font-size', '11pt');
+    .style('font-size', '12pt');
 
     bundle.select(this)
       .transition()
@@ -1110,7 +1164,7 @@ function timeline() {
   events.on('mouseout', function(d) {
     bundle.selectAll('.timelineLabel')
     .transition()
-    .duration(100)
+    .duration(200)
     .style('font-size', '9pt')
     .style('opacity', 1);
 
