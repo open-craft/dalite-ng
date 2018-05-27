@@ -66,6 +66,44 @@ export {
 
 
 // Custom functions
+/** Mike Bostock's svg line wrap function
+*   https://bl.ocks.org/mbostock/7555321
+*   (only slightly modified)
+* @function
+* @param {String} text
+* @param {Int} width
+* @this Wrap
+*/
+export function wrap(text, width) {
+  text.each(function() {
+    let text = bundle.select(this);
+    let words = text.text().split(/\s+/).reverse();
+    let word;
+    let line = [];
+    let lineNumber = 0;
+    let lineHeight = 16; // px
+    let x = text.attr('x');
+    let dx = text.attr('dx');
+    let y = text.attr('y');
+    let dy = parseFloat(text.attr('dy'));
+    let tspan = text.text(null).append('tspan')
+      .attr('x', x).attr('y', y).attr('dx', dx).attr('dy', dy + 'px');
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(' '));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(' '));
+        line = [word];
+        tspan = text.append('tspan')
+          .attr('x', x)
+          .attr('y', y)
+          .attr('dx', dx)
+          .attr('dy', ++lineNumber * lineHeight + dy + 'px').text(word);
+      }
+    }
+  });
+}
 
 /** Underline h1 with svg
 *  @function

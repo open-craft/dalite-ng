@@ -296,7 +296,7 @@ styleSheet.insertRule(".mdc-toolbar--flexible {--mdc-toolbar-ratio-to-extend-fle
   </section>
 
   <section>
-    <h1 class="mdc-typography--display3  mdc-theme--background">{% trans "History" %}
+    <h1 class="mdc-typography--display3  mdc-theme--background">{% trans "Interactive History" %}
       <svg class="underline" width=150 height=4></svg>
     </h1>
 
@@ -1175,16 +1175,15 @@ g.append('path')
     .enter().append('text')
     .attr('class', 'description')
     .attr('id', function(d) { return "description_"+d.year.replace('.','_'); })
-    .attr('x', 0)
-    .attr('dx', 21)
+    .attr('x', 21)
     .attr('y', function(d) { return y(d.year); })
     .attr('dy', function(d) { return 25+d.offset; })
     .attr('text-anchor', 'start')
     .style('font-size', '10pt')
     .style('opacity', 0)
     .attr('fill', function(d) { return c(d.type); })
-    .text(function(d) {return d.note;});
-
+    .text(function(d) {return (d.note);})
+    .call(bundle.wrap, 0.7*innerWidth);
 
   events.on('mouseover', function(d) {
     var exclude = "label_"+d.year.replace('.','_');
