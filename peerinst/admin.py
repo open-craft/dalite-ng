@@ -5,7 +5,7 @@ from django.core import exceptions
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from .models import Answer, AnswerChoice, Assignment, Question, Category
+from .models import Answer, AnswerChoice, Assignment, Question, Category, Discipline, Institution, Teacher, Student, StudentGroup, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, VerifiedDomain
 
 
 class AnswerChoiceInlineForm(forms.ModelForm):
@@ -74,7 +74,7 @@ class AnswerInline(admin.StackedInline):
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['title', 'text', 'category', 'id']}),
+        (None, {'fields': ['title', 'text', 'discipline', 'category', 'id']}),
         (_('Question image or video'), {'fields': ['image', 'image_alt_text', 'video_url']}),
         (None, {'fields': [
             'answer_style', 'fake_attributions', 'sequential_review',
@@ -88,11 +88,24 @@ class QuestionAdmin(admin.ModelAdmin):
     }
     readonly_fields = ['id']
     inlines = [AnswerChoiceInline, AnswerInline]
-    list_display = ['title', 'category']
+    list_display = ['title', 'discipline']
+    list_filter=['category']
+    ordering = ['discipline']
+    search_fields = ['title','text','category__title']
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Discipline)
+class DisciplineAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Institution)
+class InstitutionAdmin(admin.ModelAdmin):
     pass
 
 
@@ -109,8 +122,46 @@ publish_answers.short_description = _('Show selected answers to students')
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ['question', 'user_token', 'first_answer_choice_label', 'second_answer_choice_label',
-                    'rationale', 'show_to_others', 'expert', 'chosen_rationale', 'upvotes', 'downvotes']
+                    'rationale', 'show_to_others', 'expert', 'show_chosen_rationale', 'upvotes', 'downvotes']
     list_display_links = None
     list_editable = ['show_to_others', 'expert']
-    list_filter=['chosen_rationale']
+    list_filter=['question']
     actions = [publish_answers]
+    search_fields = ['question__title','rationale']
+
+
+@admin.register(Teacher)
+class TeacherAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(BlinkQuestion)
+class BlinkQuestionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(BlinkRound)
+class BlinkRoundAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(BlinkAnswer)
+class BlinkAnswerAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(BlinkAssignment)
+class BlinkAssignmentAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(BlinkAssignmentQuestion)
+class BlinkAssignmentQuestionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(StudentGroup)
+class StudentGroupAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(VerifiedDomain)
+class VerifiedDomainAdmin(admin.ModelAdmin):
+    pass

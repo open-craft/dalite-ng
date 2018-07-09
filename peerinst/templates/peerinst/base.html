@@ -1,42 +1,94 @@
-{% load staticfiles %}
+{% load staticfiles compress admin_urls %}
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>{% block title %}Dalite NG{% endblock %}</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Dalite NG">
-    <link rel="icon" href="{% static 'favicon.ico' %}">
-    <link rel="stylesheet" href="{% static 'peerinst/css/main.css' %}">
+<head>
+  <!-- Meta -->
+  <title>{% block title %}myDALITE{% endblock %}</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="myDALITE">
 
-    {% block stylesheets %}{% endblock %}
-  </head>
+  <!-- Local resources -->
+  <link href="{% static 'peerinst/img/logo.png' %}" rel="icon">
+  {% compress css %}
+  <link href="{% static 'peerinst/css/main.min.css' %}" rel="stylesheet">
+  {% endcompress %}
 
-  <body>
+  <!-- External resources -->
+  <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Custom settings for local instance -->
+  {% include 'peerinst/custom-instance-head.html' %}
+
+  {% block stylesheets %}{% endblock %}
+</head>
+
+<body>
+  <!-- Custom header for local instance -->
+  <header>
+    <div class="wrapper">
+      <div>
+        <a href="{% include 'peerinst/custom-instance-link.html' %}"><img src="{% static 'peerinst/img/logo.png' %}" alt="site-logo" id="logo"></a>
+        {% if not user.student %}
+        <a href="{% url 'assignment-list' %}">{% include 'peerinst/custom-instance-header.html' %}</a>
+        {% else %}
+        {% include 'peerinst/custom-instance-header.html' %}
+        {% endif %}
+      </div>
+      <div class="header-right">
+        {% if user.is_authenticated %}
+        {% if user.teacher %}
+        Teacher: <a class="bold" href="{% url 'teacher' pk=user.teacher.pk %}">{{ request.user.username }}</a>
+        {% else %}
+        User: {{ request.user.username }}
+        {% endif %}
+        <br>
+        {% if not user.student %}
+        <a class="bold" href="{% url 'logout' %}">Logout</a>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <div class="site-content">
     {% block body %}{% endblock %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script>
-        // Fix potential CSRF token conflicts when loading multiple iframes in parallel,
-        // if the user did not have a CSRF cookie set already.
-        // The CSRF token in the HTML may be out of date, but the cookie value should be
-        // accurate by the time we submit the form.
-        $(function() {
-            var getCookie = function(name) {
-                var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-                if (match) { return match[2]; }
-            };
-            $(document).on('submit','form', function(){
-                var csrf_token = getCookie('csrftoken');
-                if (csrf_token) {
-                    $('input[name=csrfmiddlewaretoken]').each(function() {
-                        $(this).val(csrf_token);
-                    });
-                }
-            });
+  </div>
+
+  {% block footer %}{% endblock %}
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+  <script>
+  // Fix potential CSRF token conflicts when loading multiple iframes in parallel,
+  // if the user did not have a CSRF cookie set already.
+  // The CSRF token in the HTML may be out of date, but the cookie value should be
+  // accurate by the time we submit the form.
+  $(function() {
+    var getCookie = function(name) {
+      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      if (match) { return match[2]; }
+    };
+    $(document).on('submit','form', function(){
+      var csrf_token = getCookie('csrftoken');
+      if (csrf_token) {
+        $('input[name=csrfmiddlewaretoken]').each(function() {
+          $(this).val(csrf_token);
         });
-    </script>
-    {% block scripts %}{% endblock %}
-  </body>
+      }
+    });
+  });
+  </script>
+
+  <!-- JS bundle -->
+  {% compress js %}
+  <script src="{% static 'peerinst/js/index.min.js'  %}"></script>
+  {% endcompress %}
+
+  {% block scripts %}{% endblock %}
+
+</body>
 </html>

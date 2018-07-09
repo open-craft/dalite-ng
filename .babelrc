@@ -1,0 +1,17 @@
+{
+  "presets": [
+    [
+      "env", {
+      "targets": {
+        "browsers": ["last 4 versions"]
+      },
+      "debug": true,
+      "modules": false
+      }
+
+    ]
+  ],
+  "plugins": [
+    "external-helpers"
+  ]
+}

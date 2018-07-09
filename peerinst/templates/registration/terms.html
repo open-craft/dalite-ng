@@ -1,0 +1,18 @@
+{% extends "peerinst/base.html" %}
+
+{% block body %}
+
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">Terms of Service
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+
+  <div class="admin-link">
+    <a href="{% url 'sign_up' %}">Back to sign up</a>
+  </div>
+
+  {% include 'peerinst/terms_of_service_teachers.html' %}
+</section>
+</main>
+{% endblock %}

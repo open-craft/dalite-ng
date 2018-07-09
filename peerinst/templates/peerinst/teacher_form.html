@@ -1,0 +1,56 @@
+{% extends 'peerinst/base.html' %}
+
+{% load i18n %}
+
+{% block body %}
+
+<style>
+form {
+  padding-top: 20px;
+}
+form option {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10pt;
+}
+form label {
+  vertical-align: top;
+  padding-right:10px;
+}
+.form_field_wrapper {
+  padding-bottom: 10px;
+}
+</style>
+
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">{% trans 'Identity' %}
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+
+  <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Edit discipline and institution' %}</h2>
+
+  <p>{% blocktrans %}Select content disciplines and the institutions where you teach.  You can select multiple choices using the shift button.{% endblocktrans %}</p>
+
+  {{ form.non_field_errors }}
+
+  <form action="{% url 'teacher-update' object.id %}" method="post">
+      {% csrf_token %}
+
+      <div class="form_field_wrapper">
+        {{ form.institutions.errors }}
+        {{ form.institutions.label_tag }}
+        {{ form.institutions }}
+      </div>
+
+      <div class="form_field_wrapper">
+        {{ form.disciplines.errors }}
+        {{ form.disciplines.label_tag }}
+        {{ form.disciplines }}
+      </div>
+
+      <input class="mdc-button mdc-button--raised" type="submit" value="Update"/>
+  </form>
+
+</section>
+</main>
+{% endblock %}

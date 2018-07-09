@@ -1,15 +1,54 @@
 {% extends 'peerinst/base.html' %}
+
 {% load i18n %}
 
 {% block body %}
-<h1>{% trans 'Assignments' %}</h1>
-<ul>
-{% for obj in object_list %}
-  <li><a href="{% url 'question-list' assignment_id=obj.pk %}">
-    {{ obj.pk }}
-  <a></li>
-{% empty %}
-  <li>{% trans 'No assignments available.' %}</li>
-{% endfor %}
-</ul>
+<main>
+<section>
+  <h1 class="mdc-typography--display3">{% trans 'Browse Assignments' %}
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+
+  {% if user.is_staff %}
+    <div class="admin-link"><a href="{% url 'admin_index_wrapper' %}">Click here to add or edit content</a></div>
+  {% endif %}
+
+  <div class="search">
+    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+      <label class="mdc-floating-label" for="search-bar">{% trans 'Search' %}</label>
+      <input class="mdc-text-field__input" id="search-bar" oninput="search()">
+      <div class="mdc-notched-outline">
+        <svg>
+          <path class="mdc-notched-outline__path"/>
+        </svg>
+      </div>
+      <div class="mdc-notched-outline__idle"></div>
+    </div>
+    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+      The assignment list will be filtered for titles that contain the above string.
+    </p>
+  </div>
+
+  <ul>
+  {% for obj in object_list %}
+    <li class="dense-list searchable">
+      {{ forloop.counter }}. <a href="{% url 'question-list' assignment_id=obj.pk %}">
+      {{ obj.title }}</a>
+    </li>
+  {% empty %}
+    <li>{% trans 'No assignments available.' %}</li>
+  {% endfor %}
+  </ul>
+
+</section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const searchBar = document.getElementById('search-bar');
+searchBar.oninput = function() {
+  bundle.search('.searchable', searchBar);
+}
+</script>
 {% endblock %}

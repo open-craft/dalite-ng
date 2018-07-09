@@ -9,18 +9,26 @@ import random
 import re
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
-from django.shortcuts import get_object_or_404, render_to_response, redirect
+from django.core.mail import mail_admins, send_mail
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, render, render_to_response, redirect
+from django.template import loader
 from django.template.response import TemplateResponse
+from django.utils.decorators import method_decorator
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic import DetailView
 from django.views.generic.base import TemplateView, View
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView, CreateView
 from django.views.generic.list import ListView
 from django_lti_tool_provider.signals import Signals
 from django_lti_tool_provider.models import LtiUserData
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.exceptions import ObjectDoesNotExist
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 
@@ -31,7 +39,202 @@ from . import rationale_choice
 from .util import SessionStageData, get_object_or_none, int_or_none, roundrobin
 from .admin_views import get_question_rationale_aggregates
 
+from .models import Student, StudentGroup, Teacher, Assignment, BlinkQuestion, BlinkAnswer, BlinkRound, BlinkAssignment, BlinkAssignmentQuestion, Question, Answer, Discipline, VerifiedDomain
+from django.contrib.auth.models import User
+
+#blink
+from django.http import JsonResponse
+from django.http import HttpResponse
+from django.utils import timezone
+from django.views.generic.detail import SingleObjectMixin
+from django.contrib.sessions.models import Session
+
+#reports
+from django.db.models.expressions import Func
+from django.db.models import Count
+
+
 LOGGER = logging.getLogger(__name__)
+
+# Views related to Auth
+
+
+
+def landing_page(request):
+    disciplines = {}
+
+    disciplines[str('All')] = {}
+    disciplines[str('All')][str('questions')] = Question.objects.count()
+    disciplines[str('All')][str('rationales')] = Answer.objects.count()
+    disciplines[str('All')][str('students')] = Student.objects.count()
+    disciplines[str('All')][str('teachers')] = Teacher.objects.count()
+
+    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:3]:
+        disciplines[str(d.title)] = {}
+        disciplines[str(d.title)][str('questions')] = Question.objects.filter(discipline=d).count()
+        disciplines[str(d.title)][str('rationales')] = Answer.objects.filter(question__discipline=d).count()
+
+        question_list=d.question_set.values_list('id',flat=True)
+        disciplines[str(d.title)][str('students')] = \
+        len(\
+            set(\
+                Answer.objects.filter(question_id__in=question_list)\
+                .exclude(user_token='')\
+                .values_list('user_token',flat=True)))
+
+        disciplines[str(d.title)]['teachers'] = d.teacher_set.count()
+
+    disciplines_json = json.dumps(disciplines)
+
+
+    ### try again, with re-ordering
+    disciplines_array = []
+
+    d2 = {}
+    d2[str('name')] = str('All')
+    d2[str('questions')] = Question.objects.count()
+    d2[str('rationales')] = Answer.objects.count()
+    d2[str('students')] = Student.objects.count()
+    d2[str('teachers')] = Teacher.objects.count()
+
+    disciplines_array.append(d2)
+
+    for d in Discipline.objects.annotate(num_q=Count('question')).order_by('-num_q')[:3]:
+        d2 = {}
+        d2[str('name')] = str(d.title)
+        d2[str('questions')] = Question.objects.filter(discipline=d).count()
+        d2[str('rationales')] = Answer.objects.filter(question__discipline=d).count()
+
+        question_list=d.question_set.values_list('id',flat=True)
+        disciplines[str(d.title)][str('students')] = \
+        len(\
+            set(\
+                Answer.objects.filter(question_id__in=question_list)\
+                .exclude(user_token='')\
+                .values_list('user_token',flat=True)))
+
+        d2[str('teachers')] = d.teacher_set.count()
+
+        disciplines_array.append(d2)
+
+    return TemplateResponse(
+        request,
+        'registration/landing_page.html',
+        context={
+            'disciplines': disciplines_array,
+            'json': disciplines_json,
+        })
+
+
+def admin_check(user):
+    return user.is_superuser
+
+
+@login_required
+@user_passes_test(admin_check,login_url='/welcome/',redirect_field_name=None)
+def dashboard(request):
+
+    html_email_template_name = 'registration/account_activated_html.html'
+
+    if request.method=='POST':
+        form = forms.ActivateForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            try:
+                user.is_active = True
+                user.save()
+
+                if form.cleaned_data['is_teacher']:
+                    teacher = Teacher(user=user)
+                    teacher.save()
+            except:
+                pass
+
+            # Notify user
+            email_context = dict(
+                username=user.username,
+                site_name='myDALITE',
+            )
+            send_mail(
+                _('Your myDALITE account has been activated'),
+                'Dear {},\n\nYour account has been recently activated. \n\nYou can login at:\n\n{}\n\nCheers,\nThe myDalite Team'.format(user.username,'https://'+request.get_host(),),
+                'noreply@myDALITE.org',
+                [user.email],
+                fail_silently=True,
+                html_message=loader.render_to_string(html_email_template_name, context=email_context, request=request),
+            )
+
+
+    return TemplateResponse(
+        request,
+        'peerinst/dashboard.html',
+        context={
+            'new_users': User.objects.filter(is_active=False).order_by('-date_joined'),
+        })
+
+
+def sign_up(request):
+
+    template = "registration/sign_up.html"
+    html_email_template_name = "registration/sign_up_admin_email_html.html"
+    context = {}
+
+    if request.method == "POST":
+        form = forms.SignUpForm(request.POST)
+        if form.is_valid():
+            try:
+                # Set new users as inactive until verified by Administrator
+                form.instance.is_active = False
+                form.save()
+                # Notify administrators
+                try:
+                    email_context = dict(
+                        user=form.cleaned_data['username'],
+                        date=timezone.now(),
+                        email=form.cleaned_data['email'],
+                        url=form.cleaned_data['url'],
+                        site_name='myDALITE',
+                    )
+                    mail_admins(
+                        'New user request',
+                        'Dear administrator,\n\nA new user {} was created on {}. \n\nEmail: {}  \nVerification url: {} \n\nAccess your administrator account to activate this new user.\n\n{}\n\nCheers,\nThe myDalite Team'.format(form.cleaned_data['username'],timezone.now(),form.cleaned_data['email'],form.cleaned_data['url'],'https://'+request.get_host()+reverse('dashboard')),
+                        fail_silently=True,
+                        html_message=loader.render_to_string(html_email_template_name, context=email_context, request=request),
+                    )
+                except:
+                    pass
+
+                return TemplateResponse(request,'registration/sign_up_done.html')
+            except:
+                pass
+        else:
+            context['form'] = form
+    else:
+        context['form'] = forms.SignUpForm()
+
+    return render(request,template,context)
+
+
+def terms_teacher(request):
+    return TemplateResponse(request, 'registration/terms.html')
+
+
+def logout_view(request):
+    from django.contrib.auth import logout
+    logout(request)
+    return HttpResponseRedirect(reverse('landing_page'))
+
+
+def welcome(request):
+    try:
+        teacher = Teacher.objects.get(user=request.user)
+        return HttpResponseRedirect(reverse('teacher', kwargs={ 'pk' : teacher.pk }))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('assignment-list'))
+
+
+def access_denied(request):
+    return HttpResponse('Access denied')
 
 
 class LoginRequiredMixin(object):
@@ -41,12 +244,69 @@ class LoginRequiredMixin(object):
         return login_required(view)
 
 
-class AssignmentListView(LoginRequiredMixin, ListView):
+def student_check(user):
+    try:
+        if user.teacher:
+            # Let through Teachers unconditionally
+            return True
+    except:
+        try:
+            if user.student:
+                # Block Students
+                return False
+        except:
+            # Allow through all non-Students, i.e. "guests"
+            return True
+
+class NoStudentsMixin(object):
+    """A simple mixin to explicitly allow Teacher but prevent Student access to a view."""
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(NoStudentsMixin, cls).as_view(**initkwargs)
+        return user_passes_test(student_check, login_url='/access_denied/')(view)
+
+
+class AssignmentListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of assignments used for debugging purposes."""
     model = models.Assignment
 
 
-class QuestionListView(LoginRequiredMixin, ListView):
+class AssignmentUpdateView(NoStudentsMixin,LoginRequiredMixin,DetailView):
+    """View for updating assignment."""
+
+    model = Assignment
+
+    def get_context_data(self, **kwargs):
+        context = super(AssignmentUpdateView, self).get_context_data(**kwargs)
+        context['teacher'] = Teacher.objects.get(user=self.request.user)
+
+        return context
+
+    def get_object(self):
+        return get_object_or_404(models.Assignment, pk=self.kwargs['assignment_id'])
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.user.is_authenticated():
+            form = forms.AddRemoveQuestionForm(request.POST)
+            print(form)
+            if form.is_valid():
+                question = form.cleaned_data['q']
+                if not question in self.object.questions.all():
+                    self.object.questions.add(question)
+                else:
+                    self.object.questions.remove(question)
+                self.object.save()
+
+                return HttpResponseRedirect(reverse("assignment-update", kwargs={'assignment_id': self.object.pk}))
+            else:
+                return HttpResponse("error")
+        else:
+            return HttpResponse("error3")
+
+
+
+class QuestionListView(NoStudentsMixin, LoginRequiredMixin, ListView):
     """List of questions used for debugging purposes."""
     model = models.Assignment
 
@@ -60,13 +320,18 @@ class QuestionListView(LoginRequiredMixin, ListView):
         return context
 
 
+# Views related to Question
+
 class QuestionMixin(object):
+
     def get_context_data(self, **kwargs):
         context = super(QuestionMixin, self).get_context_data(**kwargs)
         context.update(
             assignment=self.assignment,
             question=self.question,
             answer_choices=self.answer_choices,
+            correct=self.question.answerchoice_set.filter(correct=True),
+            experts=self.question.answer_set.filter(expert=True),
         )
         return context
 
@@ -164,6 +429,15 @@ class QuestionFormView(QuestionMixin, FormView):
 
         # Write JSON to log file
         LOGGER.info(json.dumps(event))
+
+        # Automatically keep track of student, student groups and their relationships based on lti data
+        user = User.objects.get(username=self.user_token)
+        student, created_student = Student.objects.get_or_create(student=user)
+        group, created_group = StudentGroup.objects.get_or_create(name=course_id)
+        if created_group:
+            group.save()
+        student.groups.add(group)
+        student.save()
 
     def submission_error(self):
         messages.error(self.request, format_html(
@@ -429,6 +703,7 @@ class QuestionReviewView(QuestionReviewBaseView):
             second_answer_choice=self.second_answer_choice,
             chosen_rationale=chosen_rationale,
             user_token=self.user_token,
+            time=datetime.datetime.now().isoformat()
         )
         self.answer.save()
         if chosen_rationale is not None:
@@ -578,7 +853,7 @@ class AnswerSummaryChartView(View):
             answer_row['rationales'] = rationales['chosen']
             # Save everything about this answer into the list of table rows
             answers.append(answer_row)
-        # Build a list of all the columns that will be used in this chart 
+        # Build a list of all the columns that will be used in this chart
         columns = [
             {
                 "name": name,
@@ -681,3 +956,765 @@ def question(request, assignment_id, question_id):
         return redirect(request.path)
     stage_data.store()
     return result
+
+
+def reset_question(request, assignment_id, question_id):
+    """ Clear all answers from user (for testing) """
+
+    assignment = get_object_or_404(models.Assignment, pk=assignment_id)
+    question = get_object_or_404(models.Question, pk=question_id)
+    user_token = request.user.username
+    answer=get_object_or_none(
+        models.Answer, assignment=assignment, question=question, user_token=user_token
+    )
+    answer.delete()
+
+    return HttpResponseRedirect(reverse('question', kwargs={'assignment_id' : assignment.pk, 'question_id' : question.pk}))
+
+
+# Views related to Teacher
+
+class TeacherBase(LoginRequiredMixin,View):
+    """Base view for Teacher for custom authentication"""
+
+    def dispatch(self, *args, **kwargs):
+        if self.request.user == Teacher.objects.get(pk=kwargs['pk']).user:
+            return super(TeacherBase, self).dispatch(*args, **kwargs)
+        else:
+            return HttpResponse('Access denied!')
+
+
+class TeacherDetailView(TeacherBase,DetailView):
+
+    model = Teacher
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherDetailView,self).get_context_data(**kwargs)
+        context['LTI_key'] = str(settings.LTI_CLIENT_KEY)
+        context['LTI_secret'] = str(settings.LTI_CLIENT_SECRET)
+        context['LTI_launch_url'] = str('https://'+self.request.get_host()+'/lti/')
+
+        # Set all blink assignments, questions, and rounds for this teacher to inactive
+        for a in self.get_object().blinkassignment_set.all():
+            if a.active:
+                a.active = False
+                a.save()
+
+        for b in self.get_object().blinkquestion_set.all():
+            if b.active:
+                b.active = False
+                b.save()
+
+                open_rounds = BlinkRound.objects.filter(question=b).filter(deactivate_time__isnull=True)
+
+                for open_round in open_rounds:
+                    open_round.deactivate_time = timezone.now()
+                    open_round.save()
+
+        return context
+
+
+class TeacherUpdate(TeacherBase,UpdateView):
+
+    model = Teacher
+    fields = ['institutions','disciplines']
+
+
+class TeacherAssignments(TeacherBase,ListView):
+    """View to modify assignments associated to Teacher"""
+
+    model = Teacher
+    template_name = 'peerinst/teacher_assignments.html'
+
+    def get_queryset(self):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        return Assignment.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherAssignments, self).get_context_data(**kwargs)
+        context['teacher'] = self.teacher
+        context['form'] = forms.AssignmentCreateForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        form = forms.TeacherAssignmentsForm(request.POST)
+        if form.is_valid():
+            assignment = form .cleaned_data['assignment']
+            if assignment in self.teacher.assignments.all():
+                self.teacher.assignments.remove(assignment)
+            else:
+                self.teacher.assignments.add(assignment)
+            self.teacher.save()
+        else:
+            form  = forms.AssignmentCreateForm(request.POST)
+            if form.is_valid():
+                assignment = Assignment(
+                    identifier=form .cleaned_data['identifier'],
+                    title=form .cleaned_data['title'],
+                )
+                assignment.save()
+                self.teacher.assignments.add(assignment)
+                self.teacher.save()
+            else:
+                return render(request, self.template_name, {'teacher': self.teacher,'form': form, 'object_list':Assignment.objects.all()})
+
+        return HttpResponseRedirect(reverse('teacher-assignments',  kwargs={ 'pk' : self.teacher.pk }))
+
+
+class TeacherGroups(TeacherBase,ListView):
+    """View to modify groups associated to Teacher"""
+
+    model = Teacher
+    template_name = 'peerinst/teacher_groups.html'
+
+    def get_queryset(self):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        return StudentGroup.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherGroups, self).get_context_data(**kwargs)
+        context['teacher'] = self.teacher
+        context['form'] = forms.TeacherGroupsForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        form = forms.TeacherGroupsForm(request.POST)
+        if form.is_valid():
+            group = form.cleaned_data['group']
+            if group in self.teacher.groups.all():
+                self.teacher.groups.remove(group)
+            else:
+                self.teacher.groups.add(group)
+            self.teacher.save()
+
+        return HttpResponseRedirect(reverse('teacher-groups',  kwargs={ 'pk' : self.teacher.pk }))
+
+
+class TeacherBlinks(TeacherBase,ListView):
+    """OBSOLETE??"""
+
+    model = Teacher
+    template_name = 'peerinst/teacher_blinks.html'
+
+    def get_queryset(self):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        return BlinkQuestion.objects.all() # I don't think this is ever used
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherBlinks, self).get_context_data(**kwargs)
+        context['teacher'] = self.teacher
+
+        teacher_discipline_questions=Question.objects.filter(discipline__in=self.teacher.disciplines.all())
+
+        teacher_blink_questions = [bk.question for bk in self.teacher.blinkquestion_set.all()]
+        # Send as context questions not already part of teacher's blinks
+        context['suggested_questions']=[q for q in teacher_discipline_questions if q not in teacher_blink_questions]
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.teacher = get_object_or_404(Teacher, user=self.request.user)
+        if request.POST.get('blink',False):
+            form = forms.TeacherBlinksForm(request.POST)
+            if form.is_valid():
+                blink = form.cleaned_data["blink"]
+                blink.current = (not blink.current)
+                blink.save()
+
+        if request.POST.get('new_blink',False):
+            form = forms.CreateBlinkForm(request.POST)
+            if form.is_valid():
+                key = random.randrange(10000000,99999999)
+                while key in BlinkQuestion.objects.all():
+                    key = random.randrange(10000000,99999999)
+                try:
+                    blink = BlinkQuestion(
+                        question=form.cleaned_data['new_blink'],
+                        teacher=self.teacher,
+                        time_limit=60,
+                        key=key,
+                    )
+                    blink.save()
+                except:
+                    return HttpResponse("error")
+
+        return HttpResponseRedirect(reverse('teacher-blinks',  kwargs={ 'pk' : self.teacher.pk }))
+
+# Views related to Blink
+
+class BlinkQuestionFormView(SingleObjectMixin,FormView):
+
+    form_class = forms.BlinkAnswerForm
+    template_name = 'peerinst/blink.html'
+    model = BlinkQuestion
+
+    def form_valid(self,form):
+        self.object = self.get_object()
+
+        try:
+            blinkround=BlinkRound.objects.get(question=self.object,deactivate_time__isnull=True)
+        except:
+            return TemplateResponse(
+                self.request,
+                'peerinst/blink_error.html',
+                context={
+                    'message':"Voting is closed",
+                    'url':reverse('blink-get-current', kwargs={'username': self.object.teacher.user.username})
+                    })
+
+        if self.request.session.get('BQid_'+self.object.key+'_R_'+str(blinkround.id), False):
+            return TemplateResponse(
+                self.request,
+                'peerinst/blink_error.html',
+                context={
+                    'message':"You may only vote once",
+                    'url':reverse('blink-get-current', kwargs={'username': self.object.teacher.user.username})
+                    })
+        else:
+            if self.object.active:
+                try:
+                    models.BlinkAnswer(
+                        question=self.object,
+                        answer_choice=form.cleaned_data['first_answer_choice'],
+                        vote_time=timezone.now(),
+                        voting_round=blinkround,
+                    ).save()
+                    self.request.session['BQid_'+self.object.key+'_R_'+str(blinkround.id)] = True
+                    self.request.session['BQid_'+self.object.key] = form.cleaned_data['first_answer_choice']
+                except:
+                    return TemplateResponse(
+                        self.request,
+                        'peerinst/blink_error.html',
+                        context={
+                            'message':"Error; try voting again",
+                            'url':reverse('blink-get-current', kwargs={'username': self.object.teacher.user.username})
+                            })
+            else:
+                return TemplateResponse(
+                    self.request,
+                    'peerinst/blink_error.html',
+                    context={
+                        'message':"Voting is closed",
+                        'url':reverse('blink-get-current', kwargs={'username': self.object.teacher.user.username})
+                        })
+
+        return super(BlinkQuestionFormView,self).form_valid(form)
+
+    def get_form_kwargs(self):
+        self.object = self.get_object()
+        kwargs = super(BlinkQuestionFormView, self).get_form_kwargs()
+        kwargs.update(
+            answer_choices=self.object.question.get_choices(),
+        )
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super(BlinkQuestionFormView, self).get_context_data(**kwargs)
+        context['object'] = self.object
+
+        return context
+
+    def get_success_url(self):
+        return reverse('blink-summary', kwargs={'pk': self.object.pk})
+
+
+class BlinkQuestionDetailView(DetailView):
+
+    model = BlinkQuestion
+
+    def get_context_data(self, **kwargs):
+        context = super(BlinkQuestionDetailView, self).get_context_data(**kwargs)
+
+        # Check if user is a Teacher
+        if self.request.user.is_authenticated() and  Teacher.objects.filter(user__username=self.request.user).exists():
+
+            # Check question belongs to this Teacher
+            teacher = Teacher.objects.get(user__username=self.request.user)
+            if self.object.teacher == teacher:
+
+                # Set all blinks for this teacher to inactive
+                for b in teacher.blinkquestion_set.all():
+                    b.active = False
+                    b.save()
+
+                # Set _this_ question to active in order to accept responses
+                self.object.active = True
+                if not self.object.time_limit:
+                    self.object.time_limit = 60
+
+                time_left = self.object.time_limit
+                self.object.save()
+
+                # Close any open rounds
+                open_rounds = BlinkRound.objects.filter(question=self.object).filter(deactivate_time__isnull=True)
+                for open_round in open_rounds:
+                    open_round.deactivate_time = timezone.now()
+                    open_round.save()
+
+                # Create round
+                r = BlinkRound(
+                    question=self.object,
+                    activate_time=datetime.datetime.now()
+                )
+                r.save()
+            else:
+                HttpResponseRedirect(reverse('teacher', kwargs={'pk':teacher.pk}))
+        else:
+            # Get current round, if any
+            try:
+                r = BlinkRound.objects.get(question=self.object,deactivate_time__isnull=True)
+                elapsed_time = (timezone.now()-r.activate_time).seconds
+                time_left = max(self.object.time_limit - elapsed_time,0)
+            except:
+                time_left = 0
+
+            # Get latest vote, if any
+            context['latest_answer_choice'] = self.object.question.get_choice_label(int(self.request.session.get('BQid_'+self.object.key,0)))
+
+        context['teacher'] = self.object.teacher.user.username
+        context['round'] = BlinkRound.objects.filter(question=self.object).count()
+        context['time_left'] = time_left
+
+        return context
+
+
+@login_required
+def blink_assignment_start(request,pk):
+    """View to start a blink script"""
+
+    # Check this user is a Teacher and owns this assignment
+    try:
+        teacher = Teacher.objects.get(user__username=request.user)
+        blinkassignment = BlinkAssignment.objects.get(key=pk)
+
+        if blinkassignment.teacher == teacher:
+
+            # Deactivate all blinkAssignments
+            for a in teacher.blinkassignment_set.all():
+                a.active = False
+                a.save()
+
+            # Activate _this_ blinkAssignment
+            blinkassignment.active = True
+            blinkassignment.save()
+
+            return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkquestions.order_by('blinkassignmentquestion__rank').first().pk} ))
+
+        else:
+            return TemplateResponse(
+                request,
+                'peerinst/blink_error.html',
+                context={
+                    'message':"Assignment does not belong to this teacher",
+                    'url':reverse('teacher', kwargs={'pk':teacher.pk})
+                    })
+
+    except:
+        return TemplateResponse(
+            request,
+            'peerinst/blink_error.html',
+            context={
+                'message':"Error",
+                'url':reverse('logout')
+                })
+
+
+@login_required
+def blink_assignment_delete(request,pk):
+    """View to delete a blink script"""
+
+    # Check this user is a Teacher and owns this assignment
+    try:
+        teacher = Teacher.objects.get(user__username=request.user)
+        blinkassignment = BlinkAssignment.objects.get(key=pk)
+
+        if blinkassignment.teacher == teacher:
+
+            # Delete
+            blinkassignment.delete()
+
+            return HttpResponseRedirect(reverse('teacher', kwargs={'pk':teacher.pk}))
+
+        else:
+            return TemplateResponse(
+                request,
+                'peerinst/blink_error.html',
+                context={
+                    'message':"Assignment does not belong to this teacher",
+                    'url':reverse('teacher', kwargs={'pk':teacher.pk})
+                    })
+
+    except:
+        return TemplateResponse(
+            request,
+            'peerinst/blink_error.html',
+            context={
+                'message':"Error",
+                'url':reverse('logout')
+                })
+
+
+def blink_get_next(request,pk):
+    """View to process next question in a series of blink questions based on state."""
+
+    try:
+        # Get BlinkQuestion
+        blinkquestion = BlinkQuestion.objects.get(pk=pk)
+        # Get Teacher (should only ever be one object returned)
+        teacher = blinkquestion.teacher
+        # Check the active BlinkAssignment, if any
+        blinkassignment = teacher.blinkassignment_set.get(active=True)
+        # Get rank of question in list
+        for q in blinkassignment.blinkassignmentquestion_set.all():
+            if q.blinkquestion == blinkquestion:
+                rank = q.rank
+                break
+        # Redirect to next, if exists
+        if rank < blinkassignment.blinkassignmentquestion_set.count() - 1:
+
+            try:
+                # Teacher to new summary page
+                # Check existence of teacher (exception thrown otherwise)
+                user_role = Teacher.objects.get(user__username=request.user)
+                print(blinkassignment.blinkassignmentquestion_set.all())
+                return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
+            except:
+                # Others to new question page
+                return HttpResponseRedirect(reverse('blink-question', kwargs={'pk': blinkassignment.blinkassignmentquestion_set.get(rank=rank+1).blinkquestion.pk} ))
+
+        else:
+            blinkassignment.active = False
+            blinkassignment.save()
+            return HttpResponseRedirect(reverse('teacher', kwargs={'pk':teacher.pk}))
+
+    except:
+        return HttpResponse("Error")
+
+
+def blink_get_current(request,username):
+    """View to redirect user to latest active BlinkQuestion for teacher."""
+
+    try:
+        # Get teacher
+        teacher = Teacher.objects.get(user__username=username)
+    except:
+        return HttpResponse("Teacher does not exist")
+
+    try:
+        # Redirect to current active blinkquestion, if any, if this user has not voted yet in this round
+        blinkquestion = teacher.blinkquestion_set.get(active=True)
+        blinkround = blinkquestion.blinkround_set.latest('activate_time')
+        if request.session.get('BQid_'+blinkquestion.key+'_R_'+str(blinkround.id), False):
+             return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : blinkquestion.pk}))
+        else:
+            return HttpResponseRedirect(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
+    except:
+        # Else, redirect to summary for last active question
+        #latest_round = BlinkRound.objects.filter(question__in=teacher.blinkquestion_set.all()).latest('activate_time')
+        #return HttpResponseRedirect(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
+
+        # Else, redirect to waiting room
+        return HttpResponseRedirect(reverse('blink-waiting', kwargs={'username' : teacher.user.username }))
+
+
+def blink_waiting(request,username,assignment=''):
+
+    try:
+        teacher = Teacher.objects.get(user__username=username)
+    except:
+        return HttpResponse('Error')
+
+    return TemplateResponse(
+        request,
+        'peerinst/blink_waiting.html',
+        context=
+            {
+                'assignment' : assignment,
+                'teacher' : teacher,
+            },
+        )
+
+
+# AJAX functions
+@login_required
+def question_search(request):
+
+    if request.method == "GET" and request.user.teacher:
+        type = request.GET.get('type',default=None)
+        id = request.GET.get('id',default=None)
+        search_string = request.GET.get('search_string',default="")
+        limit_search = request.GET.get('limit_search',default="false")
+
+        # Exclusions based on type of search
+        q_qs = []
+        if type == 'blink':
+            bq_qs = request.user.teacher.blinkquestion_set.all()
+            q_qs = [bq.question.id for bq in bq_qs]
+            form_field_name = 'new_blink'
+
+        if type == 'assignment':
+            a_qs = Assignment.objects.get(identifier=id).questions.all()
+            q_qs = [q.id for q in a_qs]
+            form_field_name = 'q'
+
+        # All matching questions
+        # TODO: add search on categories
+        if limit_search == "true":
+            query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string)).filter(discipline__in=request.user.teacher.disciplines.all()).exclude(id__in=q_qs)
+        else:
+            query = Question.objects.filter(Q(text__icontains=search_string) | Q(title__icontains=search_string)).exclude(id__in=q_qs)
+
+        if query.count() > 50:
+            return TemplateResponse(
+                request,
+                'peerinst/question_search_error.html',
+                context={'count':query.count(),}
+                )
+        else:
+            return TemplateResponse(
+                request,
+                'peerinst/question_search_results.html',
+                context={
+                    'search_results':query,
+                    'form_field_name':form_field_name,
+                    }
+                )
+    else:
+        return HttpResponseRedirect(reverse('access_denied'))
+
+
+def blink_get_current_url(request,username):
+    """View to check current question url for teacher."""
+
+    try:
+        # Get teacher
+        teacher = Teacher.objects.get(user__username=username)
+    except:
+        return HttpResponse("Teacher does not exist")
+
+    try:
+        # Return url of current active blinkquestion, if any
+        blinkquestion = teacher.blinkquestion_set.get(active=True)
+        return HttpResponse(reverse('blink-question', kwargs={'pk' : blinkquestion.pk}))
+    except:
+        try:
+            blinkassignment = teacher.blinkassignment_set.get(active=True)
+            latest_round = BlinkRound.objects.filter(question__in=teacher.blinkquestion_set.all()).latest('activate_time')
+            return HttpResponse(reverse('blink-summary', kwargs={'pk' : latest_round.question.pk}))
+        except:
+            return HttpResponse("stop")
+
+
+def blink_count(request,pk):
+
+    blinkquestion = BlinkQuestion.objects.get(pk=pk)
+    try:
+        blinkround = BlinkRound.objects.get(question=blinkquestion,deactivate_time__isnull=True)
+    except:
+        try:
+            blinkround = BlinkRound.objects.filter(question=blinkquestion).latest('deactivate_time')
+        except:
+            return JsonResponse()
+
+    context = {}
+    context['count'] = BlinkAnswer.objects.filter(voting_round=blinkround).count()
+
+    return JsonResponse(context)
+
+
+def blink_close(request,pk):
+
+    context = {}
+
+    if request.method=="POST" and request.user.is_authenticated():
+        form = forms.BlinkQuestionStateForm(request.POST)
+        try:
+            blinkquestion = BlinkQuestion.objects.get(pk=pk)
+            blinkround = BlinkRound.objects.get(question=blinkquestion,deactivate_time__isnull=True)
+            if form.is_valid():
+                blinkquestion.active = form.cleaned_data['active']
+                blinkquestion.save()
+                blinkround.deactivate_time = timezone.now()
+                blinkround.save()
+                context['state'] = 'success'
+            else:
+                context['state'] = 'failure'
+        except:
+            context['state'] = 'failure'
+
+    return JsonResponse(context)
+
+
+def blink_latest_results(request,pk):
+
+    results = {}
+
+    blinkquestion = BlinkQuestion.objects.get(pk=pk)
+    blinkround = BlinkRound.objects.filter(question=blinkquestion).latest('deactivate_time')
+
+    c=1
+    for label, text in blinkquestion.question.get_choices():
+        results[label] = BlinkAnswer.objects.filter(question=blinkquestion).filter(voting_round=blinkround).filter(answer_choice=c).count()
+        c=c+1
+
+    return JsonResponse(results)
+
+
+def blink_status(request,pk):
+
+    blinkquestion = BlinkQuestion.objects.get(pk=pk)
+
+    response = {}
+    response['status'] = blinkquestion.active
+
+    return JsonResponse(response)
+
+
+# This is a very temporary approach with minimum checking for permissions
+@login_required
+def blink_reset(request,pk):
+
+    #blinkquestion = BlinkQuestion.objects.get(pk=pk)
+
+    return HttpResponseRedirect(reverse('blink-summary', kwargs={ 'pk' : pk }))
+
+
+class BlinkAssignmentCreate(LoginRequiredMixin,CreateView):
+
+    model = BlinkAssignment
+    fields = ['title']
+
+    def form_valid(self, form):
+        key = random.randrange(10000000,99999999)
+        while key in BlinkAssignment.objects.all():
+            key = random.randrange(10000000,99999999)
+        form.instance.key = key
+        form.instance.teacher = Teacher.objects.get(user=self.request.user)
+        return super(BlinkAssignmentCreate,self).form_valid(form)
+
+    def get_success_url(self):
+        try:
+            teacher = Teacher.objects.get(user=self.request.user)
+            return reverse('blinkAssignment-update', kwargs={'pk': self.object.id})
+        except:
+            return reverse('welcome')
+
+
+class BlinkAssignmentUpdate(LoginRequiredMixin,DetailView):
+
+    model = BlinkAssignment
+
+    def get_context_data(self, **kwargs):
+        context = super(BlinkAssignmentUpdate, self).get_context_data(**kwargs)
+        context['teacher'] = Teacher.objects.get(user=self.request.user)
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.user.is_authenticated():
+            form = forms.RankBlinkForm(request.POST)
+            if form.is_valid():
+
+                # Questions can appear in multiple assignments, but only once in each.
+                # Get Q for _this_ assignment.
+                relationship = form.cleaned_data['q'].get(blinkassignment=self.object)
+                operation = form.cleaned_data['rank']
+                if operation == "down":
+                    relationship.move_down_rank()
+                    relationship.save()
+                if operation == "up":
+                    relationship.move_up_rank()
+                    relationship.save()
+                if operation == "clear":
+                    relationship.delete()
+                    relationship.renumber()
+
+                return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
+            else:
+                form = forms.CreateBlinkForm(request.POST)
+                if form.is_valid():
+                    question = form.cleaned_data['new_blink']
+                    key = random.randrange(10000000,99999999)
+                    while key in BlinkQuestion.objects.all():
+                        key = random.randrange(10000000,99999999)
+                    try:
+                        blinkquestion = BlinkQuestion(
+                            question=question,
+                            teacher=Teacher.objects.get(user=self.request.user),
+                            time_limit=30,
+                            key=key,
+                            )
+                        blinkquestion.save()
+
+                        if not blinkquestion in self.object.blinkquestions.all():
+                            relationship = BlinkAssignmentQuestion(
+                                blinkassignment=self.object,
+                                blinkquestion=blinkquestion,
+                                rank=self.object.blinkquestions.count(),
+                            )
+                        relationship.save()
+                    except:
+                        return HttpResponse("error")
+
+                    return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
+                else:
+                    form = forms.AddBlinkForm(request.POST)
+                    if form.is_valid():
+                        blinkquestion = form.cleaned_data['blink']
+                        if not blinkquestion in self.object.blinkquestions.all():
+                            relationship = BlinkAssignmentQuestion(
+                                blinkassignment=self.object,
+                                blinkquestion=blinkquestion,
+                                rank=self.object.blinkquestions.count(),
+                            )
+                            relationship.save()
+                        else:
+                            return HttpResponse("error")
+
+                        return HttpResponseRedirect(reverse("blinkAssignment-update", kwargs={'pk': self.object.pk}))
+                    else:
+                        return HttpResponse("error")
+        else:
+            return HttpResponse("error3")
+
+class DateExtractFunc(Func):
+    function = "DATE"
+
+def assignment_timeline_data(request,assignment_id,question_id):
+    qs=models.Answer.objects.filter(assignment_id=assignment_id).filter(question_id=question_id)\
+    .annotate(date=DateExtractFunc("time"))\
+    .values('date')\
+    .annotate(N=Count('id'))
+
+    return JsonResponse(list(qs),safe=False)
+
+def network_data(request,assignment_id):
+    qs = models.Answer.objects.filter(assignment_id=assignment_id)
+
+    links={}
+
+    for answer in qs:
+        if answer.user_token not in links:
+            links[answer.user_token]={}
+            if answer.chosen_rationale:
+                if answer.chosen_rationale.user_token in links[answer.user_token]:
+                    links[answer.user_token][answer.chosen_rationale.user_token] += 1
+                else:
+                    links[answer.user_token][answer.chosen_rationale.user_token] = 1
+
+    # serialize
+    links_array = []
+    for source,targets in links.items():
+        d={}
+        for t in targets.keys():
+            d['source']=source
+            d['target']=t
+            d['value']=targets[t]
+            links_array.append(d)
+
+    return JsonResponse(links_array,safe=False)

@@ -1,0 +1,8 @@
+{% load i18n %}
+
+<ul>
+  <li class='mdc-typography--body1'>
+    <strong>Note:</strong> {% blocktrans %}Your search returned too many results.  Please try a different keyword.{% endblocktrans %}
+  </li>
+  <li class='mdc-typography--caption'>{{ count }} {% trans 'unique results' %}
+</ul>

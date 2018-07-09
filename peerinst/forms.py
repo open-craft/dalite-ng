@@ -5,6 +5,13 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
+from .models import StudentGroup, Assignment, BlinkAssignmentQuestion, BlinkQuestion, Question
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django.forms import ModelForm
+
+import password_validation
+
 
 class FirstAnswerForm(forms.Form):
     """Form to select one of the answer choices and enter a rationale."""
@@ -14,7 +21,7 @@ class FirstAnswerForm(forms.Form):
     first_answer_choice = forms.ChoiceField(
         label=_('Choose one of these answers:'), widget=forms.RadioSelect
     )
-    rationale = forms.CharField(widget=forms.Textarea)
+    rationale = forms.CharField(widget=forms.Textarea(attrs={'cols': 100, 'rows': 7}))
 
     def __init__(self, answer_choices, *args, **kwargs):
         choice_texts = [mark_safe(". ".join(pair)) for pair in answer_choices]
@@ -71,3 +78,100 @@ class SequentialReviewForm(forms.Form):
         else:
             raise forms.ValidationError(_('Please vote up or down.'))
         return cleaned_data
+
+
+class AssignmentCreateForm(forms.ModelForm):
+    """Simple form to create a new Assignment"""
+    class Meta:
+        model = Assignment
+        fields = ['identifier','title']
+
+
+class TeacherAssignmentsForm(forms.Form):
+    """Simple form to help update teacher assignments"""
+    assignment = forms.ModelChoiceField(queryset=Assignment.objects.all())
+
+
+class TeacherGroupsForm(forms.Form):
+    """Simple form to help update teacher groups"""
+    group = forms.ModelChoiceField(queryset=StudentGroup.objects.all())
+
+
+class TeacherBlinksForm(forms.Form):
+    """Simple form to help update teacher blinks"""
+    blink = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())
+
+
+class CreateBlinkForm(forms.Form):
+    """Simple form to help create blink for teacher"""
+    new_blink = forms.ModelChoiceField(queryset=Question.objects.all())
+
+
+class BlinkAnswerForm(forms.Form):
+    """Form to select one of the answer choices."""
+
+    error_css_class = 'validation-error'
+
+    first_answer_choice = forms.ChoiceField(
+        label=_('Choose one of these answers:'), widget=forms.RadioSelect
+    )
+
+    def __init__(self, answer_choices, *args, **kwargs):
+        choice_texts = [mark_safe(". ".join(pair)) for pair in answer_choices]
+        self.base_fields['first_answer_choice'].choices = enumerate(choice_texts, 1)
+        forms.Form.__init__(self, *args, **kwargs)
+
+
+class BlinkQuestionStateForm(ModelForm):
+    """Form to set active state of a BlinkQuestion."""
+    class Meta:
+        model = BlinkQuestion
+        fields = ['active']
+
+
+class RankBlinkForm(forms.Form):
+    """Form to handle reordering or deletion of blinkquestions in a blinkassignment."""
+    # Might be better to set the queryset to limit to teacher's blink set
+    q = forms.ModelMultipleChoiceField(queryset=BlinkAssignmentQuestion.objects.all(), to_field_name="blinkquestion_id")
+    rank = forms.CharField(max_length=5,widget=forms.HiddenInput)
+
+
+class AddBlinkForm(forms.Form):
+    """Form to add a blinkquestion to a blinkassignment."""
+    # Might be better to set the queryset to limit to teacher's blinks
+    blink = forms.ModelChoiceField(queryset=BlinkQuestion.objects.all())
+
+
+class SignUpForm(UserCreationForm):
+    """Form to register a new user (teacher) with e-mail address.
+
+    The clean method is overridden to add basic password validation."""
+
+    url = forms.URLField(
+        label=_('Website'),
+        initial='http://',
+        max_length=200,
+        help_text=_('Please provide an institutional url listing yourself as a faculty member and showing your e-mail address.')
+    )
+
+    def clean(self):
+        cleaned_data = super(SignUpForm, self).clean()
+        pwd = cleaned_data.get('password1')
+        if pwd:
+            password_validation.validate_password(pwd)
+
+        return cleaned_data
+
+    class Meta:
+        model = User
+        fields = ['email','username']
+
+
+class ActivateForm(forms.Form):
+    """Form to activate a User and initialize as Teacher, if indicated."""
+    is_teacher = forms.BooleanField(required=False)
+    user = forms.ModelChoiceField(queryset=User.objects.filter(is_active=False))
+
+
+class AddRemoveQuestionForm(forms.Form):
+    q = forms.ModelChoiceField(queryset=Question.objects.all())

@@ -19,20 +19,22 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 # Application definition
 
 INSTALLED_APPS = (
+    'peerinst',
     'grappelli',
+    'password_validation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'peerinst',
-    'django_lti_tool_provider'
+    'django_lti_tool_provider',
+    'compressor',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -43,14 +45,19 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    # Minify html
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'dalite.urls'
 
+CUSTOM_SETTINGS = os.environ.get('CUSTOM_SETTINGS', 'default')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'custom-settings/'+CUSTOM_SETTINGS+'/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,6 +85,33 @@ DATABASES = {
     }
 }
 
+# Caching
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
+# Password validators through django-password-validation (backport from 1.9)
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'password_validation.NumericPasswordValidator',
+    },
+]
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -100,7 +134,24 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_URL = 'admin:login'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'custom-settings/'+CUSTOM_SETTINGS+'/static'),
+)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_ENABLED = True
+KEEP_COMMENTS_ON_MINIFYING = False
+HTML_MINIFY = True
+
+# LOGIN_URL = 'login'
+LOGIN_URL = 'login'
+
+LOGIN_REDIRECT_URL = 'welcome'
 
 GRAPPELLI_ADMIN_TITLE = 'Dalite NG administration'
 
@@ -153,6 +204,7 @@ PASSWORD_GENERATOR_NONCE = os.environ.get('PASSWORD_GENERATOR_NONCE', None)
 
 # Configureation file for the heartbeat view, should contain json file. See this url for file contents.
 HEARTBEAT_REQUIRED_FREE_SPACE_PERCENTAGE = 20
+
 
 try:
     from .local_settings import *

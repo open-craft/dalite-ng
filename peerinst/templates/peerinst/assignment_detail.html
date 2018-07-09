@@ -1,0 +1,169 @@
+{% extends 'peerinst/base.html' %}
+
+{% load compress i18n %}
+
+{% block body %}
+<main>
+  <section>
+    <h1 class="mdc-typography--display3">Update Assignment
+      <svg class="underline" width=150 height=4></svg>
+    </h1>
+
+    <div class="admin-link">
+      <a href="{% url 'teacher' teacher.id %}">Back to My Account</a>
+      <span style="padding-left:0.3em;padding-right:0.5em;">|</span><a href="{% url 'teacher-assignments' teacher.id %}">{% trans 'Back to My Assignments' %}</a>
+    </div>
+
+    <h2 id="assignment" class="mdc-typography--display1  mdc-theme--secondary">{{object.title}}</h2>
+
+    <div class="mdc-form-field">
+      <span class="mdc-theme--secondary">Show images</span>
+      <i class="mdc-icon-toggle material-icons toggle-images mdc-theme--secondary" role="button" aria-pressed="false"
+      aria-label="Toggle images" tabindex="0"
+      data-toggle-on='{"label": "Hide images", "content": "check_box"}'
+      data-toggle-off='{"label": "Show images", "content": "check_box_outline_blank"}'>
+      check_box_outline_blank
+      </i>
+    </div>
+
+    <div class="mdc-form-field">
+      <span class="mdc-theme--secondary">Show answers</span>
+      <i class="mdc-icon-toggle material-icons toggle-answers mdc-theme--secondary" role="button" aria-pressed="false"
+      aria-label="Toggle answers" tabindex="0"
+      data-toggle-on='{"label": "Hide images", "content": "check_box"}'
+      data-toggle-off='{"label": "Show images", "content": "check_box_outline_blank"}'>
+      check_box_outline_blank
+      </i>
+    </div>
+
+    {% for g in object.questions.all %}
+    <div class="mdc-card" id={{g.blinkquestion.question.id|slugify}}>
+      <div class="mdc-typography--title bold" style="margin-bottom:5px;">
+        {{g.title|safe}}
+      </div>
+
+      <div class="mdc-typography--body1">
+        {{g.text|safe}}
+      </div>
+
+      {% if g.image %}
+      <img class="question-image" src="{{ g.image.url }}" alt="g.image_alt_text" style="display:none;">
+      {% endif %}
+
+      <div class="question-answers" style="display:none;">
+        <ul>
+          {% for label, choice in g.get_choices %}
+          <li class="mdc-typography--body1">{{ label }}. {{ choice|safe }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="mdc-card__actions">
+        <div class="mdc-card__action-buttons" style="color:grey;">
+          <div class="mdc-typography--caption">
+            <div>
+              {% trans 'Discipline' %}: {{g.discipline}}
+            </div>
+            <div>
+              {% trans 'Categories' %}:
+              {% for c in g.category.all %}
+              {{ c.title|safe }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+              {% trans 'Uncategorized' %}
+              {% endfor %}
+            </div>
+            <div>
+              {% trans 'Difficulty' %}:
+            </div>
+          </div>
+        </div>
+
+        <div class="mdc-card__action-icons">
+          <form style="display:inline;" method="post" action="#">
+            {% csrf_token %}
+            <input type="hidden" name="q" value="{{g.pk}}" />
+            <input class="material-icons small-button mdc-button mdc-button--raised" type="submit" value="clear"/>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <ul>
+      <li><strong>Note:</strong> There are currently no questions in this assignment.  You can add them from the list below.</li>
+    </ul>
+    {% endfor %}
+
+
+    <h2 class="mdc-typography--display1 mdc-theme--secondary">{% trans 'Search database' %}</h2>
+
+    <div class="admin-link">
+      <a href="#assignment">{% trans 'Return to top' %}</a>
+    </div>
+
+    <div class="mdc-form-field">
+      <div class="mdc-checkbox">
+        <input type="checkbox"
+        class="mdc-checkbox__native-control"
+        id="limit-search"
+        checked />
+        <div class="mdc-checkbox__background">
+          <svg class="mdc-checkbox__checkmark"
+          viewBox="0 0 24 24">
+          <path class="mdc-checkbox__checkmark-path"
+          fill="none"
+          stroke="white"
+          d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+          </svg>
+          <div class="mdc-checkbox__mixedmark"></div>
+        </div>
+      </div>
+      <label class="mdc-theme--secondary" for="limit-search">{% trans 'Limit search to questions in your discipline(s) (recommended)' %}</label>
+    </div>
+    <br>
+    <div class="search">
+      <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+        <label class="mdc-floating-label" for="search-bar">{% trans 'Search' %}</label>
+        <input class="mdc-text-field__input" id="search-bar">
+        <div class="mdc-notched-outline">
+          <svg>
+            <path class="mdc-notched-outline__path"/>
+          </svg>
+        </div>
+        <div class="mdc-notched-outline__idle"></div>
+      </div>
+      <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+        {% trans 'Search database for questions containing above string.' %}'
+      </p>
+    </div>
+
+    <div id="search_results"></div>
+
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+bundle.toggleImages();
+bundle.toggleAnswers();
+var limitSearch = document.querySelector('#limit-search');
+bundle.iconToggle.MDCIconToggle.attachTo(limitSearch);
+var search = document.getElementById('search-bar');
+
+function processResponse(text, status, obj) {
+  console.info(text);
+  console.info(status);
+  console.info(obj);
+  location.href = "#limit-search";
+  bundle.toggleImages();
+  bundle.toggleAnswers();
+  search.value = "";
+  search.focus();
+}
+
+search.onchange = function() {
+  console.info("Searching: "+search.value);
+  $('#search_results').load("{% url 'question-search' %}", "search_string="+search.value+"&type=assignment&id={{object.pk|urlencode}}&limit_search="+limitSearch.checked, processResponse);
+}
+</script>
+{% endblock %}

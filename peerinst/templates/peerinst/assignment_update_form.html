@@ -1,0 +1,11 @@
+{% extends 'peerinst/base.html' %}
+{% load i18n %}
+
+{% block body %}
+<h2>Update questions in DALITE Assignment</h2>
+<form action="" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Update" />
+</form>
+
+{% endblock %}

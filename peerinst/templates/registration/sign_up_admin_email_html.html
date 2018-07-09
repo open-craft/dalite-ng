@@ -1,0 +1,27 @@
+{% extends 'registration/email_base.html' %}
+
+{% load i18n %}
+
+{% block body %}
+
+<h1>{% trans "New User Request" %}</h1>
+
+<p>{% trans "Dear administrator," %}</p>
+
+<p>{% trans "A new user was created on " %}{{ date }}</p>
+
+<ul>
+  <li>{% trans "Username" %}: {{ user }} </li>
+  <li>{% trans "Email" %}: {{ email }} </li>
+  <li>{% trans "Verification url" %}: {{ url }} </li>
+</ul>
+
+<p>{% trans "Access your administrator account to activate this new user at:" %}</p>
+
+<p>https://{{ request.get_host }}{% url 'dashboard' %}</p>
+
+<p>{% trans 'Cheers'%},</p>
+
+<p>{% blocktrans %}The {{ site_name }} team{% endblocktrans %}</p>
+
+{% endblock %}

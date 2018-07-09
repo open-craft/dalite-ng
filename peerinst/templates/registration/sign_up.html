@@ -1,0 +1,51 @@
+{% extends 'peerinst/base.html' %}
+
+{% load add_class i18n %}
+
+{% block body %}
+<main>
+<section>
+  <h1 class="mdc-typography--display3" style="position:sticky;">Sign Up
+    <svg class="underline" width=150 height=4></svg>
+  </h1>
+
+  <div class="admin-link">
+    <a href="{% url 'login' %}">Back to login</a>
+  </div>
+
+  <p> To create an account, provide a unique username, an e-mail address, and a password. </p>
+  <br>
+  <p> After the sign-up form is submitted, a site administrator will contact you to finalize the registration process. </p>
+
+  {{ form.non_field_errors }}
+
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--dense" data-mdc-auto-init="MDCTextField">
+        {{ field|add_class:"mdc-text-field__input" }}
+        {{ field.label_tag|add_class:"mdc-floating-label"|cut:":" }}
+        <div class="mdc-notched-outline">
+          <svg>
+            <path class="mdc-notched-outline__path"/>
+          </svg>
+        </div>
+        <div class="mdc-notched-outline__idle"></div>
+      </div>
+      <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent" aria-hidden="true">
+        {{ field.help_text|safe }}
+      </p>
+      {{ field.errors }}
+    {% endfor %}
+    <br>
+    By clicking on 'Register' you agree to the <a href="{% url 'terms_teacher' %}">Terms of Service</a>.
+    <br>
+    <br>
+    <div>
+      <input class="mdc-button mdc-button--raised" type="submit" value="Register"/>
+    </div>
+  </form>
+  <br>
+</section>
+</main>
+{% endblock %}
